@@ -34,7 +34,8 @@ RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
         zip \
         exif \
         gd \
-        intl
+        intl \
+        calendar
 
 # Install Composer
 COPY --from=composer:2.6 /usr/bin/composer /usr/bin/composer
@@ -101,7 +102,8 @@ RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
         bcmath \
         gd \
         intl \
-        opcache
+        opcache \
+        calendar
 
 # Install Redis extension (opzionale, per caching futuro)
 RUN apk add --no-cache --virtual .build-deps $PHPIZE_DEPS \
