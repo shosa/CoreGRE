@@ -60,7 +60,6 @@ vendor_backup/
 backups/
 database/backups/
 *.sql
-!backup.sql  # Keep main backup file
 *.sql.gz
 *.sqlite
 backup_*.sql  # Ignore timestamped backups from make db-backup
