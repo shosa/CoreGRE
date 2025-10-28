@@ -1,0 +1,156 @@
+# ============================================================================
+# CoreGre - Makefile
+# Comandi utili per gestire CoreGre nella CoreSuite
+# ============================================================================
+
+.PHONY: help setup up down restart logs shell db-setup db-backup clean
+
+# Colori per output
+RED := \033[0;31m
+GREEN := \033[0;32m
+YELLOW := \033[0;33m
+NC := \033[0m # No Color
+
+help: ## Mostra questo help
+	@echo "$(GREEN)CoreGre - Comandi disponibili:$(NC)"
+	@echo ""
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "  $(YELLOW)%-15s$(NC) %s\n", $$1, $$2}'
+	@echo ""
+
+setup: ## Setup completo (prima volta): importa database e avvia
+	@echo "$(GREEN)🚀 Setup CoreGre...$(NC)"
+	@make db-setup
+	@make up
+	@echo "$(GREEN)✅ CoreGre configurato!$(NC)"
+	@echo "   Accesso locale: http://localhost:3008"
+	@echo "   Accesso nginx:  http://localhost:84"
+
+up: ## Avvia CoreGre
+	@echo "$(GREEN)🐳 Avvio CoreGre...$(NC)"
+	docker-compose up -d
+	@echo "$(GREEN)✅ CoreGre avviato!$(NC)"
+
+build: ## Build immagine CoreGre
+	@echo "$(GREEN)🔨 Build CoreGre...$(NC)"
+	docker-compose build --no-cache
+	@echo "$(GREEN)✅ Build completato!$(NC)"
+
+up-build: ## Build e avvia CoreGre
+	@echo "$(GREEN)🔨 Build e avvio CoreGre...$(NC)"
+	docker-compose up -d --build
+	@echo "$(GREEN)✅ CoreGre avviato!$(NC)"
+
+down: ## Ferma CoreGre
+	@echo "$(YELLOW)🛑 Fermo CoreGre...$(NC)"
+	docker-compose down
+	@echo "$(GREEN)✅ CoreGre fermato!$(NC)"
+
+restart: ## Restart CoreGre
+	@echo "$(YELLOW)🔄 Restart CoreGre...$(NC)"
+	docker-compose restart
+	@echo "$(GREEN)✅ CoreGre riavviato!$(NC)"
+
+logs: ## Mostra logs in tempo reale
+	docker-compose logs -f
+
+logs-app: ## Logs solo app
+	docker-compose logs -f app
+
+logs-redis: ## Logs Redis condiviso (CoreServices)
+	cd ../CoreServices && docker-compose logs -f redis
+
+shell: ## Shell nel container app
+	docker exec -it coregre-app sh
+
+shell-mysql: ## Shell MySQL
+	docker exec -it core-mysql mysql -uroot -prootpassword coregre
+
+db-setup: ## Importa backup.sql nel database
+	@echo "$(GREEN)📥 Importo database...$(NC)"
+	@if [ -f setup-database.sh ]; then \
+		chmod +x setup-database.sh && ./setup-database.sh; \
+	else \
+		echo "$(YELLOW)Script setup-database.sh non trovato, eseguo manualmente...$(NC)"; \
+		docker exec -i core-mysql mysql -uroot -prootpassword -e "CREATE DATABASE IF NOT EXISTS coregre CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"; \
+		docker exec -i core-mysql mysql -uroot -prootpassword coregre < backup.sql; \
+		echo "$(GREEN)✅ Database importato!$(NC)"; \
+	fi
+
+db-backup: ## Crea backup del database
+	@echo "$(GREEN)💾 Creo backup database...$(NC)"
+	docker exec core-mysql mysqldump -uroot -prootpassword coregre > backup_$(shell date +%Y%m%d_%H%M%S).sql
+	@echo "$(GREEN)✅ Backup creato!$(NC)"
+
+db-tables: ## Mostra tabelle del database
+	docker exec -i core-mysql mysql -uroot -prootpassword coregre -e "SHOW TABLES;"
+
+ps: ## Mostra status container
+	docker-compose ps
+
+stats: ## Mostra statistiche risorse
+	docker stats coregre-app --no-stream
+
+clean: ## Pulizia completa (ATTENZIONE: rimuove volumi!)
+	@echo "$(RED)⚠️  ATTENZIONE: Questo rimuoverà tutti i volumi!$(NC)"
+	@read -p "Sei sicuro? [y/N] " -n 1 -r; \
+	echo; \
+	if [[ $$REPLY =~ ^[Yy]$$ ]]; then \
+		docker-compose down -v; \
+		echo "$(GREEN)✅ Pulizia completata!$(NC)"; \
+	else \
+		echo "$(YELLOW)Operazione annullata$(NC)"; \
+	fi
+
+check-services: ## Verifica che CoreServices sia attivo
+	@echo "$(GREEN)🔍 Verifico CoreServices...$(NC)"
+	@if docker ps | grep -q core-mysql; then \
+		echo "$(GREEN)✅ MySQL attivo$(NC)"; \
+	else \
+		echo "$(RED)❌ MySQL non attivo$(NC)"; \
+		echo "   Avvia CoreServices: cd ../CoreServices && docker-compose up -d"; \
+		exit 1; \
+	fi
+	@if docker ps | grep -q core-nginx; then \
+		echo "$(GREEN)✅ Nginx attivo$(NC)"; \
+	else \
+		echo "$(YELLOW)⚠️  Nginx non attivo$(NC)"; \
+	fi
+
+test-connection: ## Testa connessione al database
+	@echo "$(GREEN)🔍 Testo connessione database...$(NC)"
+	docker exec -i coregre-app mysql -h core-mysql -uroot -prootpassword -e "SHOW DATABASES;" | grep coregre
+	@echo "$(GREEN)✅ Connessione OK!$(NC)"
+
+url: ## Mostra URL di accesso
+	@echo ""
+	@echo "$(GREEN)CoreGre - URL di accesso:$(NC)"
+	@echo "  📍 Locale:  http://localhost:3008"
+	@echo "  📍 Nginx:   http://localhost:84"
+	@echo ""
+
+composer-install: ## Esegui composer install nel container
+	docker exec -it coregre-app composer install
+
+composer-update: ## Esegui composer update nel container
+	docker exec -it coregre-app composer update
+
+clear-cache: ## Pulisci cache Redis (solo namespace CoreGre)
+	@echo "$(YELLOW)⚠️  Attenzione: pulisce solo cache con prefisso 'coregre:'$(NC)"
+	docker exec -it core-redis redis-cli -a coresuite_redis --scan --pattern 'coregre:*' | xargs docker exec -it core-redis redis-cli -a coresuite_redis DEL
+	@echo "$(GREEN)✅ Cache CoreGre pulita!$(NC)"
+
+clear-cache-all: ## Pulisci TUTTA la cache Redis (ATTENZIONE: tutte le app!)
+	@echo "$(RED)⚠️  ATTENZIONE: Questo pulirà cache di TUTTE le app CoreSuite!$(NC)"
+	@read -p "Sei sicuro? [y/N] " -n 1 -r; \
+	echo; \
+	if [[ $$REPLY =~ ^[Yy]$$ ]]; then \
+		docker exec -it core-redis redis-cli -a coresuite_redis FLUSHALL; \
+		echo "$(GREEN)✅ Cache completa pulita!$(NC)"; \
+	else \
+		echo "$(YELLOW)Operazione annullata$(NC)"; \
+	fi
+
+fix-permissions: ## Fix permessi storage
+	docker exec -it coregre-app chown -R www-data:www-data /var/www/html/storage
+	docker exec -it coregre-app chmod -R 755 /var/www/html/storage
+	@echo "$(GREEN)✅ Permessi corretti!$(NC)"

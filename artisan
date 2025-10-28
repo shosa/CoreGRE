@@ -1,0 +1,1760 @@
+#!/usr/bin/env php
+<?php
+/**
+ * WEBGRE Artisan CLI with Eloquent ORM
+ * Simplified Command Line Interface
+ *
+ * @author WEBGRE Team
+ * @version 3.0 - Eloquent Edition
+ */
+
+// Bootstrap the application
+define('APP_ROOT', __DIR__);
+require_once __DIR__ . '/config/config.php';
+
+/**
+ * WEBGRE Artisan Application - Simplified
+ */
+class WebgreArtisan
+{
+    private $commands = [
+        'db:status' => 'Stato connessione database',
+        'make:model' => 'Crea nuovo modello Eloquent',
+        'make:model-from-table' => 'Genera modello da tabella database esistente',
+        'make:migration' => 'Crea nuova migrazione database',
+        'make:migration-from-table' => 'Genera migrazione da tabella esistente',
+        'schema:diff' => 'Confronta modello con schema database e mostra differenze',
+        'schema:migrate' => 'Genera migrazione da differenze schema modello',
+        'schema:rename-table' => 'Rinomina tabella e aggiorna modello',
+        'migrate' => 'Esegui migrazioni pendenti',
+        'migrate:rollback' => 'Rollback ultima batch migrazioni',
+        'migrate:status' => 'Mostra stato migrazioni',
+        'migrate:reset' => 'Rollback tutte le migrazioni',
+        'migrate:refresh' => 'Reset e ri-esegui tutte le migrazioni',
+        'list' => 'Elenca tutti i comandi disponibili',
+        'cache:clear' => 'Pulisci cache applicazione',
+        'dump-autoload' => "Rigenera autoload Composer (optimized + authoritative)"
+    ];
+
+    public function run($argv)
+    {
+        array_shift($argv); // Remove script name
+
+        if (empty($argv)) {
+            $this->showHelp();
+            return;
+        }
+
+        $command = $argv[0];
+        $arguments = array_slice($argv, 1);
+
+        switch ($command) {
+            case 'db:status':
+                $this->dbStatus();
+                break;
+
+            case 'make:model':
+                $this->makeModel($arguments);
+                break;
+
+            case 'make:model-from-table':
+                $this->makeModelFromTable($arguments);
+                break;
+
+            case 'make:migration':
+                $this->makeMigration($arguments);
+                break;
+
+            case 'make:migration-from-table':
+                $this->makeMigrationFromTable($arguments);
+                break;
+
+            case 'schema:diff':
+                $this->schemaDiff($arguments);
+                break;
+
+            case 'schema:migrate':
+                $this->schemaMigrate($arguments);
+                break;
+
+            case 'schema:rename-table':
+                $this->schemaRenameTable($arguments);
+                break;
+
+            case 'migrate':
+                $this->migrate($arguments);
+                break;
+
+            case 'migrate:rollback':
+                $this->migrateRollback($arguments);
+                break;
+
+            case 'migrate:status':
+                $this->migrateStatus();
+                break;
+
+            case 'migrate:reset':
+                $this->migrateReset();
+                break;
+
+            case 'migrate:refresh':
+                $this->migrateRefresh();
+                break;
+
+            case 'list':
+                $this->listCommands();
+                break;
+
+            case 'dump-autoload':
+                $this->composerDumpAutoload();
+                break;
+
+            case 'cache:clear':
+                $this->clearCache();
+                break;
+
+            default:
+                $this->error("Comando sconosciuto: {$command}");
+                $this->showHelp();
+                exit(1);
+        }
+    }
+    private function composerDumpAutoload()
+    {
+        $this->info("Eseguendo 'composer dump-autoload'...");
+
+        $output = [];
+        $returnVar = 0;
+
+        // Determina il path di PHP
+        $phpBinary = $this->getPhpBinary();
+
+        // Path composer.phar locale
+        $composerPath = 'composer.phar';
+
+        if (file_exists($composerPath)) {
+            // Usa composer.phar locale
+            $this->info("Usando composer.phar locale...");
+            $this->info("PHP binary: {$phpBinary}");
+
+            // Usa path senza escapeshellarg per Windows
+            $composerPathQuoted = (DIRECTORY_SEPARATOR === '\\')
+                ? '"' . $composerPath . '"'
+                : escapeshellarg($composerPath);
+
+            $command = "{$phpBinary} {$composerPathQuoted} dump-autoload --optimize --classmap-authoritative 2>&1";
+        } else {
+            // Prova composer globale
+            $this->info("Usando composer globale...");
+            $command = "composer dump-autoload --optimize --classmap-authoritative 2>&1";
+        }
+
+        $this->info("Eseguendo: {$command}");
+        exec($command, $output, $returnVar);
+
+        foreach ($output as $line) {
+            $this->info($line);
+        }
+
+        if ($returnVar === 0) {
+            $this->success("✓ Autoload Composer rigenerato con successo!");
+        } else {
+            $this->error("✗ Errore nella rigenerazione autoload Composer.");
+            $this->error("Verifica che PHP sia accessibile e composer.phar sia nella root del progetto.");
+        }
+    }
+
+    /**
+     * Determina il path del binario PHP
+     */
+    private function getPhpBinary()
+    {
+        // Prima prova a leggere da core_settings
+        try {
+            $connection = EloquentBootstrap::getConnection();
+            $setting = $connection->table('core_settings')
+                ->where('item', 'php_cli_path')
+                ->first();
+
+            if ($setting && !empty($setting->value)) {
+                // Normalizza il path per il sistema operativo corrente
+                $phpPath = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $setting->value);
+
+                // Verifica che il path sia valido
+                if (file_exists($phpPath)) {
+                    return $phpPath;
+                }
+            }
+        } catch (Exception $e) {
+            // Continua con fallback se database non disponibile
+        }
+
+        // Se siamo già in PHP CLI, usa lo stesso binario
+        if (defined('PHP_BINARY') && PHP_BINARY) {
+            return PHP_BINARY;
+        }
+
+        // Cerca PHP nel PATH
+        if (DIRECTORY_SEPARATOR === '\\') {
+            // Windows
+            $paths = [
+                'C:\\xampp\\php\\php.exe',
+                'C:\\php\\php.exe',
+                'php.exe',
+                'php'
+            ];
+        } else {
+            // Linux/Unix
+            $paths = [
+                '/usr/bin/php',
+                '/usr/local/bin/php',
+                'php'
+            ];
+        }
+
+        foreach ($paths as $path) {
+            $test = @exec($path . ' -v 2>&1', $testOutput, $testReturn);
+            if ($testReturn === 0 && strpos($test, 'PHP') !== false) {
+                return $path;
+            }
+        }
+
+        // Fallback
+        return 'php';
+    }
+    private function dbStatus()
+    {
+        $this->info("Testando connessione database...");
+
+        try {
+            $connection = EloquentBootstrap::getConnection();
+            $pdo = $connection->getPdo();
+
+            $this->success("✓ Connessione database: RIUSCITA");
+            $this->info("  Host: " . DB_HOST);
+            $this->info("  Database: " . DB_NAME);
+            $this->info("  Driver: " . $pdo->getAttribute(PDO::ATTR_DRIVER_NAME));
+            $this->info("  Versione Server: " . $pdo->getAttribute(PDO::ATTR_SERVER_VERSION));
+
+            // Show table count
+            $tables = $connection->select('SHOW TABLES');
+            $this->info("  Tabelle: " . count($tables));
+
+        } catch (Exception $e) {
+            $this->error("✗ Connessione database: FALLITA");
+            $this->error("  Errore: " . $e->getMessage());
+            exit(1);
+        }
+    }
+
+    private function makeModel($arguments)
+    {
+        if (empty($arguments[0])) {
+            $this->error("Nome modello richiesto. Uso: php artisan make:model NomeModello");
+            return;
+        }
+
+        $name = $arguments[0];
+        $this->createModel($name);
+    }
+
+    private function createModel($name)
+    {
+        $className = ucfirst($name);
+        $filePath = APP_ROOT . '/app/models/' . $className . '.php';
+
+        if (file_exists($filePath)) {
+            $this->error("Modello {$className} già esistente!");
+            return;
+        }
+
+        $content = $this->getModelStub($className);
+
+        if (!is_dir(dirname($filePath))) {
+            mkdir(dirname($filePath), 0755, true);
+        }
+
+        file_put_contents($filePath, $content);
+        $this->success("Modello {$className} creato con successo!");
+        $this->info("Posizione: {$filePath}");
+    }
+
+    private function getModelStub($className)
+    {
+        $tableName = $this->getTableName($className);
+
+        return "<?php
+
+namespace App\\Models;
+
+/**
+ * {$className} Model
+ *
+ * @property int \$id
+ * @property \\Carbon\\Carbon \$created_at
+ * @property \\Carbon\\Carbon \$updated_at
+ */
+class {$className} extends BaseModel
+{
+    /**
+     * The table associated with the model.
+     */
+    protected \$table = '{$tableName}';
+
+    /**
+     * The attributes that are mass assignable.
+     */
+    protected \$fillable = [
+        // Add fillable attributes here
+    ];
+
+    /**
+     * The attributes that should be cast.
+     */
+    protected \$casts = [
+        // Add custom casts here
+    ];
+
+    /**
+     * The attributes that should be hidden for serialization.
+     */
+    protected \$hidden = [
+        // Add hidden attributes here
+    ];
+
+    // Define relationships here
+}
+";
+    }
+
+    private function getTableName($className)
+    {
+        // Convert PascalCase to snake_case and pluralize
+        $table = strtolower(preg_replace('/([a-z])([A-Z])/', '$1_$2', $className));
+
+        // Simple pluralization
+        if (substr($table, -1) === 'y') {
+            $table = substr($table, 0, -1) . 'ies';
+        } elseif (substr($table, -1) === 's') {
+            $table .= 'es';
+        } else {
+            $table .= 's';
+        }
+
+        return $table;
+    }
+
+    private function clearCache()
+    {
+        $this->info("Clearing application cache...");
+
+        // Clear various cache directories
+        $cacheDirectories = [
+            APP_ROOT . '/storage/cache',
+            APP_ROOT . '/storage/logs',
+            APP_ROOT . '/storage/tmp'
+        ];
+
+        foreach ($cacheDirectories as $dir) {
+            if (is_dir($dir)) {
+                $this->clearDirectory($dir);
+            }
+        }
+
+        $this->success("✓ Application cache cleared!");
+    }
+
+    private function clearDirectory($dir)
+    {
+        $files = glob($dir . '/*');
+        foreach ($files as $file) {
+            if (is_file($file)) {
+                unlink($file);
+            }
+        }
+    }
+
+    private function listCommands()
+    {
+        $this->success("WEBGRE Artisan Console");
+        $this->info("======================");
+        $this->info("");
+        $this->info("Comandi disponibili:");
+
+        foreach ($this->commands as $command => $description) {
+            $this->success("  {$command}");
+            $this->info("  - {$description}");
+        }
+    }
+
+    private function showHelp()
+    {
+        $this->info("WEBGRE Artisan Console");
+        $this->info("Uso: php artisan [comando] [argomenti]");
+        $this->info("");
+        $this->info("Esegui 'php artisan list' per vedere tutti i comandi disponibili.");
+    }
+
+    private function info($message)
+    {
+        echo "\033[36m{$message}\033[0m\n";
+    }
+
+    private function success($message)
+    {
+        echo "\033[32m{$message}\033[0m\n";
+    }
+
+    private function error($message)
+    {
+        echo "\033[31m{$message}\033[0m\n";
+    }
+
+    // ========================================
+    // MIGRATION SYSTEM METHODS
+    // ========================================
+
+    private function makeMigration($arguments)
+    {
+        if (empty($arguments[0])) {
+            $this->error("Nome migrazione richiesto. Uso: php artisan make:migration CreateUsersTable");
+            return;
+        }
+
+        $name = $arguments[0];
+        $this->createMigration($name);
+    }
+
+    private function createMigration($name)
+    {
+        $timestamp = date('Y_m_d_His');
+        $filename = $timestamp . '_' . strtolower($name) . '.php';
+        $className = $this->toPascalCase($name);
+
+        $migrationPath = APP_ROOT . '/database/migrations';
+        $filePath = $migrationPath . '/' . $filename;
+
+        // Create migrations directory if not exists
+        if (!is_dir($migrationPath)) {
+            mkdir($migrationPath, 0755, true);
+        }
+
+        if (file_exists($filePath)) {
+            $this->error("Migrazione {$filename} già esistente!");
+            return;
+        }
+
+        $content = $this->getMigrationStub($className);
+        file_put_contents($filePath, $content);
+
+        $this->success("Migrazione {$filename} creata con successo!");
+        $this->info("Posizione: {$filePath}");
+    }
+
+    private function getMigrationStub($className)
+    {
+        return "<?php
+
+/**
+ * {$className} Migration
+ */
+class {$className}
+{
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
+    {
+        \$connection = EloquentBootstrap::getConnection();
+
+        // Example: Create table
+        /*
+        \$connection->statement('
+            CREATE TABLE table_name (
+                id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+                name varchar(255) NOT NULL,
+                created_at timestamp NULL DEFAULT NULL,
+                updated_at timestamp NULL DEFAULT NULL,
+                PRIMARY KEY (id)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+        ');
+        */
+    }
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        \$connection = EloquentBootstrap::getConnection();
+
+        // Example: Drop table
+        // \$connection->statement('DROP TABLE IF EXISTS table_name');
+    }
+}
+";
+    }
+
+    private function migrate($arguments)
+    {
+        $this->ensureMigrationsTable();
+
+        $migrationPath = APP_ROOT . '/database/migrations';
+        if (!is_dir($migrationPath)) {
+            $this->info("No migrations directory found.");
+            return;
+        }
+
+        $files = glob($migrationPath . '/*.php');
+        if (empty($files)) {
+            $this->info("No migrations found.");
+            return;
+        }
+
+        sort($files);
+        $connection = EloquentBootstrap::getConnection();
+
+        $executed = $this->getExecutedMigrations();
+        $batch = $this->getNextBatchNumber();
+        $ranMigrations = 0;
+
+        foreach ($files as $file) {
+            $filename = basename($file, '.php');
+
+            if (in_array($filename, $executed)) {
+                continue; // Skip already executed migrations
+            }
+
+            $this->info("Migrating: {$filename}");
+
+            try {
+                // Include the migration file
+                require_once $file;
+
+                // Extract class name from filename
+                $className = $this->getMigrationClassName($filename);
+
+                if (!class_exists($className)) {
+                    $this->error("Migration class {$className} not found in {$filename}");
+                    continue;
+                }
+
+                // Execute migration
+                $migration = new $className();
+                $migration->up();
+
+                // Record migration
+                $connection->table('migrations')->insert([
+                    'migration' => $filename,
+                    'batch' => $batch
+                ]);
+
+                $this->success("Migrated: {$filename}");
+                $ranMigrations++;
+
+            } catch (Exception $e) {
+                $this->error("Failed to migrate {$filename}: " . $e->getMessage());
+                break;
+            }
+        }
+
+        if ($ranMigrations > 0) {
+            $this->success("Executed {$ranMigrations} migrations.");
+        } else {
+            $this->info("Nothing to migrate.");
+        }
+    }
+
+    private function migrateRollback($arguments)
+    {
+        $this->ensureMigrationsTable();
+
+        $steps = isset($arguments[0]) && is_numeric($arguments[0]) ? (int) $arguments[0] : 1;
+        $connection = EloquentBootstrap::getConnection();
+
+        // Get last batch migrations
+        $lastBatch = $connection->table('migrations')->max('batch');
+        if (!$lastBatch) {
+            $this->info("Nothing to rollback.");
+            return;
+        }
+
+        $migrations = $connection->table('migrations')
+            ->where('batch', $lastBatch)
+            ->orderBy('migration', 'desc')
+            ->get();
+
+        if ($migrations->isEmpty()) {
+            $this->info("Nothing to rollback.");
+            return;
+        }
+
+        $migrationPath = APP_ROOT . '/database/migrations';
+        $rolledBack = 0;
+
+        foreach ($migrations as $migration) {
+            $filename = $migration->migration;
+            $filePath = $migrationPath . '/' . $filename . '.php';
+
+            $this->info("Rolling back: {$filename}");
+
+            try {
+                if (!file_exists($filePath)) {
+                    $this->error("Migration file not found: {$filePath}");
+                    continue;
+                }
+
+                require_once $filePath;
+                $className = $this->getMigrationClassName($filename);
+
+                if (!class_exists($className)) {
+                    $this->error("Migration class {$className} not found");
+                    continue;
+                }
+
+                // Execute rollback
+                $migrationInstance = new $className();
+                $migrationInstance->down();
+
+                // Remove from migrations table
+                $connection->table('migrations')
+                    ->where('migration', $filename)
+                    ->delete();
+
+                $this->success("Rolled back: {$filename}");
+                $rolledBack++;
+
+            } catch (Exception $e) {
+                $this->error("Failed to rollback {$filename}: " . $e->getMessage());
+                break;
+            }
+        }
+
+        $this->success("Rolled back {$rolledBack} migrations.");
+    }
+
+    private function migrateStatus()
+    {
+        $this->ensureMigrationsTable();
+
+        $migrationPath = APP_ROOT . '/database/migrations';
+        if (!is_dir($migrationPath)) {
+            $this->info("No migrations directory found.");
+            return;
+        }
+
+        $files = glob($migrationPath . '/*.php');
+        if (empty($files)) {
+            $this->info("No migrations found.");
+            return;
+        }
+
+        sort($files);
+        $executed = $this->getExecutedMigrations();
+
+        $this->info("Migration Status:");
+        $this->info("=================");
+
+        foreach ($files as $file) {
+            $filename = basename($file, '.php');
+            $status = in_array($filename, $executed) ? '✓ Executed' : '✗ Pending';
+            $this->info("  {$filename} - {$status}");
+        }
+    }
+
+    private function migrateReset()
+    {
+        $this->ensureMigrationsTable();
+
+        $connection = EloquentBootstrap::getConnection();
+        $migrations = $connection->table('migrations')
+            ->orderBy('batch', 'desc')
+            ->orderBy('migration', 'desc')
+            ->get();
+
+        if ($migrations->isEmpty()) {
+            $this->info("Nothing to reset.");
+            return;
+        }
+
+        $migrationPath = APP_ROOT . '/database/migrations';
+        $rolledBack = 0;
+
+        foreach ($migrations as $migration) {
+            $filename = $migration->migration;
+            $filePath = $migrationPath . '/' . $filename . '.php';
+
+            $this->info("Rolling back: {$filename}");
+
+            try {
+                if (file_exists($filePath)) {
+                    require_once $filePath;
+                    $className = $this->getMigrationClassName($filename);
+
+                    if (class_exists($className)) {
+                        $migrationInstance = new $className();
+                        $migrationInstance->down();
+                    }
+                }
+
+                $rolledBack++;
+
+            } catch (Exception $e) {
+                $this->error("Failed to rollback {$filename}: " . $e->getMessage());
+            }
+        }
+
+        // Clear migrations table
+        $connection->table('migrations')->delete();
+
+        $this->success("Reset {$rolledBack} migrations.");
+    }
+
+    private function migrateRefresh()
+    {
+        $this->info("Refreshing migrations...");
+        $this->migrateReset();
+        $this->migrate([]);
+    }
+
+    private function ensureMigrationsTable()
+    {
+        $connection = EloquentBootstrap::getConnection();
+
+        // Check if migrations table exists
+        $exists = $connection->select("SHOW TABLES LIKE 'migrations'");
+
+        if (empty($exists)) {
+            $this->info("Creating migrations table...");
+
+            $connection->statement("
+                CREATE TABLE migrations (
+                    id int(10) unsigned NOT NULL AUTO_INCREMENT,
+                    migration varchar(255) NOT NULL,
+                    batch int(11) NOT NULL,
+                    PRIMARY KEY (id)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+            ");
+
+            $this->success("Migrations table created!");
+        }
+    }
+
+    private function getExecutedMigrations()
+    {
+        $connection = EloquentBootstrap::getConnection();
+        return $connection->table('migrations')->pluck('migration')->toArray();
+    }
+
+    private function getNextBatchNumber()
+    {
+        $connection = EloquentBootstrap::getConnection();
+        $lastBatch = $connection->table('migrations')->max('batch');
+        return $lastBatch ? $lastBatch + 1 : 1;
+    }
+
+    private function getMigrationClassName($filename)
+    {
+        // Remove timestamp prefix and convert to PascalCase
+        $parts = explode('_', $filename);
+        // Remove first 4 parts (Y_m_d_His)
+        $nameParts = array_slice($parts, 4);
+        $className = implode('_', $nameParts);
+        return $this->toPascalCase($className);
+    }
+
+    private function toPascalCase($string)
+    {
+        return str_replace('_', '', ucwords($string, '_'));
+    }
+
+    // ========================================
+    // REVERSE ENGINEERING METHODS
+    // ========================================
+
+    private function makeModelFromTable($arguments)
+    {
+        if (empty($arguments[0])) {
+            $this->error("Table name is required. Usage: php artisan make:model-from-table table_name [ModelName]");
+            return;
+        }
+
+        $tableName = $arguments[0];
+        $modelName = isset($arguments[1]) ? $arguments[1] : $this->toPascalCase($tableName);
+
+        $this->createModelFromTable($tableName, $modelName);
+    }
+
+    private function createModelFromTable($tableName, $modelName)
+    {
+        $connection = EloquentBootstrap::getConnection();
+
+        // Check if table exists
+        $tables = $connection->select("SHOW TABLES LIKE '{$tableName}'");
+        if (empty($tables)) {
+            $this->error("Table '{$tableName}' not found in database.");
+            return;
+        }
+
+        // Get table structure
+        $columns = $connection->select("DESCRIBE {$tableName}");
+
+        $className = ucfirst($modelName);
+        $filePath = APP_ROOT . '/app/models/' . $className . '.php';
+
+        if (file_exists($filePath)) {
+            $this->error("Model {$className} already exists!");
+            return;
+        }
+
+        // Analyze columns
+        $fillable = [];
+        $casts = [];
+        $primaryKey = 'id';
+        $timestamps = ['created_at' => null, 'updated_at' => null];
+
+        foreach ($columns as $column) {
+            $field = $column->Field;
+            $type = $column->Type;
+
+            // Skip auto-increment primary key
+            if ($column->Key === 'PRI' && $column->Extra === 'auto_increment') {
+                $primaryKey = $field;
+                continue;
+            }
+
+            // Check for timestamp fields
+            if (in_array($field, ['created_at', 'data_creazione', 'created'])) {
+                $timestamps['created_at'] = $field;
+                continue;
+            }
+            if (in_array($field, ['updated_at', 'data_modifica', 'modified'])) {
+                $timestamps['updated_at'] = $field;
+                continue;
+            }
+
+            // Add to fillable
+            $fillable[] = $field;
+
+            // Determine cast type
+            if (strpos($type, 'decimal') !== false || strpos($type, 'float') !== false || strpos($type, 'double') !== false) {
+                $casts[$field] = 'decimal:2';
+            } elseif (strpos($type, 'int') !== false || strpos($type, 'bigint') !== false) {
+                $casts[$field] = 'integer';
+            } elseif (strpos($type, 'tinyint(1)') !== false) {
+                $casts[$field] = 'boolean';
+            } elseif (strpos($type, 'timestamp') !== false || strpos($type, 'datetime') !== false) {
+                $casts[$field] = 'datetime';
+            } elseif (strpos($type, 'date') !== false) {
+                $casts[$field] = 'date';
+            }
+        }
+
+        $content = $this->getModelFromTableStub($className, $tableName, $fillable, $casts, $primaryKey, $timestamps);
+
+        if (!is_dir(dirname($filePath))) {
+            mkdir(dirname($filePath), 0755, true);
+        }
+
+        file_put_contents($filePath, $content);
+        $this->success("Model {$className} created from table '{$tableName}'!");
+        $this->info("Location: {$filePath}");
+        $this->info("Fillable fields: " . count($fillable));
+        $this->info("Cast types: " . count($casts));
+    }
+
+    private function getModelFromTableStub($className, $tableName, $fillable, $casts, $primaryKey, $timestamps)
+    {
+        $fillableString = $this->arrayToPhpString($fillable, 2);
+        $castsString = $this->arrayToPhpString($casts, 2);
+
+        $timestampConstants = '';
+        if ($timestamps['created_at'] && $timestamps['created_at'] !== 'created_at') {
+            $timestampConstants .= "    const CREATED_AT = '{$timestamps['created_at']}';\n";
+        }
+        if ($timestamps['updated_at'] && $timestamps['updated_at'] !== 'updated_at') {
+            $timestampConstants .= "    const UPDATED_AT = '{$timestamps['updated_at']}';\n";
+        } elseif (!$timestamps['updated_at']) {
+            $timestampConstants .= "    const UPDATED_AT = null;\n";
+        }
+
+        $primaryKeyLine = ($primaryKey !== 'id') ? "    protected \$primaryKey = '{$primaryKey}';\n\n" : '';
+
+        return "<?php
+
+namespace App\\Models;
+
+/**
+ * {$className} Model
+ * Table: {$tableName}
+ *
+ * Auto-generated from database table
+ */
+class {$className} extends BaseModel
+{
+    protected \$table = '{$tableName}';
+{$primaryKeyLine}{$timestampConstants}
+    protected \$fillable = {$fillableString};
+
+    protected \$casts = {$castsString};
+
+    // TODO: Add relationships here
+}
+";
+    }
+
+    private function makeMigrationFromTable($arguments)
+    {
+        if (empty($arguments[0])) {
+            $this->error("Table name is required. Usage: php artisan make:migration-from-table table_name [migration_name]");
+            return;
+        }
+
+        $tableName = $arguments[0];
+        $migrationName = isset($arguments[1]) ? $arguments[1] : "create_{$tableName}_table";
+
+        $this->createMigrationFromTable($tableName, $migrationName);
+    }
+
+    private function createMigrationFromTable($tableName, $migrationName)
+    {
+        $connection = EloquentBootstrap::getConnection();
+
+        // Check if table exists
+        $tables = $connection->select("SHOW TABLES LIKE '{$tableName}'");
+        if (empty($tables)) {
+            $this->error("Table '{$tableName}' not found in database.");
+            return;
+        }
+
+        // Get CREATE TABLE statement
+        $createTable = $connection->select("SHOW CREATE TABLE {$tableName}");
+        $createStatement = $createTable[0]->{'Create Table'};
+
+        $timestamp = date('Y_m_d_His');
+        $filename = $timestamp . '_' . strtolower($migrationName) . '.php';
+        $className = $this->toPascalCase($migrationName);
+
+        $migrationPath = APP_ROOT . '/database/migrations';
+        $filePath = $migrationPath . '/' . $filename;
+
+        if (!is_dir($migrationPath)) {
+            mkdir($migrationPath, 0755, true);
+        }
+
+        $content = $this->getMigrationFromTableStub($className, $tableName, $createStatement);
+        file_put_contents($filePath, $content);
+
+        $this->success("Migration {$filename} created from table '{$tableName}'!");
+        $this->info("Location: {$filePath}");
+    }
+
+    private function getMigrationFromTableStub($className, $tableName, $createStatement)
+    {
+        // Clean the CREATE TABLE statement
+        $createStatement = str_replace('`', '', $createStatement);
+        $createStatement = str_replace($tableName, $tableName, $createStatement);
+
+        return "<?php
+
+/**
+ * {$className} Migration
+ * Generated from existing table: {$tableName}
+ */
+class {$className}
+{
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
+    {
+        \$connection = EloquentBootstrap::getConnection();
+
+        \$connection->statement('
+{$createStatement}
+        ');
+    }
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        \$connection = EloquentBootstrap::getConnection();
+
+        \$connection->statement('DROP TABLE IF EXISTS {$tableName}');
+    }
+}
+";
+    }
+
+    private function arrayToPhpString($array, $indent = 0)
+    {
+        if (empty($array)) {
+            return '[]';
+        }
+
+        $spaces = str_repeat('    ', $indent);
+        $result = "[\n";
+
+        foreach ($array as $key => $value) {
+            if (is_numeric($key)) {
+                $result .= "{$spaces}    '{$value}',\n";
+            } else {
+                $result .= "{$spaces}    '{$key}' => '{$value}',\n";
+            }
+        }
+
+        $result .= "{$spaces}]";
+        return $result;
+    }
+
+    // ========================================
+    // SCHEMA DIFFING METHODS
+    // ========================================
+
+    private function schemaDiff($arguments)
+    {
+        if (empty($arguments[0])) {
+            $this->error("Model name is required. Usage: php artisan schema:diff ModelName");
+            return;
+        }
+
+        $modelName = $arguments[0];
+        $this->compareModelWithDatabase($modelName);
+    }
+
+    private function schemaMigrate($arguments)
+    {
+        if (empty($arguments[0])) {
+            $this->error("Model name is required. Usage: php artisan schema:migrate ModelName");
+            return;
+        }
+
+        $modelName = $arguments[0];
+        $this->generateMigrationFromDiff($modelName);
+    }
+
+    private function compareModelWithDatabase($modelName)
+    {
+        $className = ucfirst($modelName);
+        $modelPath = APP_ROOT . '/app/models/' . $className . '.php';
+
+        if (!file_exists($modelPath)) {
+            $this->error("Model {$className} not found at {$modelPath}");
+            return;
+        }
+
+        // Load the model class
+        require_once $modelPath;
+        $fullClassName = "App\\Models\\{$className}";
+
+        if (!class_exists($fullClassName)) {
+            $this->error("Model class {$fullClassName} not found");
+            return;
+        }
+
+        $model = new $fullClassName();
+        $tableName = $model->getTable();
+
+        $connection = EloquentBootstrap::getConnection();
+
+        // Check if table exists
+        $tables = $connection->select("SHOW TABLES LIKE '{$tableName}'");
+        if (empty($tables)) {
+            $this->error("Table '{$tableName}' not found in database. Create it first with a migration.");
+            return;
+        }
+
+        $this->info("Comparing model {$className} with table '{$tableName}'...");
+        $this->info("==================================================");
+
+        // Get model schema
+        $modelSchema = $this->getModelSchema($model);
+
+        // Get database schema
+        $dbSchema = $this->getDatabaseSchema($connection, $tableName);
+
+        // Compare schemas
+        $differences = $this->compareSchemas($modelSchema, $dbSchema);
+
+        if (empty($differences)) {
+            $this->success("✓ Model and database are in sync!");
+            return;
+        }
+
+        $this->info("Found " . count($differences) . " differences:");
+        $this->info("");
+
+        foreach ($differences as $diff) {
+            $this->displayDifference($diff);
+        }
+
+        $this->info("");
+        $this->info("Run 'php artisan schema:migrate {$modelName}' to generate migration for these changes.");
+    }
+
+    private function generateMigrationFromDiff($modelName)
+    {
+        $className = ucfirst($modelName);
+        $modelPath = APP_ROOT . '/app/models/' . $className . '.php';
+
+        if (!file_exists($modelPath)) {
+            $this->error("Model {$className} not found at {$modelPath}");
+            return;
+        }
+
+        require_once $modelPath;
+        $fullClassName = "App\\Models\\{$className}";
+        $model = new $fullClassName();
+        $tableName = $model->getTable();
+
+        $connection = EloquentBootstrap::getConnection();
+
+        // Get schemas
+        $modelSchema = $this->getModelSchema($model);
+        $dbSchema = $this->getDatabaseSchema($connection, $tableName);
+
+        // Compare schemas
+        $differences = $this->compareSchemas($modelSchema, $dbSchema);
+
+        if (empty($differences)) {
+            $this->info("No differences found. Model and database are in sync.");
+            return;
+        }
+
+        // Generate migration
+        $migrationName = "update_{$tableName}_schema";
+        $timestamp = date('Y_m_d_His');
+        $filename = $timestamp . '_' . $migrationName . '.php';
+        $migrationClassName = $this->toPascalCase($migrationName);
+
+        $migrationPath = APP_ROOT . '/database/migrations';
+        $filePath = $migrationPath . '/' . $filename;
+
+        if (!is_dir($migrationPath)) {
+            mkdir($migrationPath, 0755, true);
+        }
+
+        $content = $this->generateDiffMigration($migrationClassName, $tableName, $differences);
+        file_put_contents($filePath, $content);
+
+        $this->success("Migration {$filename} created successfully!");
+        $this->info("Location: {$filePath}");
+        $this->info("Changes: " . count($differences));
+        $this->info("");
+        $this->info("Run 'php artisan migrate' to apply these changes to the database.");
+    }
+
+    private function getModelSchema($model)
+    {
+        $schema = [
+            'table' => $model->getTable(),
+            'fillable' => $model->getFillable(),
+            'casts' => $model->getCasts(),
+            'primaryKey' => $model->getKeyName(),
+            'uses_timestamps' => $model->usesTimestamps(),
+            'timestamps' => [
+                'created_at' => $model->getCreatedAtColumn(),
+                'updated_at' => $model->getUpdatedAtColumn()
+            ],
+            'relationships' => []
+        ];
+
+        // Detect relationships using reflection
+        $reflectionClass = new ReflectionClass($model);
+        $methods = $reflectionClass->getMethods(ReflectionMethod::IS_PUBLIC);
+
+        foreach ($methods as $method) {
+            // Skip constructor, getters, setters, and framework methods
+            $methodName = $method->getName();
+            if (strpos($methodName, '__') === 0 ||
+                strpos($methodName, 'get') === 0 ||
+                strpos($methodName, 'set') === 0 ||
+                $method->getNumberOfParameters() > 0 ||
+                $method->class !== get_class($model)) {
+                continue;
+            }
+
+            try {
+                // Try to execute the method to see if it returns a relationship
+                $return = $method->invoke($model);
+
+                if ($return instanceof \Illuminate\Database\Eloquent\Relations\Relation) {
+                    $relationType = class_basename(get_class($return));
+                    $relatedModel = get_class($return->getRelated());
+                    $relatedTable = $return->getRelated()->getTable();
+
+                    $relationshipData = [
+                        'type' => $relationType,
+                        'related_model' => $relatedModel,
+                        'related_table' => $relatedTable,
+                        'method' => $methodName
+                    ];
+
+                    // Extract foreign key information based on relationship type
+                    if ($return instanceof \Illuminate\Database\Eloquent\Relations\BelongsTo) {
+                        $relationshipData['foreign_key'] = $return->getForeignKeyName();
+                        $relationshipData['owner_key'] = $return->getOwnerKeyName();
+                    } elseif ($return instanceof \Illuminate\Database\Eloquent\Relations\HasOne ||
+                              $return instanceof \Illuminate\Database\Eloquent\Relations\HasMany) {
+                        $relationshipData['foreign_key'] = $return->getForeignKeyName();
+                        $relationshipData['local_key'] = $return->getLocalKeyName();
+                    } elseif ($return instanceof \Illuminate\Database\Eloquent\Relations\BelongsToMany) {
+                        $relationshipData['pivot_table'] = $return->getTable();
+                        $relationshipData['foreign_pivot_key'] = $return->getForeignPivotKeyName();
+                        $relationshipData['related_pivot_key'] = $return->getRelatedPivotKeyName();
+                    }
+
+                    $schema['relationships'][$methodName] = $relationshipData;
+                }
+            } catch (Exception $e) {
+                // Skip methods that throw exceptions
+                continue;
+            }
+        }
+
+        return $schema;
+    }
+
+    private function getDatabaseSchema($connection, $tableName)
+    {
+        $columns = $connection->select("DESCRIBE {$tableName}");
+
+        $schema = [
+            'table' => $tableName,
+            'columns' => [],
+            'foreign_keys' => []
+        ];
+
+        foreach ($columns as $column) {
+            $schema['columns'][$column->Field] = [
+                'type' => $column->Type,
+                'null' => $column->Null === 'YES',
+                'key' => $column->Key,
+                'default' => $column->Default,
+                'extra' => $column->Extra
+            ];
+        }
+
+        // Get foreign keys
+        $foreignKeys = $connection->select("
+            SELECT
+                kcu.CONSTRAINT_NAME as constraint_name,
+                kcu.COLUMN_NAME as column_name,
+                kcu.REFERENCED_TABLE_NAME as referenced_table,
+                kcu.REFERENCED_COLUMN_NAME as referenced_column,
+                rc.UPDATE_RULE as on_update,
+                rc.DELETE_RULE as on_delete
+            FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE AS kcu
+            JOIN INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS AS rc
+                ON kcu.CONSTRAINT_NAME = rc.CONSTRAINT_NAME
+                AND kcu.CONSTRAINT_SCHEMA = rc.CONSTRAINT_SCHEMA
+            WHERE kcu.TABLE_SCHEMA = DATABASE()
+                AND kcu.TABLE_NAME = '{$tableName}'
+                AND kcu.REFERENCED_TABLE_NAME IS NOT NULL
+        ");
+
+        foreach ($foreignKeys as $fk) {
+            $schema['foreign_keys'][$fk->column_name] = [
+                'constraint_name' => $fk->constraint_name,
+                'column' => $fk->column_name,
+                'referenced_table' => $fk->referenced_table,
+                'referenced_column' => $fk->referenced_column,
+                'on_update' => $fk->on_update,
+                'on_delete' => $fk->on_delete
+            ];
+        }
+
+        return $schema;
+    }
+
+    private function compareSchemas($modelSchema, $dbSchema)
+    {
+        $differences = [];
+        
+        // Build a comprehensive list of all columns the model expects
+        $modelColumns = array_merge($modelSchema['fillable'], array_keys($modelSchema['casts']));
+
+        if ($modelSchema['uses_timestamps']) {
+            if ($modelSchema['timestamps']['created_at']) {
+                $modelColumns[] = $modelSchema['timestamps']['created_at'];
+            }
+            if ($modelSchema['timestamps']['updated_at']) {
+                $modelColumns[] = $modelSchema['timestamps']['updated_at'];
+            }
+        }
+        $modelColumns = array_unique($modelColumns);
+
+        // Check for columns to add or modify
+        foreach ($modelColumns as $field) {
+            // Skip primary key from this check
+            if ($field === $modelSchema['primaryKey']) {
+                continue;
+            }
+
+            if (!isset($dbSchema['columns'][$field])) {
+                $differences[] = [
+                    'type' => 'add_column',
+                    'field' => $field,
+                    'model_type' => $this->getModelFieldType($field, $modelSchema['casts'], $modelSchema['timestamps']),
+                    'db_type' => null
+                ];
+                continue;
+            }
+
+            // Compare types
+            $modelType = $this->getModelFieldType($field, $modelSchema['casts'], $modelSchema['timestamps']);
+            $dbType = $this->normalizeDbType($dbSchema['columns'][$field]['type']);
+            $rawDbType = $dbSchema['columns'][$field]['type'];
+
+            if (!$this->typesMatch($modelType, $dbType, $rawDbType)) {
+                $differences[] = [
+                    'type' => 'modify_column',
+                    'field' => $field,
+                    'model_type' => $modelType,
+                    'db_type' => $dbType,
+                    'db_full_type' => $dbSchema['columns'][$field]['type']
+                ];
+            }
+        }
+
+        // Check for columns to remove
+        foreach ($dbSchema['columns'] as $field => $info) {
+            if ($field === $modelSchema['primaryKey']) {
+                continue;
+            }
+
+            if (!in_array($field, $modelColumns)) {
+                $differences[] = [
+                    'type' => 'remove_column',
+                    'field' => $field,
+                    'model_type' => null,
+                    'db_type' => $this->normalizeDbType($info['type']),
+                    'db_full_type' => $info['type']
+                ];
+            }
+        }
+
+        // Compare relationships with foreign keys
+        // Check for missing foreign keys (model has relationship, DB doesn't have FK)
+        foreach ($modelSchema['relationships'] as $methodName => $relationship) {
+            // Only check BelongsTo relationships as they should have FK in current table
+            if ($relationship['type'] === 'BelongsTo' && isset($relationship['foreign_key'])) {
+                $foreignKey = $relationship['foreign_key'];
+
+                if (!isset($dbSchema['foreign_keys'][$foreignKey])) {
+                    $differences[] = [
+                        'type' => 'add_foreign_key',
+                        'field' => $foreignKey,
+                        'relationship' => $methodName,
+                        'referenced_table' => $relationship['related_table'],
+                        'referenced_column' => $relationship['owner_key'],
+                        'on_delete' => 'RESTRICT',
+                        'on_update' => 'RESTRICT'
+                    ];
+                } else {
+                    // FK exists, check if it matches
+                    $dbFk = $dbSchema['foreign_keys'][$foreignKey];
+                    if ($dbFk['referenced_table'] !== $relationship['related_table']) {
+                        $differences[] = [
+                            'type' => 'modify_foreign_key',
+                            'field' => $foreignKey,
+                            'relationship' => $methodName,
+                            'model_referenced_table' => $relationship['related_table'],
+                            'db_referenced_table' => $dbFk['referenced_table']
+                        ];
+                    }
+                }
+            }
+        }
+
+        // Check for orphaned foreign keys (DB has FK, model doesn't have relationship)
+        foreach ($dbSchema['foreign_keys'] as $column => $fk) {
+            $hasMatchingRelationship = false;
+
+            foreach ($modelSchema['relationships'] as $relationship) {
+                if ($relationship['type'] === 'BelongsTo' &&
+                    isset($relationship['foreign_key']) &&
+                    $relationship['foreign_key'] === $column) {
+                    $hasMatchingRelationship = true;
+                    break;
+                }
+            }
+
+            if (!$hasMatchingRelationship) {
+                $differences[] = [
+                    'type' => 'remove_foreign_key',
+                    'field' => $column,
+                    'constraint_name' => $fk['constraint_name'],
+                    'referenced_table' => $fk['referenced_table'],
+                    'referenced_column' => $fk['referenced_column']
+                ];
+            }
+        }
+
+        return $differences;
+    }
+
+    private function getModelFieldType($field, $casts, $timestamps)
+    {
+        if (isset($casts[$field])) {
+            return $casts[$field];
+        }
+        if ($timestamps && ($field === $timestamps['created_at'] || $field === $timestamps['updated_at'])) {
+            return 'datetime';
+        }
+        return 'string'; // default
+    }
+
+    private function normalizeDbType($dbType)
+    {
+        $dbType = strtolower($dbType);
+
+        if (strpos($dbType, 'varchar') !== false || strpos($dbType, 'text') !== false) {
+            return 'string';
+        }
+        if (strpos($dbType, 'int') !== false) {
+            return 'integer';
+        }
+        if (strpos($dbType, 'decimal') !== false || strpos($dbType, 'float') !== false) {
+            return 'decimal:2';
+        }
+        if (strpos($dbType, 'tinyint(1)') !== false) {
+            return 'boolean';
+        }
+        if (strpos($dbType, 'datetime') !== false || strpos($dbType, 'timestamp') !== false) {
+            return 'datetime';
+        }
+        if (strpos($dbType, 'date') !== false) {
+            return 'date';
+        }
+
+        return 'string';
+    }
+
+    private function typesMatch($modelType, $dbType, $rawDbType = null)
+    {
+        // Normalize both types for comparison
+        $modelType = strtolower($modelType);
+        $dbType = strtolower($dbType);
+
+        // Handle decimal precision differences
+        if (strpos($modelType, 'decimal') !== false && strpos($dbType, 'decimal') !== false) {
+            return true;
+        }
+
+        // Handle boolean/tinyint(1) equivalence
+        if ($modelType === 'boolean' && $rawDbType) {
+            return strtolower($rawDbType) === 'tinyint(1)';
+        }
+
+        return $modelType === $dbType;
+    }
+
+    private function displayDifference($diff)
+    {
+        switch ($diff['type']) {
+            case 'add_column':
+                $this->info("  + ADD COLUMN: {$diff['field']} ({$diff['model_type']})");
+                break;
+            case 'modify_column':
+                $this->info("  ~ MODIFY COLUMN: {$diff['field']}");
+                $this->info("    Model expects: {$diff['model_type']}");
+                $this->info("    Database has:  {$diff['db_type']} ({$diff['db_full_type']})");
+                break;
+            case 'remove_column':
+                $this->info("  - REMOVE COLUMN: {$diff['field']} ({$diff['db_type']})");
+                $this->info("    (Not in model fillable - will be suggested for removal)");
+                break;
+            case 'add_foreign_key':
+                $this->info("  + ADD FOREIGN KEY: {$diff['field']}");
+                $this->info("    Relationship: {$diff['relationship']}()");
+                $this->info("    References: {$diff['referenced_table']}({$diff['referenced_column']})");
+                break;
+            case 'modify_foreign_key':
+                $this->info("  ~ MODIFY FOREIGN KEY: {$diff['field']}");
+                $this->info("    Relationship: {$diff['relationship']}()");
+                $this->info("    Model expects: references {$diff['model_referenced_table']}");
+                $this->info("    Database has:  references {$diff['db_referenced_table']}");
+                break;
+            case 'remove_foreign_key':
+                $this->info("  - REMOVE FOREIGN KEY: {$diff['field']}");
+                $this->info("    Constraint: {$diff['constraint_name']}");
+                $this->info("    (No matching BelongsTo relationship in model)");
+                break;
+        }
+        $this->info("");
+    }
+
+    private function generateDiffMigration($className, $tableName, $differences)
+    {
+        $upStatements = [];
+        $downStatements = [];
+
+        foreach ($differences as $diff) {
+            switch ($diff['type']) {
+                case 'add_column':
+                    $sqlType = $this->modelTypeToSqlType($diff['model_type']);
+                    $upStatements[] = "ALTER TABLE {$tableName} ADD COLUMN {$diff['field']} {$sqlType}";
+                    $downStatements[] = "ALTER TABLE {$tableName} DROP COLUMN {$diff['field']}";
+                    break;
+
+                case 'modify_column':
+                    $sqlType = $this->modelTypeToSqlType($diff['model_type']);
+                    $upStatements[] = "ALTER TABLE {$tableName} MODIFY COLUMN {$diff['field']} {$sqlType}";
+                    $downStatements[] = "ALTER TABLE {$tableName} MODIFY COLUMN {$diff['field']} {$diff['db_full_type']}";
+                    break;
+
+                case 'remove_column':
+                    $upStatements[] = "-- ALTER TABLE {$tableName} DROP COLUMN {$diff['field']} -- UNCOMMENT IF YOU WANT TO REMOVE";
+                    $downStatements[] = "-- ALTER TABLE {$tableName} ADD COLUMN {$diff['field']} {$diff['db_full_type']} -- UNCOMMENT TO RESTORE";
+                    break;
+
+                case 'add_foreign_key':
+                    $constraintName = "{$tableName}_{$diff['field']}_foreign";
+                    $upStatements[] = "ALTER TABLE {$tableName} ADD CONSTRAINT {$constraintName} FOREIGN KEY ({$diff['field']}) REFERENCES {$diff['referenced_table']}({$diff['referenced_column']}) ON DELETE {$diff['on_delete']} ON UPDATE {$diff['on_update']}";
+                    $downStatements[] = "ALTER TABLE {$tableName} DROP FOREIGN KEY {$constraintName}";
+                    break;
+
+                case 'modify_foreign_key':
+                    // This requires getting the existing constraint name from the DB schema
+                    // Let's assume we can get it from the diff, if not, this needs adjustment.
+                    // For now, let's use a placeholder.
+                    $dbFk = $this->getDatabaseSchema(EloquentBootstrap::getConnection(), $tableName)['foreign_keys'][$diff['field']];
+                    $constraintName = $dbFk['constraint_name'];
+
+                    // UP: Drop old, add new
+                    $upStatements[] = "ALTER TABLE {$tableName} DROP FOREIGN KEY {$constraintName}";
+                    $newConstraintName = "{$tableName}_{$diff['field']}_foreign";
+                    $upStatements[] = "ALTER TABLE {$tableName} ADD CONSTRAINT {$newConstraintName} FOREIGN KEY ({$diff['field']}) REFERENCES {$diff['model_referenced_table']}(id)"; // Assuming 'id' for now
+                    
+                    // DOWN: Drop new, add old
+                    $downStatements[] = "ALTER TABLE {$tableName} DROP FOREIGN KEY {$newConstraintName}";
+                    $downStatements[] = "ALTER TABLE {$tableName} ADD CONSTRAINT {$constraintName} FOREIGN KEY ({$diff['field']}) REFERENCES {$diff['db_referenced_table']}(id)"; // Assuming 'id'
+                    break;
+
+                case 'remove_foreign_key':
+                    $upStatements[] = "ALTER TABLE {$tableName} DROP FOREIGN KEY {$diff['constraint_name']}";
+                    $downStatements[] = "ALTER TABLE {$tableName} ADD CONSTRAINT {$diff['constraint_name']} FOREIGN KEY ({$diff['field']}) REFERENCES {$diff['referenced_table']}({$diff['referenced_column']})";
+                    break;
+            }
+        }
+
+        $upCode = implode("');\n        \$connection->statement('", $upStatements);
+        $downCode = implode("');\n        \$connection->statement('", $downStatements);
+
+        return "<?php
+
+/**
+ * {$className} Migration
+ * Auto-generated from model schema differences
+ */
+class {$className}
+{
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
+    {
+        \$connection = EloquentBootstrap::getConnection();
+
+        \$connection->statement('{$upCode}');
+    }
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        \$connection = EloquentBootstrap::getConnection();
+
+        \$connection->statement('{$downCode}');
+    }
+}
+";
+    }
+
+    private function modelTypeToSqlType($modelType)
+    {
+        switch (strtolower($modelType)) {
+            case 'integer':
+                return 'INT(11)';
+            case 'string':
+                return 'VARCHAR(255)';
+            case 'text':
+                return 'TEXT';
+            case 'boolean':
+                return 'TINYINT(1)';
+            case 'datetime':
+                return 'DATETIME';
+            case 'date':
+                return 'DATE';
+            case 'decimal:2':
+                return 'DECIMAL(10,2)';
+            case 'decimal:3':
+                return 'DECIMAL(10,3)';
+            default:
+                if (strpos($modelType, 'decimal:') !== false) {
+                    $precision = substr($modelType, 8);
+                    return "DECIMAL(10,{$precision})";
+                }
+                return 'VARCHAR(255)';
+        }
+    }
+
+    // ========================================
+    // SCHEMA RENAME TABLE METHOD
+    // ========================================
+
+    private function schemaRenameTable($arguments)
+    {
+        if (count($arguments) < 3) {
+            $this->error("Parametri richiesti: php artisan schema:rename-table vecchio_nome nuovo_nome NomeModello");
+            $this->info("Esempio: php artisan schema:rename-table exp_documenti export_documents ExportDocument");
+            return;
+        }
+
+        $oldTableName = $arguments[0];
+        $newTableName = $arguments[1];
+        $modelName = $arguments[2];
+
+        $this->renameTableAndUpdateModel($oldTableName, $newTableName, $modelName);
+    }
+
+    private function renameTableAndUpdateModel($oldTableName, $newTableName, $modelName)
+    {
+        $connection = EloquentBootstrap::getConnection();
+
+        // Verifica che la tabella vecchia esista
+        $oldTableExists = $connection->select("SHOW TABLES LIKE '{$oldTableName}'");
+        if (empty($oldTableExists)) {
+            $this->error("Tabella '{$oldTableName}' non trovata nel database.");
+            return;
+        }
+
+        // Verifica che la tabella nuova NON esista
+        $newTableExists = $connection->select("SHOW TABLES LIKE '{$newTableName}'");
+        if (!empty($newTableExists)) {
+            $this->error("Tabella '{$newTableName}' esiste già nel database.");
+            return;
+        }
+
+        // Verifica che il modello esista
+        $className = ucfirst($modelName);
+        $modelPath = APP_ROOT . '/app/models/' . $className . '.php';
+
+        if (!file_exists($modelPath)) {
+            $this->error("Modello {$className} non trovato in {$modelPath}");
+            return;
+        }
+
+        $this->info("Rinominando tabella '{$oldTableName}' → '{$newTableName}'...");
+        $this->info("Aggiornando modello {$className}...");
+        $this->info("================================================");
+
+        // 1. Genera migrazione per rinominare la tabella
+        $migrationName = "rename_{$oldTableName}_to_{$newTableName}";
+        $timestamp = date('Y_m_d_His');
+        $filename = $timestamp . '_' . $migrationName . '.php';
+        $migrationClassName = $this->toPascalCase($migrationName);
+
+        $migrationPath = APP_ROOT . '/database/migrations';
+        $filePath = $migrationPath . '/' . $filename;
+
+        if (!is_dir($migrationPath)) {
+            mkdir($migrationPath, 0755, true);
+        }
+
+        $migrationContent = $this->generateRenameMigration($migrationClassName, $oldTableName, $newTableName);
+        file_put_contents($filePath, $migrationContent);
+
+        $this->success("✓ Migrazione creata: {$filename}");
+
+        // 2. Aggiorna il modello
+        $this->updateModelTableName($modelPath, $oldTableName, $newTableName);
+
+        $this->success("✓ Modello {$className} aggiornato");
+        $this->info("");
+        $this->info("Operazioni completate:");
+        $this->info("1. Migrazione creata per rinominare '{$oldTableName}' → '{$newTableName}'");
+        $this->info("2. Proprietà \$table del modello aggiornata");
+        $this->info("");
+        $this->info("Esegui 'php artisan migrate' per applicare la rinominazione al database.");
+    }
+
+    private function generateRenameMigration($className, $oldTableName, $newTableName)
+    {
+        return "<?php
+
+/**
+ * {$className} Migration
+ * Rinomina tabella {$oldTableName} in {$newTableName}
+ */
+class {$className}
+{
+    /**
+     * Esegui le migrazioni.
+     *
+     * @return void
+     */
+    public function up()
+    {
+        \$connection = EloquentBootstrap::getConnection();
+
+        \$connection->statement('RENAME TABLE {$oldTableName} TO {$newTableName}');
+    }
+
+    /**
+     * Rollback delle migrazioni.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        \$connection = EloquentBootstrap::getConnection();
+
+        \$connection->statement('RENAME TABLE {$newTableName} TO {$oldTableName}');
+    }
+}
+";
+    }
+
+    private function updateModelTableName($modelPath, $oldTableName, $newTableName)
+    {
+        $content = file_get_contents($modelPath);
+
+        // Pattern per trovare protected $table = 'vecchio_nome';
+        $pattern = "/protected\\s+\\\$table\\s*=\\s*['\"]" . preg_quote($oldTableName, '/') . "['\"]\\s*;/";
+        $replacement = "protected \$table = '{$newTableName}';";
+
+        if (preg_match($pattern, $content)) {
+            $content = preg_replace($pattern, $replacement, $content);
+            file_put_contents($modelPath, $content);
+        } else {
+            $this->error("Avviso: Non è stato possibile aggiornare automaticamente \$table nel modello.");
+            $this->info("Aggiorna manualmente: protected \$table = '{$newTableName}';");
+        }
+    }
+}
+
+// Run the application
+try {
+    $app = new WebgreArtisan();
+    $app->run($argv);
+} catch (Exception $e) {
+    echo "\033[31mError: " . $e->getMessage() . "\033[0m\n";
+    exit(1);
+}

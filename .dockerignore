@@ -1,0 +1,86 @@
+# ============================================================================
+# Docker Ignore - File da escludere dal build context
+# ============================================================================
+
+# Git
+.git
+.gitignore
+.gitattributes
+.github
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# Environment
+.env
+.env.*
+!.env.docker
+
+# Docker files
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# Documentation
+*.md
+!README.md
+DEPLOY_*.md
+PERFORMANCE_*.md
+GUIDA_*.md
+
+# Tests
+tests/
+phpunit.xml
+.phpunit.result.cache
+
+# Build artifacts
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Temporary files
+temp/
+tmp/
+cache/
+
+# Storage (rebuilt in container)
+storage/cache/*
+storage/logs/*
+storage/sessions/*
+!storage/cache/.gitkeep
+!storage/logs/.gitkeep
+!storage/sessions/.gitkeep
+
+# Uploads (persistent volume)
+public/uploads/*
+!public/uploads/.gitkeep
+
+# Backups
+backups/
+database/backups/
+*.backup
+*.bak
+*.sql
+*.sql.gz
+
+# Composer
+vendor_backup/
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Legacy
+legacy/
+
+# Scripts di deploy locale
+deploy.sh

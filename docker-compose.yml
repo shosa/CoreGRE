@@ -1,0 +1,81 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: coregre-app
+    restart: unless-stopped
+
+    ports:
+      - "3008:80"  # Mappa porta 3008 locale -> 80 container
+
+    volumes:
+      # Mount codice per development (commenta in production)
+      - ./:/var/www/html:delegated
+
+      # Mount storage persistenti
+      - coregre-storage:/var/www/html/storage
+      - coregre-uploads:/var/www/html/public/uploads
+
+      # Mount configurazioni (opzionale per override)
+      - ./docker/php/php.ini:/usr/local/etc/php/conf.d/99-coregre.ini:ro
+      - ./docker/nginx/default.conf:/etc/nginx/http.d/default.conf:ro
+
+    environment:
+      # Application
+      APP_ENV: ${APP_ENV:-production}
+      APP_DEBUG: ${APP_DEBUG:-false}
+      APP_NAME: ${APP_NAME:-CoreGre}
+      APP_VERSION: ${APP_VERSION:-1.0.0}
+
+      # Database - Connessione a MySQL core-services
+      DB_HOST: ${DB_HOST:-core-mysql}  # Nome container MySQL in CoreServices
+      DB_PORT: ${DB_PORT:-3306}
+      DB_NAME: ${DB_NAME:-coregre}
+      DB_USER: ${DB_USER:-root}
+      DB_PASS: ${DB_PASS:-rootpassword}
+
+      # Redis - Connessione a Redis condiviso in CoreServices
+      REDIS_HOST: ${REDIS_HOST:-core-redis}
+      REDIS_PORT: ${REDIS_PORT:-6379}
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-coresuite_redis}
+
+      # PHP Settings
+      PHP_OPCACHE_ENABLE: ${PHP_OPCACHE_ENABLE:-1}
+      PHP_MEMORY_LIMIT: ${PHP_MEMORY_LIMIT:-256M}
+      PHP_UPLOAD_MAX_FILESIZE: ${PHP_UPLOAD_MAX_FILESIZE:-50M}
+      PHP_POST_MAX_SIZE: ${PHP_POST_MAX_SIZE:-50M}
+
+      # Timezone
+      TZ: Europe/Rome
+
+    networks:
+      - core-network  # Network condivisa con tutti i servizi Core
+
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 40s
+
+    labels:
+      - "com.coresuite.app=coregre"
+      - "com.coresuite.environment=${APP_ENV:-production}"
+
+networks:
+  # Usa la network condivisa CoreSuite
+  core-network:
+    external: true
+    name: core-network
+
+volumes:
+  coregre-storage:
+    driver: local
+    name: coregre-storage
+
+  coregre-uploads:
+    driver: local
+    name: coregre-uploads

@@ -1,0 +1,69 @@
+# Composer
+/vendor/
+composer.lock
+
+
+# Temporary and cache files
+/temp/
+/cache/
+/logs/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# PHP Storm
+.phpstorm.meta.php
+
+# Environment
+.env
+.env.local
+.env.production
+!.env.docker
+
+
+# Node modules (se usi npm/yarn)
+node_modules/
+
+# Claude code permission settings
+.claude/
+
+# Build files
+/public/build/
+/public/mix-manifest.json
+
+# Backup files
+vendor_backup/
+*.backup
+*.bak
+
+# Upload directories
+/public/uploads/
+/storage/
+
+# Progetto Legacy
+/legacy/
+
+# Database backups
+backups/
+database/backups/
+*.sql
+!backup.sql  # Keep main backup file
+*.sql.gz
+*.sqlite
+backup_*.sql  # Ignore timestamped backups from make db-backup
+
+# Roba temporanea di dev
+temp/
