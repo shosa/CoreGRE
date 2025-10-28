@@ -310,8 +310,8 @@
                 if (file.type !== 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
                     if (window.showAlert) {
                         window.showAlert('Formato non valido: ' + file.name + '. Carica solo file Excel (.xlsx)', 'error');
-                    } else if (window.WebgreNotifications) {
-                        window.WebgreNotifications.error('Formato non valido: ' + file.name);
+                    } else if (window.CoregreNotifications) {
+                        window.CoregreNotifications.error('Formato non valido: ' + file.name);
                     }
                     return;
                 }
@@ -328,10 +328,10 @@
             const fileId = 'file-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
             addFileToList(file.name, fileId, 'loading');
             
-            fetch(window.WEBGRE.baseUrl + '/export/api/upload', {
+            fetch(window.COREGRE.baseUrl + '/export/api/upload', {
                 method: 'POST',
                 headers: {
-                    'X-CSRF-TOKEN': window.WEBGRE.csrfToken
+                    'X-CSRF-TOKEN': window.COREGRE.csrfToken
                 },
                 body: formData
             })
@@ -343,8 +343,8 @@
                     updateFileStatus(fileId, 'error', file.name);
                     if (window.showAlert) {
                         window.showAlert(data.error || 'Errore nel caricamento del file', 'error');
-                    } else if (window.WebgreNotifications) {
-                        window.WebgreNotifications.error(data.error || 'Errore nel caricamento del file');
+                    } else if (window.CoregreNotifications) {
+                        window.CoregreNotifications.error(data.error || 'Errore nel caricamento del file');
                     }
                 }
             })
@@ -353,8 +353,8 @@
                 updateFileStatus(fileId, 'error', file.name);
                 if (window.showAlert) {
                     window.showAlert('Errore di rete nel caricamento del file', 'error');
-                } else if (window.WebgreNotifications) {
-                    window.WebgreNotifications.error('Errore di rete nel caricamento del file');
+                } else if (window.CoregreNotifications) {
+                    window.CoregreNotifications.error('Errore di rete nel caricamento del file');
                 }
             });
         }
@@ -429,13 +429,13 @@
             window.currentFileName = fileName;
             
             // Mostra modal con stato di loading
-            WebgreModals.openModal('excel-modal');
+            CoregreModals.openModal('excel-modal');
             document.getElementById('modello-info').textContent = 'Caricamento...';
             document.getElementById('taglio-table').innerHTML = '<div class="text-center py-4">Caricamento...</div>';
             document.getElementById('orlatura-table').innerHTML = '<div class="text-center py-4">Caricamento...</div>';
             
             // Chiama API per processare il file Excel
-            fetch(window.WEBGRE.baseUrl + '/export/api/processExcel?fileName=' + encodeURIComponent(fileName), {
+            fetch(window.COREGRE.baseUrl + '/export/api/processExcel?fileName=' + encodeURIComponent(fileName), {
                 method: 'GET',
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest'
@@ -460,7 +460,7 @@
                         window.showAlert(data.error || 'Errore nel caricamento del contenuto Excel', 'error');
                     }
                     // Chiudi modal in caso di errore
-                    WebgreModals.closeModal('excel-modal');
+                    CoregreModals.closeModal('excel-modal');
                 }
             })
             .catch(error => {
@@ -468,7 +468,7 @@
                 if (window.showAlert) {
                     window.showAlert('Errore di rete nel caricamento del contenuto', 'error');
                 }
-                WebgreModals.closeModal('excel-modal');
+                CoregreModals.closeModal('excel-modal');
             });
         };
         
@@ -481,7 +481,7 @@
         };
         
         window.closeModal = function(modalId) {
-            WebgreModals.closeModal(modalId);
+            CoregreModals.closeModal(modalId);
         };
         
         window.saveExcelData = function() {
@@ -492,8 +492,8 @@
             if (!lancio.trim()) {
                 if (window.showAlert) {
                     window.showAlert('Inserisci un valore per il campo Lancio', 'warning');
-                } else if (window.WebgreNotifications) {
-                    window.WebgreNotifications.warning('Inserisci un valore per il campo Lancio');
+                } else if (window.CoregreNotifications) {
+                    window.CoregreNotifications.warning('Inserisci un valore per il campo Lancio');
                 }
                 return;
             }
@@ -515,7 +515,7 @@
             };
             
             // Invia dati al server
-            fetch(window.WEBGRE.baseUrl + '/export/api/saveExcel', {
+            fetch(window.COREGRE.baseUrl + '/export/api/saveExcel', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -528,8 +528,8 @@
                 if (data.success) {
                     if (window.showAlert) {
                         window.showAlert('Scheda salvata nella cartella temporanea! Carica la scheda successiva o vai al prossimo Step.', 'success');
-                    } else if (window.WebgreNotifications) {
-                        window.WebgreNotifications.success('Scheda salvata! Carica la scheda successiva o vai al prossimo Step.');
+                    } else if (window.CoregreNotifications) {
+                        window.CoregreNotifications.success('Scheda salvata! Carica la scheda successiva o vai al prossimo Step.');
                     }
                     
                     // Segna il file come processato nella lista
@@ -539,8 +539,8 @@
                 } else {
                     if (window.showAlert) {
                         window.showAlert(data.error || 'Errore nel salvataggio del file Excel', 'error');
-                    } else if (window.WebgreNotifications) {
-                        window.WebgreNotifications.error(data.error || 'Errore nel salvataggio del file Excel');
+                    } else if (window.CoregreNotifications) {
+                        window.CoregreNotifications.error(data.error || 'Errore nel salvataggio del file Excel');
                     }
                 }
             })
@@ -548,15 +548,15 @@
                 console.error('Error:', error);
                 if (window.showAlert) {
                     window.showAlert('Errore di rete nel salvataggio', 'error');
-                } else if (window.WebgreNotifications) {
-                    window.WebgreNotifications.error('Errore di rete nel salvataggio');
+                } else if (window.CoregreNotifications) {
+                    window.CoregreNotifications.error('Errore di rete nel salvataggio');
                 }
             });
         };
         
         window.navigateToStep3 = function() {
             const progressivo = <?= json_encode($progressivo) ?>;
-            const url = window.WEBGRE.baseUrl + '/export/preview/' + progressivo;
+            const url = window.COREGRE.baseUrl + '/export/preview/' + progressivo;
             
             if (window.pjax) {
                 window.pjax.navigateTo(url);
@@ -792,7 +792,7 @@
         modals.forEach(modal => {
             function clickHandler(e) {
                 if (e.target === modal) {
-                    WebgreModals.closeModal(modal.id);
+                    CoregreModals.closeModal(modal.id);
                 }
             }
             modal.addEventListener('click', clickHandler);
@@ -811,8 +811,8 @@
     }
     
     // Registrazione PJAX
-    if (window.WEBGRE && window.WEBGRE.onPageLoad) {
-        window.WEBGRE.onPageLoad(initExportUpload);
+    if (window.COREGRE && window.COREGRE.onPageLoad) {
+        window.COREGRE.onPageLoad(initExportUpload);
     }
     
     // Fallback primo caricamento

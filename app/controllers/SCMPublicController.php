@@ -845,7 +845,7 @@ class SCMPublicController extends BaseController
     }
 
     /**
-     * Renderizza una view standalone senza layout WEBGRE
+     * Renderizza una view standalone senza layout COREGRE
      */
     protected function renderStandalone($viewName, $data = [])
     {

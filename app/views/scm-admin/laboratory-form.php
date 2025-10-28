@@ -300,7 +300,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         if (!isEdit && password.length < 8) {
             e.preventDefault();
-            WebgreNotifications.error('La password deve essere di almeno 8 caratteri');
+            CoregreNotifications.error('La password deve essere di almeno 8 caratteri');
             return false;
         }
         

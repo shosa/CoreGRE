@@ -256,14 +256,14 @@
     }
 
     function deletePhase(phaseId) {
-        if (window.WebgreModals && window.WebgreModals.confirmDelete) {
-            window.WebgreModals.confirmDelete(
+        if (window.CoregreModals && window.CoregreModals.confirmDelete) {
+            window.CoregreModals.confirmDelete(
                 'Sei sicuro di voler eliminare questa fase standard?\n\nQuesta operazione è irreversibile.',
                 () => confirmDeletePhase(phaseId),
                 1
             );
         } else {
-            // Fallback se WebgreModals non disponibile
+            // Fallback se CoregreModals non disponibile
             if (confirm('Sei sicuro di voler eliminare questa fase standard?\n\nQuesta operazione è irreversibile.')) {
                 confirmDeletePhase(phaseId);
             }

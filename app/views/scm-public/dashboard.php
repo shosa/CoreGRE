@@ -10,7 +10,7 @@
 </head>
 
 <body class="bg-gray-50 min-h-screen">
-    <!-- Header - Stile WEBGRE Moderno -->
+    <!-- Header - Stile COREGRE Moderno -->
     <nav class="bg-gradient-to-r from-slate-900 via-blue-900 to-indigo-900 shadow-2xl">
         <div class="max-w-7xl mx-auto px-4">
             <div class="flex justify-between items-center h-20">
@@ -59,7 +59,7 @@
             </p>
         </div>
 
-        <!-- Statistics Cards - Stile WEBGRE Moderno -->
+        <!-- Statistics Cards - Stile COREGRE Moderno -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
             <!-- Paia Totali -->
             <div

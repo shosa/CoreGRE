@@ -346,14 +346,14 @@
 
         // Funzione per eliminare log
         window.deleteLog = function(id) {
-            if (window.WebgreModals && window.WebgreModals.confirmDelete) {
-                window.WebgreModals.confirmDelete(
+            if (window.CoregreModals && window.CoregreModals.confirmDelete) {
+                window.CoregreModals.confirmDelete(
                     'Sei sicuro di voler eliminare questo log?',
                     async () => {
                         try {
                             let loadingId = null;
-                            if (window.WebgreNotifications && window.WebgreNotifications.loading) {
-                                loadingId = window.WebgreNotifications.loading('Eliminazione in corso...');
+                            if (window.CoregreNotifications && window.CoregreNotifications.loading) {
+                                loadingId = window.CoregreNotifications.loading('Eliminazione in corso...');
                             }
 
                             const response = await fetch(`<?= $this->url('/logs/delete') ?>`, {
@@ -361,13 +361,13 @@
                                 headers: {
                                     'Content-Type': 'application/json',
                                     'X-Requested-With': 'XMLHttpRequest',
-                                    'X-CSRF-TOKEN': window.WEBGRE ? window.WEBGRE.csrfToken : ''
+                                    'X-CSRF-TOKEN': window.COREGRE ? window.COREGRE.csrfToken : ''
                                 },
                                 body: JSON.stringify({ ids: [id] })
                             });
 
-                            if (loadingId && window.WebgreNotifications && window.WebgreNotifications.remove) {
-                                window.WebgreNotifications.remove(loadingId);
+                            if (loadingId && window.CoregreNotifications && window.CoregreNotifications.remove) {
+                                window.CoregreNotifications.remove(loadingId);
                             }
 
                             if (!response.ok) {
@@ -414,8 +414,8 @@
         };
 
         // Registra l'inizializzatore per PJAX
-        if (window.WEBGRE && window.WEBGRE.onPageLoad) {
-            window.WEBGRE.onPageLoad(initLogShow);
+        if (window.COREGRE && window.COREGRE.onPageLoad) {
+            window.COREGRE.onPageLoad(initLogShow);
         }
 
         // Inizializza anche al primo caricamento

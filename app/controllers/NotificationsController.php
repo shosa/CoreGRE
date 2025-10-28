@@ -5,7 +5,7 @@ use App\Models\User;
 
 /**
  * Notifications Controller
- * Gestione sistema notifiche interno WEBGRE
+ * Gestione sistema notifiche interno COREGRE
  */
 class NotificationsController extends BaseController
 {

@@ -316,8 +316,8 @@
             if (selectedIds.length === 0) return;
             
             const count = selectedIds.length;
-            if (window.WebgreModals && window.WebgreModals.confirmDelete) {
-                window.WebgreModals.confirmDelete(
+            if (window.CoregreModals && window.CoregreModals.confirmDelete) {
+                window.CoregreModals.confirmDelete(
                     count === 1 
                         ? 'Sei sicuro di voler eliminare questa riparazione?' 
                         : `Sei sicuro di voler eliminare ${count} riparazioni?`,
@@ -325,7 +325,7 @@
                     count
                 );
             } else {
-                // Fallback semplice se WebgreModals non disponibile
+                // Fallback semplice se CoregreModals non disponibile
                 if (confirm(count === 1 
                     ? 'Sei sicuro di voler eliminare questa riparazione?' 
                     : `Sei sicuro di voler eliminare ${count} riparazioni?`)) {
@@ -346,14 +346,14 @@
 
     // Gestione eliminazione singola - funzione globale
     window.deleteRiparazione = function(id) {
-        if (window.WebgreModals && window.WebgreModals.confirmDelete) {
-            window.WebgreModals.confirmDelete(
+        if (window.CoregreModals && window.CoregreModals.confirmDelete) {
+            window.CoregreModals.confirmDelete(
                 'Sei sicuro di voler eliminare questa riparazione?',
                 () => confirmDelete([id]),
                 1
             );
         } else {
-            // Fallback semplice se WebgreModals non disponibile
+            // Fallback semplice se CoregreModals non disponibile
             if (confirm('Sei sicuro di voler eliminare questa riparazione?')) {
                 confirmDelete([id]);
             }
@@ -365,8 +365,8 @@
         try {
             // Mostra notifica di caricamento
             let loadingId = null;
-            if (window.WebgreNotifications && window.WebgreNotifications.loading) {
-                loadingId = window.WebgreNotifications.loading('Eliminazione in corso...');
+            if (window.CoregreNotifications && window.CoregreNotifications.loading) {
+                loadingId = window.CoregreNotifications.loading('Eliminazione in corso...');
             }
             
             const response = await fetch(`<?= $this->url('/api/riparazioni/delete') ?>`, {
@@ -374,14 +374,14 @@
                 headers: {
                     'Content-Type': 'application/json',
                     'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRF-TOKEN': window.WEBGRE ? window.WEBGRE.csrfToken : ''
+                    'X-CSRF-TOKEN': window.COREGRE ? window.COREGRE.csrfToken : ''
                 },
                 body: JSON.stringify({ ids: ids })
             });
             
             // Rimuovi notifica di caricamento
-            if (loadingId && window.WebgreNotifications && window.WebgreNotifications.remove) {
-                window.WebgreNotifications.remove(loadingId);
+            if (loadingId && window.CoregreNotifications && window.CoregreNotifications.remove) {
+                window.CoregreNotifications.remove(loadingId);
             }
             
             if (!response.ok) {
@@ -403,8 +403,8 @@
                 // Usa sistema di notifiche globale se disponibile
                 if (window.showAlert) {
                     window.showAlert(message, 'success');
-                } else if (window.WebgreNotifications && window.WebgreNotifications.success) {
-                    window.WebgreNotifications.success(message, 3000);
+                } else if (window.CoregreNotifications && window.CoregreNotifications.success) {
+                    window.CoregreNotifications.success(message, 3000);
                 }
                 
                 // Ricarica la pagina con PJAX se possibile, altrimenti normale reload
@@ -423,22 +423,22 @@
             console.error('Error deleting riparazioni:', error);
             
             // Rimuovi eventuali notifiche di caricamento
-            if (window.WebgreNotifications && window.WebgreNotifications.removeByText) {
-                window.WebgreNotifications.removeByText('Eliminazione in corso');
+            if (window.CoregreNotifications && window.CoregreNotifications.removeByText) {
+                window.CoregreNotifications.removeByText('Eliminazione in corso');
             }
             
             const errorMsg = `Errore durante l'eliminazione: ${error.message}`;
             if (window.showAlert) {
                 window.showAlert(errorMsg, 'error');
-            } else if (window.WebgreNotifications && window.WebgreNotifications.error) {
-                window.WebgreNotifications.error(errorMsg);
+            } else if (window.CoregreNotifications && window.CoregreNotifications.error) {
+                window.CoregreNotifications.error(errorMsg);
             }
         }
     }
 
     // Registra l'inizializzatore per PJAX
-    if (window.WEBGRE && window.WEBGRE.onPageLoad) {
-        window.WEBGRE.onPageLoad(initRiparazioniIndex);
+    if (window.COREGRE && window.COREGRE.onPageLoad) {
+        window.COREGRE.onPageLoad(initRiparazioniIndex);
     }
 
     // Inizializza anche al primo caricamento

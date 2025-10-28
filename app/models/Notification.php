@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 /**
  * Notification Model
  *
- * Sistema di notifiche interno WEBGRE
+ * Sistema di notifiche interno COREGRE
  *
  * @property int $id
  * @property int $user_id

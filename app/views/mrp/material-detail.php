@@ -1174,23 +1174,23 @@ function openOrderModal() {
     if (modal.parentElement !== document.body) {
         document.body.appendChild(modal);
     }
-    WebgreModals.openModal('orderModal');
+    CoregreModals.openModal('orderModal');
     document.getElementById('orderForm').reset();
     resetOrderRows();
 }
 
 function closeOrderModal() {
-    WebgreModals.closeModal('orderModal');
+    CoregreModals.closeModal('orderModal');
 }
 
 function openArrivalModal() {
-    WebgreModals.openModal('arrivalModal');
+    CoregreModals.openModal('arrivalModal');
     document.getElementById('arrivalForm').reset();
     resetArrivalRows();
 }
 
 function closeArrivalModal() {
-    WebgreModals.closeModal('arrivalModal');
+    CoregreModals.closeModal('arrivalModal');
 }
 
 // Row management for materials without sizes
@@ -1299,10 +1299,10 @@ function removeArrivalSizeRow(button) {
 
 // Delete functions
 function deleteOrder(orderId) {
-    WebgreModals.confirmDelete(
+    CoregreModals.confirmDelete(
         'Sei sicuro di voler eliminare questo ordine?',
         () => {
-            const loadingId = WebgreNotifications.loading('Eliminazione in corso...');
+            const loadingId = CoregreNotifications.loading('Eliminazione in corso...');
 
             fetch('<?= $this->url('/mrp/order/delete') ?>', {
                 method: 'POST',
@@ -1314,29 +1314,29 @@ function deleteOrder(orderId) {
             })
             .then(response => response.json())
             .then(data => {
-                WebgreNotifications.remove(loadingId);
+                CoregreNotifications.remove(loadingId);
 
                 if (data.success) {
-                    WebgreNotifications.success('Ordine eliminato con successo');
+                    CoregreNotifications.success('Ordine eliminato con successo');
                     setTimeout(() => { window.location.reload(); }, 1200);
                 } else {
-                    WebgreNotifications.error(data.error || 'Errore durante l\'eliminazione');
+                    CoregreNotifications.error(data.error || 'Errore durante l\'eliminazione');
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                WebgreNotifications.remove(loadingId);
-                WebgreNotifications.error('Errore di connessione durante l\'eliminazione');
+                CoregreNotifications.remove(loadingId);
+                CoregreNotifications.error('Errore di connessione durante l\'eliminazione');
             });
         }
     );
 }
 
 function deleteArrival(arrivalId) {
-    WebgreModals.confirmDelete(
+    CoregreModals.confirmDelete(
         'Sei sicuro di voler eliminare questo arrivo?',
         () => {
-            const loadingId = WebgreNotifications.loading('Eliminazione in corso...');
+            const loadingId = CoregreNotifications.loading('Eliminazione in corso...');
 
             fetch('<?= $this->url('/mrp/arrival/delete') ?>', {
                 method: 'POST',
@@ -1348,19 +1348,19 @@ function deleteArrival(arrivalId) {
             })
             .then(response => response.json())
             .then(data => {
-                WebgreNotifications.remove(loadingId);
+                CoregreNotifications.remove(loadingId);
 
                 if (data.success) {
-                    WebgreNotifications.success('Arrivo eliminato con successo');
+                    CoregreNotifications.success('Arrivo eliminato con successo');
                     setTimeout(() => { window.location.reload(); }, 1200);
                 } else {
-                    WebgreNotifications.error(data.error || 'Errore durante l\'eliminazione');
+                    CoregreNotifications.error(data.error || 'Errore durante l\'eliminazione');
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                WebgreNotifications.remove(loadingId);
-                WebgreNotifications.error('Errore di connessione durante l\'eliminazione');
+                CoregreNotifications.remove(loadingId);
+                CoregreNotifications.error('Errore di connessione durante l\'eliminazione');
             });
         }
     );
@@ -1368,14 +1368,14 @@ function deleteArrival(arrivalId) {
 
 // Modal Delete Material
 function openDeleteMaterialModal() {
-    WebgreModals.openModal('deleteMaterialModal');
+    CoregreModals.openModal('deleteMaterialModal');
     document.getElementById('deleteConfirmation').value = '';
     document.getElementById('deleteReason').value = '';
     document.getElementById('confirmDeleteButton').disabled = true;
 }
 
 function closeDeleteMaterialModal() {
-    WebgreModals.closeModal('deleteMaterialModal');
+    CoregreModals.closeModal('deleteMaterialModal');
 }
 
 function validateDeleteConfirmation() {

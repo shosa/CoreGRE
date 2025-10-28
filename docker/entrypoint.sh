@@ -1,13 +1,13 @@
 #!/bin/bash
 # ============================================================================
-# WEBGRE3 - Docker Entrypoint Script
+# COREGRE - Docker Entrypoint Script
 # Prepara il container all'avvio
 # ============================================================================
 
 set -e
 
 echo "============================================"
-echo "WEBGRE3 Container Starting..."
+echo "COREGRE Container Starting..."
 echo "============================================"
 
 # ============================================================================
@@ -144,7 +144,7 @@ echo "[7/7] Startup information..."
 
 echo ""
 echo "============================================"
-echo "✓ WEBGRE3 Container Ready!"
+echo "✓ COREGRE Container Ready!"
 echo "============================================"
 echo "Application:  ${APP_NAME} v${APP_VERSION}"
 echo "Environment:  ${APP_ENV}"

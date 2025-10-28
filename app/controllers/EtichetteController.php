@@ -25,7 +25,7 @@ class EtichetteController extends BaseController
        
         
         $data = [
-            'pageTitle' => 'Etichette DYMO - WEBGRE',
+            'pageTitle' => 'Etichette DYMO - COREGRE',
             'pageScripts' => $this->getDymoScripts()
         ];
 

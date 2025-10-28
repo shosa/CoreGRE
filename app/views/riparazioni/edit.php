@@ -592,8 +592,8 @@
 
                 if (!isValid) {
                     e.preventDefault();
-                    if (window.WebgreNotifications && window.WebgreNotifications.error) {
-                        window.WebgreNotifications.error('Per favore, compila tutti i campi obbligatori.');
+                    if (window.CoregreNotifications && window.CoregreNotifications.error) {
+                        window.CoregreNotifications.error('Per favore, compila tutti i campi obbligatori.');
                     } else if (window.showAlert) {
                         window.showAlert('Per favore, compila tutti i campi obbligatori.', 'error');
                     } else {
@@ -678,8 +678,8 @@
             updateTableProgress(input);
         });
 
-        if (window.WebgreNotifications && window.WebgreNotifications.success) {
-            window.WebgreNotifications.success('Tutte le quantità sono state impostate a 1.');
+        if (window.CoregreNotifications && window.CoregreNotifications.success) {
+            window.CoregreNotifications.success('Tutte le quantità sono state impostate a 1.');
         } else if (window.showAlert) {
             window.showAlert('Tutte le quantità sono state impostate a 1.', 'success');
         } else {
@@ -708,8 +708,8 @@
     }
 
     // Registra l'inizializzatore per PJAX
-    if (window.WEBGRE && window.WEBGRE.onPageLoad) {
-        window.WEBGRE.onPageLoad(() => {
+    if (window.COREGRE && window.COREGRE.onPageLoad) {
+        window.COREGRE.onPageLoad(() => {
             initRiparazioniEdit();
             initKeyboardShortcuts();
         });

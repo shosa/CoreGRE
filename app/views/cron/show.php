@@ -254,7 +254,7 @@
 <!-- Modal Dettagli Log -->
 <div id="log-detail-modal" class="hidden fixed inset-0 z-[99999] overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
     <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-4 text-center">
-        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity backdrop-blur-sm" onclick="WebgreModals.closeModal('log-detail-modal')"></div>
+        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity backdrop-blur-sm" onclick="CoregreModals.closeModal('log-detail-modal')"></div>
 
         <div class="relative inline-block align-middle bg-white dark:bg-gray-800 rounded-2xl px-6 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all max-w-4xl w-full mx-4 border border-gray-200 dark:border-gray-700">
             <div class="flex items-center justify-between pb-4 border-b border-gray-200 dark:border-gray-700">
@@ -264,7 +264,7 @@
                     </div>
                     Dettagli Log
                 </h3>
-                <button class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors" onclick="WebgreModals.closeModal('log-detail-modal')">
+                <button class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors" onclick="CoregreModals.closeModal('log-detail-modal')">
                     <i class="fas fa-times text-xl"></i>
                 </button>
             </div>
@@ -275,7 +275,7 @@
                 </div>
             </div>
             <div class="flex justify-end pt-4 border-t border-gray-200 dark:border-gray-700 mt-6">
-                <button onclick="WebgreModals.closeModal('log-detail-modal')"
+                <button onclick="CoregreModals.closeModal('log-detail-modal')"
                     class="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 dark:bg-gray-600 dark:text-gray-300 dark:hover:bg-gray-500 transition-colors">
                     Chiudi
                 </button>
@@ -301,7 +301,7 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded',
-                        'X-CSRF-TOKEN': window.WEBGRE ? window.WEBGRE.csrfToken : ''
+                        'X-CSRF-TOKEN': window.COREGRE ? window.COREGRE.csrfToken : ''
                     },
                     body: 'job_class=' + encodeURIComponent(jobClass)
                 });
@@ -335,7 +335,7 @@
         window.viewLogDetail = async function(logId) {
             const content = document.getElementById('log-detail-content');
 
-            WebgreModals.openModal('log-detail-modal');
+            CoregreModals.openModal('log-detail-modal');
 
             content.innerHTML = `
                 <div class="text-center py-8">
@@ -347,7 +347,7 @@
             try {
                 const response = await fetch('<?= $this->url('/cron/log-detail') ?>?id=' + logId, {
                     headers: {
-                        'X-CSRF-TOKEN': window.WEBGRE ? window.WEBGRE.csrfToken : ''
+                        'X-CSRF-TOKEN': window.COREGRE ? window.COREGRE.csrfToken : ''
                     }
                 });
 
@@ -409,8 +409,8 @@
     }
 
     // Registrazione PJAX
-    if (window.WEBGRE && window.WEBGRE.onPageLoad) {
-        window.WEBGRE.onPageLoad(initCronShow);
+    if (window.COREGRE && window.COREGRE.onPageLoad) {
+        window.COREGRE.onPageLoad(initCronShow);
     }
 
     // Inizializza al primo caricamento

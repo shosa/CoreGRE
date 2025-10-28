@@ -17,7 +17,7 @@
                         Impostazioni Sistema
                     </h1>
                     <p class="mt-2 text-gray-600 dark:text-gray-400">
-                        Gestione avanzata parametri e configurazioni WEBGRE
+                        Gestione avanzata parametri e configurazioni COREGRE
                     </p>
                 </div>
             </div>

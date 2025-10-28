@@ -258,7 +258,7 @@
 
             // Validate input
             if (!cartellinoValue && !commessaValue) {
-                WebgreNotifications.warning('Per favore, inserisci un cartellino o una commessa.');
+                CoregreNotifications.warning('Per favore, inserisci un cartellino o una commessa.');
                 return;
             }
 
@@ -277,7 +277,7 @@
                 console.log('Starting checkCartellino for:', cartellino); // Debug
 
                 // Show loading notification instead of global loader
-                const loadingId = WebgreNotifications.loading('Verifica cartellino in corso...');
+                const loadingId = CoregreNotifications.loading('Verifica cartellino in corso...');
 
                 const response = await fetch(`<?= $this->url('/api/riparazioni/check-cartellino') ?>?cartellino=${encodeURIComponent(cartellino)}`, {
                     headers: {
@@ -295,7 +295,7 @@
                 console.log('Data received:', data); // Debug
 
                 // Remove loading notification
-                WebgreNotifications.remove(loadingId);
+                CoregreNotifications.remove(loadingId);
 
                 if (data.error) {
                     throw new Error(data.error);
@@ -303,7 +303,7 @@
 
                 if (data.exists) {
                     // Cartellino exists, proceed to step 2
-                    WebgreNotifications.success(`Cartellino "${cartellino}" trovato! Reindirizzamento...`, 2000);
+                    CoregreNotifications.success(`Cartellino "${cartellino}" trovato! Reindirizzamento...`, 2000);
                     setTimeout(() => {
                         console.log('Redirecting to step 2'); // Debug
                         console.log('window.pjax exists:', !!window.pjax); // Debug
@@ -319,7 +319,7 @@
                         }
                     }, 1000);
                 } else {
-                    WebgreNotifications.error(`Cartellino "${cartellino}" non trovato nel database. Verifica il numero inserito.`);
+                    CoregreNotifications.error(`Cartellino "${cartellino}" non trovato nel database. Verifica il numero inserito.`);
                     // Reset del campo per facilitare una nuova ricerca
                     cartellinoInput.value = '';
                     cartellinoInput.focus();
@@ -328,9 +328,9 @@
                 console.error('Error checking cartellino:', error);
 
                 // Remove loading notification
-                WebgreNotifications.remove(loadingId);
+                CoregreNotifications.remove(loadingId);
 
-                WebgreNotifications.error(`Errore durante la verifica del cartellino: ${error.message}`);
+                CoregreNotifications.error(`Errore durante la verifica del cartellino: ${error.message}`);
                 // Reset del campo in caso di errore
                 cartellinoInput.value = '';
                 cartellinoInput.focus();
@@ -342,7 +342,7 @@
                 console.log('Starting checkCommessa for:', commessa); // Debug
 
                 // Show loading notification
-                const loadingId = WebgreNotifications.loading('Verifica commessa in corso...');
+                const loadingId = CoregreNotifications.loading('Verifica commessa in corso...');
 
                 const response = await fetch(`<?= $this->url('/api/riparazioni/check-commessa') ?>?commessa=${encodeURIComponent(commessa)}`, {
                     headers: {
@@ -360,7 +360,7 @@
                 console.log('Data received:', data); // Debug
 
                 // Remove loading notification
-                WebgreNotifications.remove(loadingId);
+                CoregreNotifications.remove(loadingId);
 
                 if (data.error) {
                     throw new Error(data.error);
@@ -368,7 +368,7 @@
 
                 if (data.exists && data.cartellino) {
                     // Commessa exists, use the returned cartellino for step 2
-                    WebgreNotifications.success(`Commessa "${commessa}" trovata! Cartellino: ${data.cartellino}`, 2000);
+                    CoregreNotifications.success(`Commessa "${commessa}" trovata! Cartellino: ${data.cartellino}`, 2000);
                     setTimeout(() => {
                         console.log('Redirecting to step 2 with cartellino:', data.cartellino); // Debug
                         console.log('window.pjax exists:', !!window.pjax); // Debug
@@ -384,7 +384,7 @@
                         }
                     }, 1000);
                 } else {
-                    WebgreNotifications.error(`Commessa "${commessa}" non trovata nel database. Verifica il codice inserito.`);
+                    CoregreNotifications.error(`Commessa "${commessa}" non trovata nel database. Verifica il codice inserito.`);
                     // Reset del campo per facilitare una nuova ricerca
                     commessaInput.value = '';
                     commessaInput.focus();
@@ -393,9 +393,9 @@
                 console.error('Error checking commessa:', error);
 
                 // Remove loading notification
-                WebgreNotifications.remove(loadingId);
+                CoregreNotifications.remove(loadingId);
 
-                WebgreNotifications.error(`Errore durante la verifica della commessa: ${error.message}`);
+                CoregreNotifications.error(`Errore durante la verifica della commessa: ${error.message}`);
                 // Reset del campo in caso di errore
                 commessaInput.value = '';
                 commessaInput.focus();
@@ -407,8 +407,8 @@
     document.addEventListener('DOMContentLoaded', initSearchForm);
 
     // Registra l'inizializzatore per PJAX
-    if (window.WEBGRE && window.WEBGRE.onPageLoad) {
-        window.WEBGRE.onPageLoad(initSearchForm);
+    if (window.COREGRE && window.COREGRE.onPageLoad) {
+        window.COREGRE.onPageLoad(initSearchForm);
     }
 
     // Initialize after PJAX navigation

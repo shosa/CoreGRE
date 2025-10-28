@@ -15,7 +15,7 @@ class AddPerformanceIndexes
         $connection = EloquentBootstrap::getConnection();
 
         // ============================================
-        // PERFORMANCE INDEXES - WEBGRE3
+        // PERFORMANCE INDEXES - COREGRE
         // Miglioramento 10-50x su query filtrate
         // ============================================
 

@@ -1,6 +1,6 @@
 #!/bin/bash
 ###############################################################################
-# WEBGRE3 - Deploy Helper Script
+# COREGRE - Deploy Helper Script
 # Facilita il deploy automatico via GitHub Actions
 ###############################################################################
 
@@ -16,7 +16,7 @@ NC='\033[0m' # No Color
 # Funzioni
 print_header() {
     echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-    echo -e "${BLUE}  WEBGRE3 Deploy Helper${NC}"
+    echo -e "${BLUE}  COREGRE Deploy Helper${NC}"
     echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo ""
 }

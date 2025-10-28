@@ -655,8 +655,8 @@ class DatabaseController extends BaseController
 
         // Dimensione database
         $sizeResult = $this->db->fetch("
-            SELECT ROUND(SUM(data_length + index_length) / 1024 / 1024, 2) as size_mb 
-            FROM information_schema.tables 
+            SELECT ROUND(SUM(DATA_LENGTH + INDEX_LENGTH) / 1024 / 1024, 2) as size_mb
+            FROM information_schema.tables
             WHERE table_schema = ?
         ", [DB_NAME]);
         $stats['size'] = $sizeResult['size_mb'] . ' MB';
@@ -666,11 +666,11 @@ class DatabaseController extends BaseController
 
         // Engine più usato
         $engineResult = $this->db->fetch("
-            SELECT engine, COUNT(*) as count
-            FROM information_schema.tables 
+            SELECT ENGINE as engine, COUNT(*) as count
+            FROM information_schema.tables
             WHERE table_schema = ?
-            GROUP BY engine 
-            ORDER BY count DESC 
+            GROUP BY ENGINE
+            ORDER BY count DESC
             LIMIT 1
         ", [DB_NAME]);
         $stats['main_engine'] = $engineResult['engine'] ?? 'N/A';
@@ -684,17 +684,17 @@ class DatabaseController extends BaseController
     private function getTablesInfo()
     {
         return $this->db->fetchAll("
-            SELECT 
-                table_name,
-                table_rows,
-                ROUND(((data_length + index_length) / 1024 / 1024), 2) as size_mb,
-                engine,
-                table_collation,
-                create_time,
-                update_time
-            FROM information_schema.tables 
+            SELECT
+                TABLE_NAME as table_name,
+                TABLE_ROWS as table_rows,
+                ROUND(((DATA_LENGTH + INDEX_LENGTH) / 1024 / 1024), 2) as size_mb,
+                ENGINE as engine,
+                TABLE_COLLATION as table_collation,
+                CREATE_TIME as create_time,
+                UPDATE_TIME as update_time
+            FROM information_schema.tables
             WHERE table_schema = ?
-            ORDER BY table_name
+            ORDER BY TABLE_NAME
         ", [DB_NAME]);
     }
 
@@ -769,20 +769,20 @@ class DatabaseController extends BaseController
     private function getTableInfo($tableName)
     {
         return $this->db->fetch("
-            SELECT 
-                table_name,
-                table_rows,
-                avg_row_length,
-                data_length,
-                index_length,
-                auto_increment,
-                engine,
-                table_collation,
-                create_time,
-                update_time,
-                table_comment
-            FROM information_schema.tables 
-            WHERE table_schema = ? AND table_name = ?
+            SELECT
+                TABLE_NAME as table_name,
+                TABLE_ROWS as table_rows,
+                AVG_ROW_LENGTH as avg_row_length,
+                DATA_LENGTH as data_length,
+                INDEX_LENGTH as index_length,
+                AUTO_INCREMENT as auto_increment,
+                ENGINE as engine,
+                TABLE_COLLATION as table_collation,
+                CREATE_TIME as create_time,
+                UPDATE_TIME as update_time,
+                TABLE_COMMENT as table_comment
+            FROM information_schema.tables
+            WHERE table_schema = ? AND TABLE_NAME = ?
         ", [DB_NAME, $tableName]);
     }
 

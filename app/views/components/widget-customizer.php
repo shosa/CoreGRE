@@ -186,7 +186,7 @@ async function savePendingChanges() {
     if (widgetCustomizer.pendingChanges.length === 0) return;
 
     try {
-        const response = await fetch(window.WEBGRE.baseUrl + '/api/widgets/batch-update', {
+        const response = await fetch(window.COREGRE.baseUrl + '/api/widgets/batch-update', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -212,7 +212,7 @@ async function loadAvailableWidgets() {
     container.classList.add('hidden');
     
     try {
-        const response = await fetch(window.WEBGRE.baseUrl + '/api/widgets/available');
+        const response = await fetch(window.COREGRE.baseUrl + '/api/widgets/available');
         const data = await response.json();
         
         if (data.success) {

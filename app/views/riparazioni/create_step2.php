@@ -471,7 +471,7 @@
                 
                 if (!hasQuantity) {
                     e.preventDefault();
-                    WebgreNotifications.warning('Deve essere specificata almeno una quantità da riparare.');
+                    CoregreNotifications.warning('Deve essere specificata almeno una quantità da riparare.');
                     return;
                 }
                 
@@ -550,7 +550,7 @@
             updateTableProgress(input);
         });
         
-        WebgreNotifications.success('Tutte le quantità sono state impostate a 1.');
+        CoregreNotifications.success('Tutte le quantità sono state impostate a 1.');
     };
 
     // Keyboard shortcuts handler
@@ -574,8 +574,8 @@
     }
 
     // Registra l'inizializzatore per PJAX
-    if (window.WEBGRE && window.WEBGRE.onPageLoad) {
-        window.WEBGRE.onPageLoad(() => {
+    if (window.COREGRE && window.COREGRE.onPageLoad) {
+        window.COREGRE.onPageLoad(() => {
             initRiparazioniCreateStep2();
             initKeyboardShortcuts();
         });

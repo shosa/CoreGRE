@@ -404,13 +404,13 @@
     function addAlert(message, type = 'info') {
         if (window.showAlert) {
             window.showAlert(message, type);
-        } else if (window.WebgreNotifications) {
+        } else if (window.CoregreNotifications) {
             if (type === 'success') {
-                window.WebgreNotifications.success(message, 3000);
+                window.CoregreNotifications.success(message, 3000);
             } else if (type === 'error') {
-                window.WebgreNotifications.error(message, 5000);
+                window.CoregreNotifications.error(message, 5000);
             } else {
-                window.WebgreNotifications.info(message, 3000);
+                window.CoregreNotifications.info(message, 3000);
             }
         } else {
             // Fallback to alert
@@ -419,8 +419,8 @@
     }
 
     // Registrazione PJAX
-    if (window.WEBGRE && window.WEBGRE.onPageLoad) {
-        window.WEBGRE.onPageLoad(initPackingList);
+    if (window.COREGRE && window.COREGRE.onPageLoad) {
+        window.COREGRE.onPageLoad(initPackingList);
     } else {
         // Fallback primo caricamento se PJAX non disponibile
         if (document.readyState === 'loading') {

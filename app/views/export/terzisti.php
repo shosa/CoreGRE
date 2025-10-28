@@ -289,14 +289,14 @@
     }
     
     window.confirmDeleteTerzista = function(id) {
-        if (window.WebgreModals && window.WebgreModals.confirmDelete) {
-            window.WebgreModals.confirmDelete(
+        if (window.CoregreModals && window.CoregreModals.confirmDelete) {
+            window.CoregreModals.confirmDelete(
                 'Sei sicuro di voler eliminare questo terzista? Questa operazione non può essere annullata!',
                 () => deleteTerzista(id),
                 1
             );
         } else {
-            // Fallback semplice se WebgreModals non disponibile
+            // Fallback semplice se CoregreModals non disponibile
             if (confirm('Sei sicuro di voler eliminare questo terzista? Questa operazione non può essere annullata!')) {
                 deleteTerzista(id);
             }
@@ -304,7 +304,7 @@
     };
     
     function deleteTerzista(id) {
-        fetch(window.WEBGRE.baseUrl + '/export/terzisti/delete', {
+        fetch(window.COREGRE.baseUrl + '/export/terzisti/delete', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded'
@@ -316,8 +316,8 @@
             if (data.success) {
                 if (window.showAlert) {
                     window.showAlert(data.message || 'Terzista eliminato con successo', 'success');
-                } else if (window.WebgreNotifications) {
-                    window.WebgreNotifications.success(data.message || 'Terzista eliminato con successo');
+                } else if (window.CoregreNotifications) {
+                    window.CoregreNotifications.success(data.message || 'Terzista eliminato con successo');
                 }
                 // Ricarica la pagina dopo un breve delay
                 setTimeout(() => {
@@ -326,8 +326,8 @@
             } else {
                 if (window.showAlert) {
                     window.showAlert(data.message || 'Errore durante l\'eliminazione', 'error');
-                } else if (window.WebgreNotifications) {
-                    window.WebgreNotifications.error(data.message || 'Errore durante l\'eliminazione');
+                } else if (window.CoregreNotifications) {
+                    window.CoregreNotifications.error(data.message || 'Errore durante l\'eliminazione');
                 }
             }
         })
@@ -335,8 +335,8 @@
             console.error('Error:', error);
             if (window.showAlert) {
                 window.showAlert('Errore durante l\'eliminazione del terzista', 'error');
-            } else if (window.WebgreNotifications) {
-                window.WebgreNotifications.error('Errore durante l\'eliminazione del terzista');
+            } else if (window.CoregreNotifications) {
+                window.CoregreNotifications.error('Errore durante l\'eliminazione del terzista');
             }
         });
     }
@@ -349,8 +349,8 @@
     }
     
     // Registrazione PJAX
-    if (window.WEBGRE && window.WEBGRE.onPageLoad) {
-        window.WEBGRE.onPageLoad(initTerzistiIndex);
+    if (window.COREGRE && window.COREGRE.onPageLoad) {
+        window.COREGRE.onPageLoad(initTerzistiIndex);
     }
     
     // Fallback primo caricamento

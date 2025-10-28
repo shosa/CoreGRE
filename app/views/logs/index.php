@@ -556,8 +556,8 @@
                     if (selectedIds.length === 0) return;
 
                     const count = selectedIds.length;
-                    if (window.WebgreModals && window.WebgreModals.confirmDelete) {
-                        window.WebgreModals.confirmDelete(
+                    if (window.CoregreModals && window.CoregreModals.confirmDelete) {
+                        window.CoregreModals.confirmDelete(
                             count === 1
                                 ? 'Sei sicuro di voler eliminare questo log?'
                                 : `Sei sicuro di voler eliminare ${count} log?`,
@@ -565,7 +565,7 @@
                             count
                         );
                     } else {
-                        // Fallback semplice se WebgreModals non disponibile
+                        // Fallback semplice se CoregreModals non disponibile
                         if (confirm(count === 1
                             ? 'Sei sicuro di voler eliminare questo log?'
                             : `Sei sicuro di voler eliminare ${count} log?`)) {
@@ -595,9 +595,9 @@
             }
 
             // Fallback per PJAX legacy
-            if (window.WebgrePjax && typeof window.WebgrePjax.navigateTo === 'function') {
-                console.log('Reloading with WebgrePjax...');
-                window.WebgrePjax.navigateTo(window.location.href);
+            if (window.CoregrePjax && typeof window.CoregrePjax.navigateTo === 'function') {
+                console.log('Reloading with CoregrePjax...');
+                window.CoregrePjax.navigateTo(window.location.href);
                 return;
             }
 
@@ -619,14 +619,14 @@
 
         // Gestione eliminazione singola - funzione globale
         window.deleteLog = function (id) {
-            if (window.WebgreModals && window.WebgreModals.confirmDelete) {
-                window.WebgreModals.confirmDelete(
+            if (window.CoregreModals && window.CoregreModals.confirmDelete) {
+                window.CoregreModals.confirmDelete(
                     'Sei sicuro di voler eliminare questo log?',
                     () => confirmDelete([id]),
                     1
                 );
             } else {
-                // Fallback semplice se WebgreModals non disponibile
+                // Fallback semplice se CoregreModals non disponibile
                 if (confirm('Sei sicuro di voler eliminare questo log?')) {
                     confirmDelete([id]);
                 }
@@ -638,8 +638,8 @@
             try {
                 // Mostra notifica di caricamento
                 let loadingId = null;
-                if (window.WebgreNotifications && window.WebgreNotifications.loading) {
-                    loadingId = window.WebgreNotifications.loading('Eliminazione in corso...');
+                if (window.CoregreNotifications && window.CoregreNotifications.loading) {
+                    loadingId = window.CoregreNotifications.loading('Eliminazione in corso...');
                 }
 
                 const response = await fetch(`<?= $this->url('/logs/delete') ?>`, {
@@ -647,14 +647,14 @@
                     headers: {
                         'Content-Type': 'application/json',
                         'X-Requested-With': 'XMLHttpRequest',
-                        'X-CSRF-TOKEN': window.WEBGRE ? window.WEBGRE.csrfToken : ''
+                        'X-CSRF-TOKEN': window.COREGRE ? window.COREGRE.csrfToken : ''
                     },
                     body: JSON.stringify({ ids: ids })
                 });
 
                 // Rimuovi notifica di caricamento
-                if (loadingId && window.WebgreNotifications && window.WebgreNotifications.remove) {
-                    window.WebgreNotifications.remove(loadingId);
+                if (loadingId && window.CoregreNotifications && window.CoregreNotifications.remove) {
+                    window.CoregreNotifications.remove(loadingId);
                 }
 
                 if (!response.ok) {
@@ -676,8 +676,8 @@
                     // Usa sistema di notifiche globale se disponibile
                     if (window.showAlert) {
                         window.showAlert(message, 'success');
-                    } else if (window.WebgreNotifications && window.WebgreNotifications.success) {
-                        window.WebgreNotifications.success(message, 3000);
+                    } else if (window.CoregreNotifications && window.CoregreNotifications.success) {
+                        window.CoregreNotifications.success(message, 3000);
                     }
 
                     // Rimuovi le righe eliminate visivamente per feedback immediato
@@ -702,26 +702,26 @@
                 console.error('Error deleting logs:', error);
 
                 // Rimuovi eventuali notifiche di caricamento
-                if (window.WebgreNotifications && window.WebgreNotifications.removeByText) {
-                    window.WebgreNotifications.removeByText('Eliminazione in corso');
+                if (window.CoregreNotifications && window.CoregreNotifications.removeByText) {
+                    window.CoregreNotifications.removeByText('Eliminazione in corso');
                 }
 
                 const errorMsg = `Errore durante l'eliminazione: ${error.message}`;
                 if (window.showAlert) {
                     window.showAlert(errorMsg, 'error');
-                } else if (window.WebgreNotifications && window.WebgreNotifications.error) {
-                    window.WebgreNotifications.error(errorMsg);
+                } else if (window.CoregreNotifications && window.CoregreNotifications.error) {
+                    window.CoregreNotifications.error(errorMsg);
                 }
             }
         }
 
         // Modal cleanup functions - solo per admin
         window.showCleanupModal = function() {
-            WebgreModals.openModal('cleanup-modal');
+            CoregreModals.openModal('cleanup-modal');
         };
 
         window.hideCleanupModal = function() {
-            WebgreModals.closeModal('cleanup-modal');
+            CoregreModals.closeModal('cleanup-modal');
         };
 
         window.performCleanup = async function() {
@@ -739,8 +739,8 @@
 
             try {
                 let loadingId = null;
-                if (window.WebgreNotifications && window.WebgreNotifications.loading) {
-                    loadingId = window.WebgreNotifications.loading('Pulizia in corso...');
+                if (window.CoregreNotifications && window.CoregreNotifications.loading) {
+                    loadingId = window.CoregreNotifications.loading('Pulizia in corso...');
                 }
 
                 const response = await fetch(`<?= $this->url('/logs/cleanup') ?>`, {
@@ -748,13 +748,13 @@
                     headers: {
                         'Content-Type': 'application/json',
                         'X-Requested-With': 'XMLHttpRequest',
-                        'X-CSRF-TOKEN': window.WEBGRE ? window.WEBGRE.csrfToken : ''
+                        'X-CSRF-TOKEN': window.COREGRE ? window.COREGRE.csrfToken : ''
                     },
                     body: JSON.stringify({ days: days })
                 });
 
-                if (loadingId && window.WebgreNotifications && window.WebgreNotifications.remove) {
-                    window.WebgreNotifications.remove(loadingId);
+                if (loadingId && window.CoregreNotifications && window.CoregreNotifications.remove) {
+                    window.CoregreNotifications.remove(loadingId);
                 }
 
                 if (!response.ok) {
@@ -770,8 +770,8 @@
                 const message = data.message || 'Pulizia completata con successo';
                 if (window.showAlert) {
                     window.showAlert(message, 'success');
-                } else if (window.WebgreNotifications && window.WebgreNotifications.success) {
-                    window.WebgreNotifications.success(message, 3000);
+                } else if (window.CoregreNotifications && window.CoregreNotifications.success) {
+                    window.CoregreNotifications.success(message, 3000);
                 }
 
                 // Chiudi modal e ricarica
@@ -783,22 +783,22 @@
             } catch (error) {
                 console.error('Error during cleanup:', error);
                 
-                if (window.WebgreNotifications && window.WebgreNotifications.removeByText) {
-                    window.WebgreNotifications.removeByText('Pulizia in corso');
+                if (window.CoregreNotifications && window.CoregreNotifications.removeByText) {
+                    window.CoregreNotifications.removeByText('Pulizia in corso');
                 }
 
                 const errorMsg = `Errore durante la pulizia: ${error.message}`;
                 if (window.showAlert) {
                     window.showAlert(errorMsg, 'error');
-                } else if (window.WebgreNotifications && window.WebgreNotifications.error) {
-                    window.WebgreNotifications.error(errorMsg);
+                } else if (window.CoregreNotifications && window.CoregreNotifications.error) {
+                    window.CoregreNotifications.error(errorMsg);
                 }
             }
         };
 
         // Registra l'inizializzatore per PJAX
-        if (window.WEBGRE && window.WEBGRE.onPageLoad) {
-            window.WEBGRE.onPageLoad(initActivityLogIndex);
+        if (window.COREGRE && window.COREGRE.onPageLoad) {
+            window.COREGRE.onPageLoad(initActivityLogIndex);
         }
 
         // Inizializza anche al primo caricamento

@@ -681,8 +681,8 @@
         const ordine = ordineInput.value.trim();
         
         if (!ordine) {
-            if (window.WEBGRE && window.WEBGRE.showModal) {
-                window.WEBGRE.showModal('Errore', 'Inserisci un numero ordine', 'error');
+            if (window.COREGRE && window.COREGRE.showModal) {
+                window.COREGRE.showModal('Errore', 'Inserisci un numero ordine', 'error');
             } else {
                 alert('Inserisci un numero ordine');
             }
@@ -690,7 +690,7 @@
         }
         
         try {
-            const response = await fetch(window.WEBGRE.baseUrl + '/tracking/search-order-details?ordine=' + encodeURIComponent(ordine));
+            const response = await fetch(window.COREGRE.baseUrl + '/tracking/search-order-details?ordine=' + encodeURIComponent(ordine));
             const data = await response.json();
             
             if (data.success) {
@@ -719,8 +719,8 @@
         const articolo = articoloInput.value.trim();
         
         if (!articolo) {
-            if (window.WEBGRE && window.WEBGRE.showModal) {
-                window.WEBGRE.showModal('Errore', 'Inserisci un codice articolo', 'error');
+            if (window.COREGRE && window.COREGRE.showModal) {
+                window.COREGRE.showModal('Errore', 'Inserisci un codice articolo', 'error');
             } else {
                 alert('Inserisci un codice articolo');
             }
@@ -728,7 +728,7 @@
         }
         
         try {
-            const response = await fetch(window.WEBGRE.baseUrl + '/tracking/search-articolo-details?articolo=' + encodeURIComponent(articolo));
+            const response = await fetch(window.COREGRE.baseUrl + '/tracking/search-articolo-details?articolo=' + encodeURIComponent(articolo));
             const data = await response.json();
             
             if (data.success) {
@@ -755,8 +755,8 @@
     }
     
     // Registrazione PJAX
-    if (window.WEBGRE && window.WEBGRE.onPageLoad) {
-        window.WEBGRE.onPageLoad(initLotDetail);
+    if (window.COREGRE && window.COREGRE.onPageLoad) {
+        window.COREGRE.onPageLoad(initLotDetail);
     }
     
     // Fallback primo caricamento

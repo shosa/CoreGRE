@@ -1,6 +1,6 @@
 #!/bin/bash
 # ============================================================================
-# WEBGRE3 - Docker Pre-flight Check
+# COREGRE - Docker Pre-flight Check
 # Verifica prerequisiti prima di avviare i container
 # ============================================================================
 
@@ -17,7 +17,7 @@ ERRORS=0
 WARNINGS=0
 
 echo -e "${BLUE}============================================${NC}"
-echo -e "${BLUE}WEBGRE3 - Docker Pre-flight Check${NC}"
+echo -e "${BLUE}COREGRE - Docker Pre-flight Check${NC}"
 echo -e "${BLUE}============================================${NC}"
 echo ""
 
@@ -99,12 +99,12 @@ fi
 # 7. Check port availability
 # ============================================================================
 if [ -f .env ]; then
-    PORT=$(grep "^WEBGRE3_PORT=" .env | cut -d '=' -f2 | tr -d ' ')
+    PORT=$(grep "^COREGRE_PORT=" .env | cut -d '=' -f2 | tr -d ' ')
     if [ -n "$PORT" ]; then
         echo -n "Checking port ${PORT} availability... "
         if lsof -Pi :${PORT} -sTCP:LISTEN -t >/dev/null 2>&1 || netstat -an | grep -q ":${PORT}.*LISTEN"; then
             echo -e "${YELLOW}⚠${NC} Port ${PORT} already in use"
-            echo "   Change WEBGRE3_PORT in .env or stop the service using port ${PORT}"
+            echo "   Change COREGRE_PORT in .env or stop the service using port ${PORT}"
             WARNINGS=$((WARNINGS + 1))
         else
             echo -e "${GREEN}✓${NC} Available"

@@ -13,7 +13,7 @@
                         Notifiche
                     </h1>
                     <p class="mt-2 text-gray-600 dark:text-gray-400">
-                        Centro notifiche sistema WEBGRE
+                        Centro notifiche sistema COREGRE
                     </p>
                 </div>
             </div>
@@ -205,7 +205,7 @@ function markAsUnread(notifId) {
 }
 
 function deleteNotification(notifId) {
-    WebgreModals.confirmDelete(
+    CoregreModals.confirmDelete(
         'Sei sicuro di voler eliminare questa notifica?',
         function() {
             fetch(`<?= $this->url('/notifications/api/delete/') ?>${notifId}`, {
@@ -235,7 +235,7 @@ function markAllAsRead() {
 }
 
 function deleteAllRead() {
-    WebgreModals.confirm({
+    CoregreModals.confirm({
         title: 'Elimina Notifiche Lette',
         message: 'Sei sicuro di voler eliminare tutte le notifiche già lette?',
         confirmText: 'Elimina',

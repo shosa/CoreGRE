@@ -1,7 +1,7 @@
 # 📤 GUIDA UPLOAD FTP SU ARUBA - PASSO PER PASSO
 
 ## 🎯 OBIETTIVO
-Caricare le ottimizzazioni performance su hosting Aruba tramite FTP per migliorare WEBGRE3 da **40 secondi a 2-3 secondi**.
+Caricare le ottimizzazioni performance su hosting Aruba tramite FTP per migliorare COREGRE da **40 secondi a 2-3 secondi**.
 
 ---
 
@@ -89,7 +89,7 @@ Porta: 21 (standard FTP) o 22 (SFTP)
 - ✓ Seleziona "Considera sempre attendibile questo certificato"
 - ✓ Clicca "OK"
 
-### STEP 3: Naviga alla Directory WEBGRE3
+### STEP 3: Naviga alla Directory COREGRE
 
 Nel pannello **DESTRA** (Aruba):
 
@@ -97,11 +97,11 @@ Nel pannello **DESTRA** (Aruba):
    ```
    /
    ├── httpdocs/  (oppure public_html/)
-   │   └── webgre3/
+   │   └── coregre/
    ```
 
 2. **Naviga fino alla root del progetto:**
-   - Se webgre3 è in `/httpdocs/webgre3/` → vai lì
+   - Se coregre è in `/httpdocs/coregre/` → vai lì
    - Dovresti vedere: `index.php`, `config/`, `app/`, `vendor/`, etc.
 
 ---
@@ -118,21 +118,21 @@ Nel pannello **DESTRA** (Aruba):
 
 **Dal locale:**
 ```
-C:\xampp\htdocs\webgre3\.user.ini
+C:\xampp\htdocs\coregre\.user.ini
 ```
 
 **Destinazione Aruba:**
 ```
-/httpdocs/webgre3/.user.ini  (root del progetto)
+/httpdocs/coregre/.user.ini  (root del progetto)
 ```
 
 **Come caricare:**
-1. Pannello SINISTRA FileZilla → Vai a `C:\xampp\htdocs\webgre3\`
+1. Pannello SINISTRA FileZilla → Vai a `C:\xampp\htdocs\coregre\`
 2. Trova file `.user.ini` (potrebbe essere nascosto!)
 3. **Se NON vedi .user.ini:**
    - FileZilla → Server → Forza visualizzazione file nascosti
    - Oppure Windows Explorer → Visualizza → ✓ Elementi nascosti
-4. **Trascina** `.user.ini` dal pannello SINISTRO al pannello DESTRO (root webgre3)
+4. **Trascina** `.user.ini` dal pannello SINISTRO al pannello DESTRO (root coregre)
 5. Attendi completamento upload
 
 **⚠️ ATTENZIONE:**
@@ -147,24 +147,24 @@ C:\xampp\htdocs\webgre3\.user.ini
 
 **File da caricare:**
 ```
-C:\xampp\htdocs\webgre3\composer.json
-C:\xampp\htdocs\webgre3\vendor\composer\autoload_classmap.php
-C:\xampp\htdocs\webgre3\vendor\composer\autoload_static.php
-C:\xampp\htdocs\webgre3\vendor\composer\autoload_real.php
+C:\xampp\htdocs\coregre\composer.json
+C:\xampp\htdocs\coregre\vendor\composer\autoload_classmap.php
+C:\xampp\htdocs\coregre\vendor\composer\autoload_static.php
+C:\xampp\htdocs\coregre\vendor\composer\autoload_real.php
 ```
 
 **Destinazione Aruba:**
 ```
-/httpdocs/webgre3/vendor/composer/
+/httpdocs/coregre/vendor/composer/
 ```
 
 **Come caricare:**
 1. Prima carica `composer.json` nella root:
-   - Pannello SINISTRA → `C:\xampp\htdocs\webgre3\`
+   - Pannello SINISTRA → `C:\xampp\htdocs\coregre\`
    - Trascina `composer.json` → sovrascrivi quando chiede
 
 2. Poi carica i file autoload:
-   - Pannello SINISTRA → `C:\xampp\htdocs\webgre3\vendor\composer\`
+   - Pannello SINISTRA → `C:\xampp\htdocs\coregre\vendor\composer\`
    - Seleziona questi 3 file:
      - `autoload_classmap.php`
      - `autoload_static.php`
@@ -181,21 +181,21 @@ C:\xampp\htdocs\webgre3\vendor\composer\autoload_real.php
 
 **Dal locale:**
 ```
-C:\xampp\htdocs\webgre3\app\utils\SimpleCache.php
+C:\xampp\htdocs\coregre\app\utils\SimpleCache.php
 ```
 
 **Destinazione Aruba:**
 ```
-/httpdocs/webgre3/app/utils/
+/httpdocs/coregre/app/utils/
 ```
 
 **Come caricare:**
-1. Pannello SINISTRA → `C:\xampp\htdocs\webgre3\app\utils\`
+1. Pannello SINISTRA → `C:\xampp\htdocs\coregre\app\utils\`
 2. Trova `SimpleCache.php`
-3. Trascina nel pannello DESTRO → `/httpdocs/webgre3/app/utils/`
+3. Trascina nel pannello DESTRO → `/httpdocs/coregre/app/utils/`
 
 **Se directory `utils` non esiste su Aruba:**
-1. Pannello DESTRA → Vai in `/httpdocs/webgre3/app/`
+1. Pannello DESTRA → Vai in `/httpdocs/coregre/app/`
 2. Tasto destro → **"Crea directory"**
 3. Nome: `utils`
 4. Poi carica `SimpleCache.php` dentro
@@ -206,18 +206,18 @@ C:\xampp\htdocs\webgre3\app\utils\SimpleCache.php
 
 **Dal locale:**
 ```
-C:\xampp\htdocs\webgre3\database\migrations\2025_10_23_144112_add_performance_indexes.php
+C:\xampp\htdocs\coregre\database\migrations\2025_10_23_144112_add_performance_indexes.php
 ```
 
 **Destinazione Aruba:**
 ```
-/httpdocs/webgre3/database/migrations/
+/httpdocs/coregre/database/migrations/
 ```
 
 **Come caricare:**
-1. Pannello SINISTRA → `C:\xampp\htdocs\webgre3\database\migrations\`
+1. Pannello SINISTRA → `C:\xampp\htdocs\coregre\database\migrations\`
 2. Trova `2025_10_23_144112_add_performance_indexes.php`
-3. Trascina nel pannello DESTRO → `/httpdocs/webgre3/database/migrations/`
+3. Trascina nel pannello DESTRO → `/httpdocs/coregre/database/migrations/`
 
 **NOTA IMPORTANTE:**
 Questo file contiene la migrazione per creare 29 indici di performance sul database.
@@ -229,17 +229,17 @@ Dopo l'upload, dovrai eseguire: `php artisan migrate` (vedi sezione successiva).
 
 **Dal locale:**
 ```
-C:\xampp\htdocs\webgre3\app\controllers\ExportController.php
-C:\xampp\htdocs\webgre3\app\controllers\HomeController.php
+C:\xampp\htdocs\coregre\app\controllers\ExportController.php
+C:\xampp\htdocs\coregre\app\controllers\HomeController.php
 ```
 
 **Destinazione Aruba:**
 ```
-/httpdocs/webgre3/app/controllers/
+/httpdocs/coregre/app/controllers/
 ```
 
 **Come caricare:**
-1. Pannello SINISTRA → `C:\xampp\htdocs\webgre3\app\controllers\`
+1. Pannello SINISTRA → `C:\xampp\htdocs\coregre\app\controllers\`
 2. Seleziona `ExportController.php` e `HomeController.php`
 3. Trascina → sovrascrivi quando richiesto
 
@@ -249,12 +249,12 @@ C:\xampp\htdocs\webgre3\app\controllers\HomeController.php
 
 **Dal locale:**
 ```
-C:\xampp\htdocs\webgre3\artisan
+C:\xampp\htdocs\coregre\artisan
 ```
 
 **Destinazione Aruba:**
 ```
-/httpdocs/webgre3/artisan
+/httpdocs/coregre/artisan
 ```
 
 **Come caricare:**
@@ -267,12 +267,12 @@ C:\xampp\htdocs\webgre3\artisan
 
 **Dal locale:**
 ```
-C:\xampp\htdocs\webgre3\database\performance_indexes.sql
+C:\xampp\htdocs\coregre\database\performance_indexes.sql
 ```
 
 **Destinazione Aruba:**
 ```
-/httpdocs/webgre3/database/
+/httpdocs/coregre/database/
 ```
 
 **Come caricare:**
@@ -285,8 +285,8 @@ C:\xampp\htdocs\webgre3\database\performance_indexes.sql
 
 Se vuoi averli sul server per riferimento:
 ```
-C:\xampp\htdocs\webgre3\PERFORMANCE_OPTIMIZATION.md
-C:\xampp\htdocs\webgre3\DEPLOY_CHECKLIST.md
+C:\xampp\htdocs\coregre\PERFORMANCE_OPTIMIZATION.md
+C:\xampp\htdocs\coregre\DEPLOY_CHECKLIST.md
 ```
 
 Carica nella root.
@@ -298,7 +298,7 @@ Carica nella root.
 Dopo l'upload, nel pannello DESTRA dovresti vedere:
 
 ```
-/httpdocs/webgre3/
+/httpdocs/coregre/
 ├── .user.ini                               ← ✓ NUOVO
 ├── composer.json                           ← ✓ SOVRASCRITTO
 ├── artisan                                 ← ✓ SOVRASCRITTO
@@ -328,7 +328,7 @@ Dopo l'upload, nel pannello DESTRA dovresti vedere:
 ### **STEP 4: Crea Directory Cache** (se non esiste)
 
 **Via FileZilla:**
-1. Pannello DESTRA → Vai in `/httpdocs/webgre3/storage/`
+1. Pannello DESTRA → Vai in `/httpdocs/coregre/storage/`
 2. Verifica se esiste directory `cache`
 3. **Se NON esiste:**
    - Tasto destro → Crea directory → Nome: `cache`
@@ -378,14 +378,14 @@ Dopo l'upload, nel pannello DESTRA dovresti vedere:
    - Oppure vai su: `https://phpmyadmin.nome-dominio.it`
 
 2. **Seleziona Database:**
-   - Pannello sinistro → Seleziona `my_webgre` (o il tuo nome DB)
+   - Pannello sinistro → Seleziona `my_coregre` (o il tuo nome DB)
 
 3. **Apri Editor SQL:**
    - Tab in alto → **"SQL"**
 
 4. **Carica Script:**
    - Metodo A (copia-incolla):
-     - Apri locale `C:\xampp\htdocs\webgre3\database\performance_indexes.sql`
+     - Apri locale `C:\xampp\htdocs\coregre\database\performance_indexes.sql`
      - Copia TUTTO il contenuto
      - Incolla nell'editor SQL di phpMyAdmin
 
@@ -431,7 +431,7 @@ Dopo l'upload, nel pannello DESTRA dovresti vedere:
    require_once __DIR__ . '/config/config.php';
    require_once __DIR__ . '/app/utils/SimpleCache.php';
 
-   echo "<h1>Pulizia Cache WEBGRE3</h1>";
+   echo "<h1>Pulizia Cache COREGRE</h1>";
    echo "<pre>";
 
    echo "Svuotando cache applicazione...\n";
@@ -452,10 +452,10 @@ Dopo l'upload, nel pannello DESTRA dovresti vedere:
    ```
 
 2. **Carica via FTP:**
-   - Trascina `clear-cache.php` nella **root di webgre3** su Aruba
+   - Trascina `clear-cache.php` nella **root di coregre** su Aruba
 
 3. **Esegui dal browser:**
-   - Vai su: `https://tuo-dominio.it/webgre3/clear-cache.php`
+   - Vai su: `https://tuo-dominio.it/coregre/clear-cache.php`
    - Dovresti vedere:
      ```
      ✓ Cache applicazione svuotata!
@@ -483,7 +483,7 @@ Dopo l'upload, nel pannello DESTRA dovresti vedere:
 
 2. Carica via FTP nella root
 
-3. Vai su: `https://tuo-dominio.it/webgre3/test-opcache.php`
+3. Vai su: `https://tuo-dominio.it/coregre/test-opcache.php`
 
 4. **Cerca nella pagina** (CTRL+F):
    ```
@@ -504,7 +504,7 @@ Dopo l'upload, nel pannello DESTRA dovresti vedere:
 
 ### **TEST 2: Login Performance** ⏱️
 
-1. **Vai su:** `https://tuo-dominio.it/webgre3/`
+1. **Vai su:** `https://tuo-dominio.it/coregre/`
 2. **Logout** (se loggato)
 3. **Apri Chrome DevTools:**
    - Premi `F12`
@@ -547,7 +547,7 @@ Dopo l'upload, nel pannello DESTRA dovresti vedere:
 
 **CONGRATULAZIONI!** 🚀
 
-Hai portato WEBGRE3 da **40 secondi a 2-3 secondi**!
+Hai portato COREGRE da **40 secondi a 2-3 secondi**!
 
 **Performance finale:**
 - Login: **20x più veloce**
@@ -595,7 +595,7 @@ Hai portato WEBGRE3 da **40 secondi a 2-3 secondi**!
 1. Verifica upload: `app/utils/SimpleCache.php` presente?
 2. Via SSH (se hai accesso):
    ```bash
-   cd /httpdocs/webgre3
+   cd /httpdocs/coregre
    php artisan dump-autoload
    ```
 3. Senza SSH:

@@ -62,7 +62,7 @@ $groupColors = [
                 <div class="w-3 h-3 bg-yellow-500 rounded-full"></div>
                 <div class="w-3 h-3 bg-green-500 rounded-full"></div>
             </div>
-            <span class="text-gray-300 text-sm font-mono">WEBGRE Artisan Console</span>
+            <span class="text-gray-300 text-sm font-mono">COREGRE Artisan Console</span>
         </div>
         <div class="text-xs text-gray-400 font-mono">
             v3.0 | <?= date('Y-m-d H:i:s') ?>
@@ -85,7 +85,7 @@ $groupColors = [
 
     <!-- Console Output -->
     <div id="console-output" class="h-96 overflow-y-auto p-4 font-mono text-sm bg-slate-900 text-gray-100">
-        <div class="text-cyan-400">WEBGRE Artisan Console v3.0</div>
+        <div class="text-cyan-400">COREGRE Artisan Console v3.0</div>
         <div class="text-gray-400">Pronto per eseguire comandi...</div>
         <div class="text-gray-600">Digita 'list' per l'elenco dei comandi disponibili</div>
         <div class="text-gray-600">───────────────────────────────────</div>
@@ -94,7 +94,7 @@ $groupColors = [
     <!-- Command Input -->
     <div class="bg-slate-800 border-t border-slate-700 p-4">
         <div class="flex items-center space-x-2">
-            <span class="text-green-400 font-mono text-sm">PS C:\webgre3></span>
+            <span class="text-green-400 font-mono text-sm">PS C:\coregre></span>
             <div class="flex-1 relative">
                 <input type="text"
                        id="commandInput"
@@ -255,7 +255,7 @@ window.executeCommand = function() {
     if (commandHistory.length > 50) commandHistory.pop();
     historyIndex = -1;
 
-    addToConsole('<span class="ps-prompt">PS C:\\webgre3></span> <span class="ps-command">php artisan ' + command + '</span>');
+    addToConsole('<span class="ps-prompt">PS C:\\coregre></span> <span class="ps-command">php artisan ' + command + '</span>');
     input.value = '';
     addToConsole('<span class="typing">Executing...</span>');
 
@@ -295,7 +295,7 @@ window.executeQuickCommand = function(command) {
 window.clearConsole = function() {
     const output = document.getElementById('console-output');
     output.innerHTML =
-        '<div class="text-cyan-400">WEBGRE Artisan Console v3.0</div>' +
+        '<div class="text-cyan-400">COREGRE Artisan Console v3.0</div>' +
         '<div class="text-gray-400">Console cleared - Ready for new commands...</div>' +
         '<div class="text-gray-600">───────────────────────────────────</div>';
     document.getElementById('commandInput').focus();

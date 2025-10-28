@@ -1,6 +1,6 @@
 {
-    "name": "webgre/webgre-mvc",
-    "description": "Sistema di gestione aziendale WEBGRE con architettura MVC",
+    "name": "coregre/coregre-mvc",
+    "description": "Sistema di gestione aziendale COREGRE con architettura MVC",
     "type": "project",
     "license": "proprietary",
     "minimum-stability": "stable",

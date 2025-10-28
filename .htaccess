@@ -1,5 +1,5 @@
 RewriteEngine On
-RewriteBase /webgre3
+RewriteBase /coregre
 RewriteCond %{REQUEST_FILENAME} !-f
 
 RewriteRule ^(.*)$ index.php [QSA,L]

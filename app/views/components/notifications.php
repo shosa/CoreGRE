@@ -10,7 +10,7 @@
 
 <script>
 // Sistema di notifiche universale
-window.WebgreNotifications = {
+window.CoregreNotifications = {
     /**
      * Mostra una notifica
      */
@@ -60,7 +60,7 @@ window.WebgreNotifications = {
                         <p class="text-base font-semibold text-white leading-relaxed break-words">${message}</p>
                     </div>
                     <div class="flex-shrink-0">
-                        <button onclick="WebgreNotifications.remove('${id}')" class="bg-white/20 rounded-xl p-2 hover:bg-white/30 focus:outline-none focus:ring-2 focus:ring-white/50 transition-colors shadow-lg hover:shadow-xl">
+                        <button onclick="CoregreNotifications.remove('${id}')" class="bg-white/20 rounded-xl p-2 hover:bg-white/30 focus:outline-none focus:ring-2 focus:ring-white/50 transition-colors shadow-lg hover:shadow-xl">
                             <i class="fas fa-times text-white text-sm"></i>
                         </button>
                     </div>
@@ -137,6 +137,6 @@ window.WebgreNotifications = {
 };
 
 // Alias per retrocompatibilità
-window.showNotification = WebgreNotifications.show.bind(WebgreNotifications);
-window.removeNotification = WebgreNotifications.remove.bind(WebgreNotifications);
+window.showNotification = CoregreNotifications.show.bind(CoregreNotifications);
+window.removeNotification = CoregreNotifications.remove.bind(CoregreNotifications);
 </script>

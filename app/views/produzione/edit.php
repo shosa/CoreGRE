@@ -334,8 +334,8 @@ document.getElementById('produzioneForm').addEventListener('submit', function(e)
     // Conferma aggiornamento con modal personalizzato
     e.preventDefault();
     
-    if (window.WebgreModals) {
-        window.WebgreModals.confirm({
+    if (window.CoregreModals) {
+        window.CoregreModals.confirm({
             title: 'Conferma Aggiornamento',
             message: 'Sei sicuro di voler aggiornare questi dati di produzione?',
             confirmText: 'Aggiorna',

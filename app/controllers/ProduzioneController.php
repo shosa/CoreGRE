@@ -1319,7 +1319,7 @@ class ProduzioneController extends BaseController
 
             // Imposta le proprietà del documento
             $mpdf->SetTitle('Report Produzione da CSV');
-            $mpdf->SetAuthor('WebGRE - EMMEGIEMME');
+            $mpdf->SetAuthor('CoreGRE - EMMEGIEMME');
 
             // Genera l'HTML per il PDF
             $html = $this->generateReportHTML($groupedData, $totaleGenerale);

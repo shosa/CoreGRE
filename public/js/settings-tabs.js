@@ -297,7 +297,7 @@
 
     // CRUD functions for tables
     window.addNewDepartment = function() {
-        WebgreModals.confirm({
+        CoregreModals.confirm({
             title: 'Nuovo Reparto',
             message: '<input type="text" id="new-dept-name" class="w-full px-4 py-2 border rounded-lg" placeholder="Nome reparto">',
             confirmText: 'Aggiungi',
@@ -312,7 +312,7 @@
     };
 
     window.editDepartment = function(id, nome) {
-        WebgreModals.confirm({
+        CoregreModals.confirm({
             title: 'Modifica Reparto',
             message: `<input type="text" id="edit-dept-name" value="${nome}" class="w-full px-4 py-2 border rounded-lg">`,
             confirmText: 'Salva',
@@ -327,13 +327,13 @@
     };
 
     window.deleteDepartment = function(id) {
-        WebgreModals.confirmDelete('Sei sicuro di voler eliminare questo reparto?', function() {
+        CoregreModals.confirmDelete('Sei sicuro di voler eliminare questo reparto?', function() {
             manageCrudOperation('department', 'delete', { id: id });
         });
     };
 
     window.addNewLaboratory = function() {
-        WebgreModals.confirm({
+        CoregreModals.confirm({
             title: 'Nuovo Laboratorio',
             message: '<input type="text" id="new-lab-name" class="w-full px-4 py-2 border rounded-lg" placeholder="Nome laboratorio">',
             confirmText: 'Aggiungi',
@@ -348,7 +348,7 @@
     };
 
     window.editLaboratory = function(id, nome) {
-        WebgreModals.confirm({
+        CoregreModals.confirm({
             title: 'Modifica Laboratorio',
             message: `<input type="text" id="edit-lab-name" value="${nome}" class="w-full px-4 py-2 border rounded-lg">`,
             confirmText: 'Salva',
@@ -363,13 +363,13 @@
     };
 
     window.deleteLaboratory = function(id) {
-        WebgreModals.confirmDelete('Sei sicuro di voler eliminare questo laboratorio?', function() {
+        CoregreModals.confirmDelete('Sei sicuro di voler eliminare questo laboratorio?', function() {
             manageCrudOperation('laboratory', 'delete', { id: id });
         });
     };
 
     window.addNewLine = function() {
-        WebgreModals.confirm({
+        CoregreModals.confirm({
             title: 'Nuova Linea Produzione',
             message: `<div class="space-y-3">
                 <input type="text" id="new-line-sigla" maxlength="2" class="w-full px-4 py-2 border rounded-lg" placeholder="Sigla (2 caratteri)">
@@ -388,7 +388,7 @@
     };
 
     window.editLine = function(id, sigla, descrizione) {
-        WebgreModals.confirm({
+        CoregreModals.confirm({
             title: 'Modifica Linea Produzione',
             message: `<div class="space-y-3">
                 <input type="text" id="edit-line-sigla" maxlength="2" value="${sigla}" class="w-full px-4 py-2 border rounded-lg" placeholder="Sigla (2 caratteri)">
@@ -407,7 +407,7 @@
     };
 
     window.deleteLine = function(id) {
-        WebgreModals.confirmDelete('Sei sicuro di voler eliminare questa linea?', function() {
+        CoregreModals.confirmDelete('Sei sicuro di voler eliminare questa linea?', function() {
             manageCrudOperation('line', 'delete', { id: id });
         });
     };
@@ -678,8 +678,8 @@
     }
 
     // Re-initialize on PJAX load
-    if (window.WEBGRE && window.WEBGRE.onPageLoad) {
-        window.WEBGRE.onPageLoad(initSettingsPage);
+    if (window.COREGRE && window.COREGRE.onPageLoad) {
+        window.COREGRE.onPageLoad(initSettingsPage);
     }
 
 })();

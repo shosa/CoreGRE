@@ -1,4 +1,4 @@
-# Sistema Universale Modali e Notifiche WEBGRE
+# Sistema Universale Modali e Notifiche COREGRE
 
 ## Panoramica
 Questo sistema fornisce componenti JavaScript universali per modali e notifiche che possono essere utilizzati in tutta l'applicazione senza dover riscrivere codice.
@@ -11,18 +11,18 @@ Sistema completo per mostrare notifiche toast con animazioni Tailwind.
 #### Utilizzo Base
 ```javascript
 // Mostra una notifica
-WebgreNotifications.show('Messaggio di prova', 'success', 3000);
+CoregreNotifications.show('Messaggio di prova', 'success', 3000);
 
 // Shortcuts per i vari tipi
-WebgreNotifications.success('Operazione completata!');
-WebgreNotifications.error('Si è verificato un errore');
-WebgreNotifications.warning('Attenzione: controllare i dati');
-WebgreNotifications.info('Informazione importante');
+CoregreNotifications.success('Operazione completata!');
+CoregreNotifications.error('Si è verificato un errore');
+CoregreNotifications.warning('Attenzione: controllare i dati');
+CoregreNotifications.info('Informazione importante');
 
 // Notifica persistente (deve essere chiusa manualmente)
-const loadingId = WebgreNotifications.loading('Caricamento in corso...');
+const loadingId = CoregreNotifications.loading('Caricamento in corso...');
 // ... operazione asincrona ...
-WebgreNotifications.remove(loadingId);
+CoregreNotifications.remove(loadingId);
 ```
 
 #### Metodi Disponibili
@@ -41,7 +41,7 @@ Sistema completo per modali di conferma e informativi.
 #### Utilizzo Base
 ```javascript
 // Modale di conferma generico
-WebgreModals.confirm({
+CoregreModals.confirm({
     title: 'Conferma Azione',
     message: 'Sei sicuro di voler procedere?',
     confirmText: 'Procedi',
@@ -56,7 +56,7 @@ WebgreModals.confirm({
 });
 
 // Shortcut per eliminazione
-WebgreModals.confirmDelete(
+CoregreModals.confirmDelete(
     'Sei sicuro di voler eliminare questo elemento?',
     () => {
         // Logica di eliminazione
@@ -66,7 +66,7 @@ WebgreModals.confirmDelete(
 );
 
 // Modale informativo (solo OK)
-WebgreModals.alert(
+CoregreModals.alert(
     'Informazione',
     'Operazione completata con successo',
     () => console.log('Chiuso')
@@ -103,7 +103,7 @@ Quando si migra una pagina esistente:
 showNotification('Messaggio', 'success');
 
 // NUOVO  
-WebgreNotifications.success('Messaggio');
+CoregreNotifications.success('Messaggio');
 ```
 
 3. **Sostituire** i modali personalizzati:
@@ -114,7 +114,7 @@ if (confirm('Sei sicuro?')) {
 }
 
 // NUOVO
-WebgreModals.confirm({
+CoregreModals.confirm({
     message: 'Sei sicuro?',
     onConfirm: () => {
         // azione
@@ -127,27 +127,27 @@ WebgreModals.confirm({
 ### Esempio Eliminazione con Conferma
 ```javascript
 function deleteItem(id) {
-    WebgreModals.confirmDelete(
+    CoregreModals.confirmDelete(
         'Questa azione non può essere annullata',
         async () => {
-            const loadingId = WebgreNotifications.loading('Eliminazione in corso...');
+            const loadingId = CoregreNotifications.loading('Eliminazione in corso...');
             
             try {
                 const response = await fetch(`/api/items/${id}`, { 
                     method: 'DELETE' 
                 });
                 
-                WebgreNotifications.remove(loadingId);
+                CoregreNotifications.remove(loadingId);
                 
                 if (response.ok) {
-                    WebgreNotifications.success('Elemento eliminato');
+                    CoregreNotifications.success('Elemento eliminato');
                     // Ricarica dati o rimuovi dalla UI
                 } else {
                     throw new Error('Errore server');
                 }
             } catch (error) {
-                WebgreNotifications.remove(loadingId);
-                WebgreNotifications.error('Errore durante l\'eliminazione');
+                CoregreNotifications.remove(loadingId);
+                CoregreNotifications.error('Errore durante l\'eliminazione');
             }
         }
     );
@@ -157,7 +157,7 @@ function deleteItem(id) {
 ### Esempio Form con Validazione
 ```javascript
 async function submitForm(data) {
-    const loadingId = WebgreNotifications.loading('Salvataggio in corso...');
+    const loadingId = CoregreNotifications.loading('Salvataggio in corso...');
     
     try {
         const response = await fetch('/api/save', {
@@ -166,18 +166,18 @@ async function submitForm(data) {
             body: JSON.stringify(data)
         });
         
-        WebgreNotifications.remove(loadingId);
+        CoregreNotifications.remove(loadingId);
         
         const result = await response.json();
         
         if (result.success) {
-            WebgreNotifications.success('Dati salvati con successo');
+            CoregreNotifications.success('Dati salvati con successo');
         } else {
-            WebgreNotifications.warning(result.message || 'Controllare i dati inseriti');
+            CoregreNotifications.warning(result.message || 'Controllare i dati inseriti');
         }
     } catch (error) {
-        WebgreNotifications.remove(loadingId);  
-        WebgreNotifications.error('Errore durante il salvataggio');
+        CoregreNotifications.remove(loadingId);  
+        CoregreNotifications.error('Errore durante il salvataggio');
     }
 }
 ```

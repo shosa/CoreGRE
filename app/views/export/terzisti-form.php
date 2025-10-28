@@ -220,8 +220,8 @@
     }
     
     // Registrazione PJAX
-    if (window.WEBGRE && window.WEBGRE.onPageLoad) {
-        window.WEBGRE.onPageLoad(initTerzistiForm);
+    if (window.COREGRE && window.COREGRE.onPageLoad) {
+        window.COREGRE.onPageLoad(initTerzistiForm);
     }
     
     // Fallback primo caricamento

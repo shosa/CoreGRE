@@ -276,7 +276,7 @@ $router->get('/database/record/get', 'Database@getRecord');
 $router->get('/activity-log', 'ActivityLog@index');
 $router->get('/activity-log/export', 'ActivityLog@export');
 
-// Impostazioni Sistema WEBGRE
+// Impostazioni Sistema COREGRE
 $router->get('/settings', 'Settings@index');
 $router->post('/settings/load-section', 'Settings@loadSection');
 $router->post('/settings/save', 'Settings@save');

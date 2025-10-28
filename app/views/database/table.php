@@ -756,7 +756,7 @@
                 // Imposta un array di ID invece di un singolo ID
                 currentDeleteId = ids;
 
-                window.WEBGRE.openModal('delete-record-modal');
+                window.COREGRE.openModal('delete-record-modal');
             }
         };
 
@@ -767,7 +767,7 @@
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/x-www-form-urlencoded',
-                            'X-CSRF-TOKEN': window.WEBGRE ? window.WEBGRE.csrfToken : ''
+                            'X-CSRF-TOKEN': window.COREGRE ? window.COREGRE.csrfToken : ''
                         },
                         body: `table=${tableName}&id=${encodeURIComponent(id)}`
                     }).then(r => r.json())
@@ -828,21 +828,21 @@
 
         // Table Operations
         window.optimizeTable = function() {
-            WebgreModals.confirm({
+            CoregreModals.confirm({
                 message: `Sei sicuro di voler ottimizzare la tabella ${tableName.toUpperCase()}?`,
                 onConfirm: () => performTableOperation('optimize')
             });
         };
 
         window.repairTable = function() {
-            WebgreModals.confirm({
+            CoregreModals.confirm({
                 message: `Sei sicuro di voler riparare la tabella ${tableName.toUpperCase()}?`,
                 onConfirm: () => performTableOperation('repair')
             });
         };
 
         window.truncateTable = function() {
-            WebgreModals.confirm({
+            CoregreModals.confirm({
                 title: 'ATTENZIONE - Operazione Irreversibile',
                 message: `Sei sicuro di voler svuotare completamente la tabella ${tableName.toUpperCase()}? Tutti i dati saranno eliminati definitivamente!\n\nQuesta operazione è IRREVERSIBILE.`,
                 type: 'danger',
@@ -858,7 +858,7 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded',
-                        'X-CSRF-TOKEN': window.WEBGRE ? window.WEBGRE.csrfToken : ''
+                        'X-CSRF-TOKEN': window.COREGRE ? window.COREGRE.csrfToken : ''
                     },
                     body: `table=${tableName}&operation=${operation}`
                 });
@@ -897,11 +897,11 @@
         const primaryKey = '<?= array_filter($structure, function($col) { return $col['Key'] === 'PRI'; })[0]['Field'] ?? 'id' ?>';
 
         window.showAddRecordModal = function() {
-            window.WEBGRE.openModal('add-record-modal');
+            window.COREGRE.openModal('add-record-modal');
         };
 
         window.hideAddRecordModal = function() {
-            window.WEBGRE.closeModal('add-record-modal', function() {
+            window.COREGRE.closeModal('add-record-modal', function() {
                 const form = document.getElementById('add-record-form');
                 if (form) form.reset();
             });
@@ -935,7 +935,7 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded',
-                        'X-CSRF-TOKEN': window.WEBGRE ? window.WEBGRE.csrfToken : ''
+                        'X-CSRF-TOKEN': window.COREGRE ? window.COREGRE.csrfToken : ''
                     },
                     body: `table=${tableName}&data=${encodeURIComponent(JSON.stringify(data))}`
                 });
@@ -981,7 +981,7 @@
                 // Recupera i dati del record
                 const response = await fetch(url, {
                     headers: {
-                        'X-CSRF-TOKEN': window.WEBGRE ? window.WEBGRE.csrfToken : ''
+                        'X-CSRF-TOKEN': window.COREGRE ? window.COREGRE.csrfToken : ''
                     }
                 });
 
@@ -1069,11 +1069,11 @@
         }
 
         function showEditRecordModal() {
-            window.WEBGRE.openModal('edit-record-modal');
+            window.COREGRE.openModal('edit-record-modal');
         }
 
         window.hideEditRecordModal = function() {
-            window.WEBGRE.closeModal('edit-record-modal', function() {
+            window.COREGRE.closeModal('edit-record-modal', function() {
                 currentEditId = null;
                 const editFields = document.getElementById('edit-record-fields');
                 if (editFields) editFields.innerHTML = '';
@@ -1125,7 +1125,7 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': window.WEBGRE ? window.WEBGRE.csrfToken : ''
+                        'X-CSRF-TOKEN': window.COREGRE ? window.COREGRE.csrfToken : ''
                     },
                     body: JSON.stringify(payload)
                 });
@@ -1162,7 +1162,7 @@
                 // Recupera i dati del record per preview
                 const response = await fetch(`<?= $this->url('/database/record/get') ?>?table=${tableName}&id=${id}`, {
                     headers: {
-                        'X-CSRF-TOKEN': window.WEBGRE ? window.WEBGRE.csrfToken : ''
+                        'X-CSRF-TOKEN': window.COREGRE ? window.COREGRE.csrfToken : ''
                     }
                 });
 
@@ -1212,11 +1212,11 @@
         }
 
         function showDeleteRecordModal() {
-            window.WEBGRE.openModal('delete-record-modal');
+            window.COREGRE.openModal('delete-record-modal');
         }
 
         window.hideDeleteRecordModal = function() {
-            window.WEBGRE.closeModal('delete-record-modal', function() {
+            window.COREGRE.closeModal('delete-record-modal', function() {
                 currentDeleteId = null;
             });
         };
@@ -1235,7 +1235,7 @@
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/x-www-form-urlencoded',
-                            'X-CSRF-TOKEN': window.WEBGRE ? window.WEBGRE.csrfToken : ''
+                            'X-CSRF-TOKEN': window.COREGRE ? window.COREGRE.csrfToken : ''
                         },
                         body: `table=${tableName}&id=${currentDeleteId}`
                     });
@@ -1267,8 +1267,8 @@
         };
 
         // Registra l'inizializzatore per PJAX
-        if (window.WEBGRE && window.WEBGRE.onPageLoad) {
-            window.WEBGRE.onPageLoad(initDatabaseTable);
+        if (window.COREGRE && window.COREGRE.onPageLoad) {
+            window.COREGRE.onPageLoad(initDatabaseTable);
         }
 
         // Inizializza anche al primo caricamento

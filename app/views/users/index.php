@@ -329,8 +329,8 @@
                     ? 'Sei sicuro di voler eliminare questo utente?'
                     : `Sei sicuro di voler eliminare ${count} utenti?`;
 
-                if (window.WebgreModals) {
-                    window.WebgreModals.confirm({
+                if (window.CoregreModals) {
+                    window.CoregreModals.confirm({
                         title: 'Conferma Eliminazione',
                         message: message,
                         type: 'danger',
@@ -358,8 +358,8 @@
 
         // Gestione eliminazione singola - funzione globale
         window.deleteUser = function (id) {
-            if (window.WebgreModals) {
-                window.WebgreModals.confirm({
+            if (window.CoregreModals) {
+                window.CoregreModals.confirm({
                     title: 'Conferma Eliminazione',
                     message: 'Sei sicuro di voler eliminare questo utente?',
                     type: 'danger',
@@ -383,7 +383,7 @@
                     headers: {
                         'Content-Type': 'application/json',
                         'X-Requested-With': 'XMLHttpRequest',
-                        'X-CSRF-TOKEN': window.WEBGRE ? window.WEBGRE.csrfToken : ''
+                        'X-CSRF-TOKEN': window.COREGRE ? window.COREGRE.csrfToken : ''
                     },
                     body: JSON.stringify({ ids: ids })
                 });
@@ -399,12 +399,12 @@
                 }
 
                 // Mostra notifica di successo
-                WebgreNotifications.success(data.message || 'Utenti eliminati con successo');
+                CoregreNotifications.success(data.message || 'Utenti eliminati con successo');
 
                 // Ricarica la pagina per aggiornare la lista
                 setTimeout(() => {
-                    if (window.WEBGRE && window.WEBGRE.pjax) {
-                        window.WEBGRE.pjax.reload();
+                    if (window.COREGRE && window.COREGRE.pjax) {
+                        window.COREGRE.pjax.reload();
                     } else {
                         location.reload();
                     }
@@ -415,13 +415,13 @@
 
                 // Mostra errore con sistema notifiche
                 const errorMessage = error.message || 'Errore sconosciuto durante l\'eliminazione';
-                WebgreNotifications.error(errorMessage);
+                CoregreNotifications.error(errorMessage);
             }
         }
 
         // Registra l'inizializzatore per PJAX
-        if (window.WEBGRE && window.WEBGRE.onPageLoad) {
-            window.WEBGRE.onPageLoad(initUsersIndex);
+        if (window.COREGRE && window.COREGRE.onPageLoad) {
+            window.COREGRE.onPageLoad(initUsersIndex);
         }
 
         // Inizializza anche al primo caricamento

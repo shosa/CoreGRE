@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 
 /**
  * User Model
- * Rappresenta gli utenti del sistema WEBGRE
+ * Rappresenta gli utenti del sistema COREGRE
  *
  * @property int $id
  * @property string $user_name

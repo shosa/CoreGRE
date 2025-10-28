@@ -11,7 +11,7 @@ use Illuminate\Database\Capsule\Manager as Capsule;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 
 /**
- * Settings Controller - Sistema Impostazioni Webgre 
+ * Settings Controller - Sistema Impostazioni Coregre 
  * Gestisce tutte le impostazioni di sistema: Database, Strumenti, Email, Tabelle, Generale
  */
 class SettingsController extends BaseController
@@ -436,7 +436,7 @@ class SettingsController extends BaseController
                     </div>
                     <div class="ml-3">
                         <h4 class="text-sm font-medium text-blue-800 dark:text-blue-200">Versione Corrente</h4>
-                        <p class="text-sm text-blue-600 dark:text-blue-300">WEBGRE v2.1.0 (Build 2024.12)</p>
+                        <p class="text-sm text-blue-600 dark:text-blue-300">COREGRE v2.1.0 (Build 2024.12)</p>
                     </div>
                 </div>
             </div>

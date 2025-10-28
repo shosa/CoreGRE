@@ -884,15 +884,15 @@
         .then(data => {
             if (data.success) {
                 closeDefectModal();
-                WebgreNotifications.success('Difetto salvato con successo');
+                CoregreNotifications.success('Difetto salvato con successo');
                 location.reload();
             } else {
-                WebgreNotifications.error('Errore: ' + (data.message || 'Errore sconosciuto'));
+                CoregreNotifications.error('Errore: ' + (data.message || 'Errore sconosciuto'));
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            WebgreNotifications.error('Errore di connessione');
+            CoregreNotifications.error('Errore di connessione');
         });
     }
 
@@ -902,7 +902,7 @@
     }
 
     function deleteDefect(id) {
-        WebgreModals.confirmDelete(
+        CoregreModals.confirmDelete(
             'Sei sicuro di voler eliminare questo tipo di difetto?',
             () => {
                 fetch('<?= $this->url('/quality/delete-defect-type') ?>', {
@@ -915,15 +915,15 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        WebgreNotifications.success('Difetto eliminato con successo');
+                        CoregreNotifications.success('Difetto eliminato con successo');
                         location.reload();
                     } else {
-                        WebgreNotifications.error('Errore: ' + (data.message || 'Errore sconosciuto'));
+                        CoregreNotifications.error('Errore: ' + (data.message || 'Errore sconosciuto'));
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    WebgreNotifications.error('Errore di connessione');
+                    CoregreNotifications.error('Errore di connessione');
                 });
             }
         );
@@ -937,8 +937,8 @@
     window.deleteDefect = deleteDefect;
 
     // Registra inizializzatore PJAX
-    if (window.WEBGRE && window.WEBGRE.onPageLoad) {
-        window.WEBGRE.onPageLoad(initHermesDashboard);
+    if (window.COREGRE && window.COREGRE.onPageLoad) {
+        window.COREGRE.onPageLoad(initHermesDashboard);
     }
 
     // Inizializzazione

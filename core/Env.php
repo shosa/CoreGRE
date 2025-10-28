@@ -24,7 +24,7 @@ class Env
             // Se non esiste .env, prova con .env.example
             $examplePath = APP_ROOT . '/.env.example';
             if (file_exists($examplePath)) {
-                error_log("WEBGRE: File .env non trovato, usa .env.example come template");
+                error_log("COREGRE: File .env non trovato, usa .env.example come template");
             }
             return;
         }

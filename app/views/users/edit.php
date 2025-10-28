@@ -233,14 +233,14 @@
                             if (window.showAlert) {
                                 window.showAlert('Le nuove password non coincidono', 'error');
                             } else {
-                                WebgreNotifications.error('Le nuove password non coincidono');
+                                CoregreNotifications.error('Le nuove password non coincidono');
                             }
                             return false;
                         }
 
                         if (newPassword.length < 6) {
                             e.preventDefault();
-                            WebgreNotifications.error('La nuova password deve essere di almeno 6 caratteri');
+                            CoregreNotifications.error('La nuova password deve essere di almeno 6 caratteri');
                             return false;
                         }
                     }
@@ -260,7 +260,7 @@
 
                     if (!isValid) {
                         e.preventDefault();
-                        WebgreNotifications.error('Per favore, compila tutti i campi obbligatori.');
+                        CoregreNotifications.error('Per favore, compila tutti i campi obbligatori.');
                         return false;
                     }
                 }
@@ -297,26 +297,26 @@
 
         // Funzione globale per eliminare utente
         window.deleteUser = function () {
-            WebgreModals.confirmDelete(
+            CoregreModals.confirmDelete(
                 'Sei sicuro di voler eliminare questo utente? Questa azione non può essere annullata.',
                 () => {
-                    const loadingId = WebgreNotifications.loading('Eliminazione in corso...');
+                    const loadingId = CoregreNotifications.loading('Eliminazione in corso...');
 
                     fetch('<?= $this->url('/users/delete') ?>', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
                             'X-Requested-With': 'XMLHttpRequest',
-                            'X-CSRF-TOKEN': window.WEBGRE ? window.WEBGRE.csrfToken : ''
+                            'X-CSRF-TOKEN': window.COREGRE ? window.COREGRE.csrfToken : ''
                         },
                         body: JSON.stringify({ id: <?= $user->id ?> })
                     })
                         .then(response => response.json())
                         .then(data => {
-                            WebgreNotifications.remove(loadingId);
+                            CoregreNotifications.remove(loadingId);
 
                             if (data.success) {
-                                WebgreNotifications.success('Utente eliminato con successo');
+                                CoregreNotifications.success('Utente eliminato con successo');
                                 setTimeout(() => {
                                     if (window.pjax) {
                                         window.pjax.navigateTo('<?= $this->url('/users') ?>');
@@ -325,21 +325,21 @@
                                     }
                                 }, 1500);
                             } else {
-                                WebgreNotifications.error(data.error || 'Errore durante l\'eliminazione');
+                                CoregreNotifications.error(data.error || 'Errore durante l\'eliminazione');
                             }
                         })
                         .catch(error => {
                             console.error('Error:', error);
-                            WebgreNotifications.remove(loadingId);
-                            WebgreNotifications.error('Errore di rete durante l\'eliminazione');
+                            CoregreNotifications.remove(loadingId);
+                            CoregreNotifications.error('Errore di rete durante l\'eliminazione');
                         });
                 }
             );
         };
 
         // Registra l'inizializzatore per PJAX
-        if (window.WEBGRE && window.WEBGRE.onPageLoad) {
-            window.WEBGRE.onPageLoad(initUsersEdit);
+        if (window.COREGRE && window.COREGRE.onPageLoad) {
+            window.COREGRE.onPageLoad(initUsersEdit);
         }
 
         // Inizializza anche al primo caricamento

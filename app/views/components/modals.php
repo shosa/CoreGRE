@@ -74,7 +74,7 @@
 
 <script>
 // Sistema di modali universale
-window.WebgreModals = {
+window.CoregreModals = {
     /**
      * Apre un modale HTML statico con animazioni
      */
@@ -180,7 +180,7 @@ window.WebgreModals = {
         const modalHtml = `
             <div id="${modalId}" class="fixed inset-0 z-[99999] overflow-y-auto modal-backdrop" aria-labelledby="modal-title" role="dialog" aria-modal="true">
                 <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-4 text-center">
-                    <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity backdrop-blur-sm" onclick="WebgreModals.close('${modalId}')"></div>
+                    <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity backdrop-blur-sm" onclick="CoregreModals.close('${modalId}')"></div>
 
                     <!-- Modal panel -->
                     <div class="modal-content relative inline-block align-middle bg-white dark:bg-gray-800 rounded-2xl px-6 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all max-w-lg w-full mx-4 border border-gray-200 dark:border-gray-700">
@@ -201,12 +201,12 @@ window.WebgreModals = {
                             </div>
                         </div>
                         <div class="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse gap-3">
-                            <button type="button" onclick="WebgreModals.handleConfirm('${modalId}')" 
+                            <button type="button" onclick="CoregreModals.handleConfirm('${modalId}')" 
                                     class="w-full inline-flex justify-center rounded-lg border border-transparent shadow-sm px-4 py-2 ${config.confirmClass} text-base font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm transition-all duration-200 hover:shadow-lg">
                                 <i class="fas fa-check mr-2"></i>
                                 ${config.confirmText}
                             </button>
-                            <button type="button" onclick="WebgreModals.handleCancel('${modalId}')" 
+                            <button type="button" onclick="CoregreModals.handleCancel('${modalId}')" 
                                     class="mt-3 w-full inline-flex justify-center rounded-lg border border-gray-300 dark:border-gray-600 shadow-sm px-4 py-2 bg-white dark:bg-gray-700 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 sm:mt-0 sm:w-auto sm:text-sm transition-colors">
                                 ${config.cancelText}
                             </button>

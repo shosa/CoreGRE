@@ -1,6 +1,6 @@
 <?php
 /**
- * Configurazione principale dell'applicazione WEBGRE MVC
+ * Configurazione principale dell'applicazione COREGRE MVC
  */
 
 // Impedisce accesso diretto al file
@@ -20,7 +20,7 @@ define('BUILD_NO', Env::get('BUILD_NO', '2025.09'));
 
 // Database configuration
 define('DB_HOST', Env::get('DB_HOST', 'localhost'));
-define('DB_NAME', Env::get('DB_NAME', 'my_webgre'));
+define('DB_NAME', Env::get('DB_NAME', 'my_coregre'));
 define('DB_USER', Env::get('DB_USER', 'root'));
 define('DB_PASS', Env::get('DB_PASS', ''));
 define('DB_CHARSET', Env::get('DB_CHARSET', 'utf8mb4'));
@@ -82,7 +82,7 @@ define('HASH_COST', Env::getInt('HASH_COST', 12));
 define('CSRF_TOKEN_LENGTH', Env::getInt('CSRF_TOKEN_LENGTH', 32));
 
 // Application settings
-define('APP_NAME', Env::get('APP_NAME', 'WEBGRE'));
+define('APP_NAME', Env::get('APP_NAME', 'COREGRE'));
 define('APP_VERSION', Env::get('APP_VERSION', '2.0.0'));
 define('DEFAULT_CONTROLLER', Env::get('DEFAULT_CONTROLLER', 'Home'));
 define('DEFAULT_ACTION', Env::get('DEFAULT_ACTION', 'index'));

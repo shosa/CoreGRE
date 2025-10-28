@@ -498,23 +498,23 @@
                 method: 'POST',
                 body: formData,
                 headers: {
-                    'X-CSRF-TOKEN': window.WEBGRE ? window.WEBGRE.csrfToken : ''
+                    'X-CSRF-TOKEN': window.COREGRE ? window.COREGRE.csrfToken : ''
                 }
             })
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        WebgreNotifications.success('Email inviata con successo!');
+                        CoregreNotifications.success('Email inviata con successo!');
                         closeEmailModal();
                     } else {
                         const errorMsg = data.error || 'Errore durante l\'invio dell\'email';
-                        WebgreNotifications.error(errorMsg);
+                        CoregreNotifications.error(errorMsg);
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
                     const errorMsg = 'Errore di rete durante l\'invio dell\'email';
-                    WebgreNotifications.error(errorMsg);
+                    CoregreNotifications.error(errorMsg);
                 })
                 .finally(() => {
                     // Riabilita il pulsante
@@ -523,7 +523,7 @@
                 });
         };
 
-        // Funzione showNotification rimossa - usa il sistema WebgreNotifications universale
+        // Funzione showNotification rimossa - usa il sistema CoregreNotifications universale
 
         // Gestione eventi - compatibile con PJAX
         let escapeListener = null;
@@ -544,8 +544,8 @@
         }
 
         // Registra l'inizializzatore per PJAX
-        if (window.WEBGRE && window.WEBGRE.onPageLoad) {
-            window.WEBGRE.onPageLoad(initPageEvents);
+        if (window.COREGRE && window.COREGRE.onPageLoad) {
+            window.COREGRE.onPageLoad(initPageEvents);
         } else {
             // Fallback per il primo caricamento se PJAX non è ancora disponibile
             document.addEventListener('DOMContentLoaded', initPageEvents);

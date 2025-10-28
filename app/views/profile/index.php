@@ -303,7 +303,7 @@ async function updateTheme(theme) {
             }
             
             // Show success message
-            WebgreNotifications.success('Tema aggiornato con successo');
+            CoregreNotifications.success('Tema aggiornato con successo');
         } else {
             console.error('Error updating theme:', result.message);
         }
@@ -322,7 +322,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             if (newPassword !== confirmPassword) {
                 e.preventDefault();
-                WebgreNotifications.error('Le password non coincidono');
+                CoregreNotifications.error('Le password non coincidono');
             }
         });
     }

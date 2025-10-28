@@ -407,7 +407,7 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded',
-                        'X-CSRF-TOKEN': window.WEBGRE ? window.WEBGRE.csrfToken : ''
+                        'X-CSRF-TOKEN': window.COREGRE ? window.COREGRE.csrfToken : ''
                     },
                     body: `table=${encodeURIComponent(tableName)}&page=${page}&search=${encodeURIComponent(search)}`
                 });
@@ -550,8 +550,8 @@
 
 
         // Registra l'inizializzatore per PJAX
-        if (window.WEBGRE && window.WEBGRE.onPageLoad) {
-            window.WEBGRE.onPageLoad(initDatabaseIndex);
+        if (window.COREGRE && window.COREGRE.onPageLoad) {
+            window.COREGRE.onPageLoad(initDatabaseIndex);
         }
 
         // Inizializza anche al primo caricamento

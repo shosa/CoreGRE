@@ -342,8 +342,8 @@
     };
 
     // Registra l'inizializzatore per PJAX
-    if (window.WEBGRE && window.WEBGRE.onPageLoad) {
-        window.WEBGRE.onPageLoad(initRiparazioniCreate);
+    if (window.COREGRE && window.COREGRE.onPageLoad) {
+        window.COREGRE.onPageLoad(initRiparazioniCreate);
     }
 
     // Inizializza anche al primo caricamento

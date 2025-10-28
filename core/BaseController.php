@@ -62,7 +62,7 @@ abstract class BaseController
         if ($this->isPjax()) {
             $response = [
                 'content' => $content,
-                'title' => $data['pageTitle'] ?? 'WEBGRE',
+                'title' => $data['pageTitle'] ?? 'COREGRE',
                 'url' => $_SERVER['REQUEST_URI'] ?? '/',
                 'scripts' => $data['pageScripts'] ?? null
             ];

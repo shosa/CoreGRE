@@ -234,11 +234,11 @@
                 submitBtn.disabled = false;
                 
                 // Carica dettagli terzista via AJAX
-                fetch(window.WEBGRE.baseUrl + '/export/getTerzistaDetails', {
+                fetch(window.COREGRE.baseUrl + '/export/getTerzistaDetails', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded',
-                        'X-CSRF-TOKEN': window.WEBGRE.csrfToken
+                        'X-CSRF-TOKEN': window.COREGRE.csrfToken
                     },
                     body: 'id=' + encodeURIComponent(terzistaId)
                 })
@@ -290,8 +290,8 @@
             if (!form.checkValidity()) {
                 if (window.showAlert) {
                     window.showAlert('Seleziona un terzista prima di procedere', 'warning');
-                } else if (window.WebgreNotifications) {
-                    window.WebgreNotifications.warning('Seleziona un terzista prima di procedere');
+                } else if (window.CoregreNotifications) {
+                    window.CoregreNotifications.warning('Seleziona un terzista prima di procedere');
                 }
                 return false;
             }
@@ -305,10 +305,10 @@
             const formData = new FormData(form);
             
             // Invia richiesta
-            fetch(window.WEBGRE.baseUrl + '/export/create', {
+            fetch(window.COREGRE.baseUrl + '/export/create', {
                 method: 'POST',
                 headers: {
-                    'X-CSRF-TOKEN': window.WEBGRE.csrfToken,
+                    'X-CSRF-TOKEN': window.COREGRE.csrfToken,
                     'X-Requested-With': 'XMLHttpRequest'
                 },
                 body: formData
@@ -318,8 +318,8 @@
                 if (data.success) {
                     if (window.showAlert) {
                         window.showAlert('Documento creato con successo!', 'success');
-                    } else if (window.WebgreNotifications) {
-                        window.WebgreNotifications.success('Documento creato con successo!');
+                    } else if (window.CoregreNotifications) {
+                        window.CoregreNotifications.success('Documento creato con successo!');
                     }
                     
                     // Reindirizza al prossimo step
@@ -333,8 +333,8 @@
                 } else {
                     if (window.showAlert) {
                         window.showAlert(data.message || 'Errore nella creazione del documento', 'error');
-                    } else if (window.WebgreNotifications) {
-                        window.WebgreNotifications.error(data.message || 'Errore nella creazione del documento');
+                    } else if (window.CoregreNotifications) {
+                        window.CoregreNotifications.error(data.message || 'Errore nella creazione del documento');
                     }
                     
                     // Ripristina il pulsante
@@ -346,8 +346,8 @@
                 console.error('Error:', error);
                 if (window.showAlert) {
                     window.showAlert('Errore di rete durante la creazione del documento', 'error');
-                } else if (window.WebgreNotifications) {
-                    window.WebgreNotifications.error('Errore di rete durante la creazione del documento');
+                } else if (window.CoregreNotifications) {
+                    window.CoregreNotifications.error('Errore di rete durante la creazione del documento');
                 }
                 
                 // Ripristina il pulsante
@@ -372,8 +372,8 @@
     }
     
     // Registrazione PJAX
-    if (window.WEBGRE && window.WEBGRE.onPageLoad) {
-        window.WEBGRE.onPageLoad(initExportCreate);
+    if (window.COREGRE && window.COREGRE.onPageLoad) {
+        window.COREGRE.onPageLoad(initExportCreate);
     }
     
     // Fallback primo caricamento

@@ -335,8 +335,8 @@
         // Conferma invio con modal personalizzato
         e.preventDefault();
         
-        if (window.WebgreModals) {
-            window.WebgreModals.confirm({
+        if (window.CoregreModals) {
+            window.CoregreModals.confirm({
                 title: 'Conferma Salvataggio',
                 message: 'Sei sicuro di voler salvare questi dati di produzione?',
                 confirmText: 'Salva',

@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * Base Model per tutti i modelli WEBGRE
+ * Base Model per tutti i modelli COREGRE
  * Estende Eloquent Model con funzionalità personalizzate
  */
 abstract class BaseModel extends Model

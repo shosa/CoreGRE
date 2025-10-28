@@ -365,8 +365,8 @@
 
 <script>
 function startLaunch() {
-    if (window.WebgreModals && window.WebgreModals.confirm) {
-        window.WebgreModals.confirm({
+    if (window.CoregreModals && window.CoregreModals.confirm) {
+        window.CoregreModals.confirm({
             title: 'Avvia Lancio',
             message: 'Sei sicuro di voler avviare questo lancio?\n\nDopo l\'avvio non sarà più possibile modificare articoli e fasi.',
             type: 'warning',
@@ -376,8 +376,8 @@ function startLaunch() {
             }
         });
     } else {
-        // Fallback usando WebgreModals
-        WebgreModals.confirm({
+        // Fallback usando CoregreModals
+        CoregreModals.confirm({
             message: 'Sei sicuro di voler avviare questo lancio?\n\nDopo l\'avvio non sarà più possibile modificare articoli e fasi.',
             onConfirm: () => {
                 window.location.href = '<?= $this->url('/scm-admin/launches/' . $launch->id . '/start') ?>';
@@ -387,8 +387,8 @@ function startLaunch() {
 }
 
 function completeLaunch() {
-    if (window.WebgreModals && window.WebgreModals.confirm) {
-        window.WebgreModals.confirm({
+    if (window.CoregreModals && window.CoregreModals.confirm) {
+        window.CoregreModals.confirm({
             title: 'Completa Lancio',
             message: 'Sei sicuro di voler completare questo lancio?\n\nQuesta operazione segnerà il lancio come terminato.',
             type: 'info',
@@ -398,8 +398,8 @@ function completeLaunch() {
             }
         });
     } else {
-        // Fallback usando WebgreModals
-        WebgreModals.confirm({
+        // Fallback usando CoregreModals
+        CoregreModals.confirm({
             message: 'Sei sicuro di voler completare questo lancio?\n\nQuesta operazione segnerà il lancio come terminato.',
             onConfirm: () => {
                 window.location.href = '<?= $this->url('/scm-admin/launches/' . $launch->id . '/complete') ?>';

@@ -1,6 +1,6 @@
 <?php
 /**
- * WEBGRE Application Entry Point
+ * COREGRE Application Entry Point
  * Punto di ingresso principale dell'applicazione MVC
  */
 
@@ -74,7 +74,7 @@ try {
                 <head>
                     <meta charset="UTF-8">
                     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                    <title>Errore - WEBGRE</title>
+                    <title>Errore - COREGRE</title>
                     <script src="https://cdn.tailwindcss.com"></script>
                 </head>
                 <body class="bg-gray-50">

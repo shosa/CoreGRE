@@ -758,8 +758,8 @@
         };
 
         // Registra inizializzatore PJAX
-        if (window.WEBGRE && window.WEBGRE.onPageLoad) {
-            window.WEBGRE.onPageLoad(initEtichetteDYMO);
+        if (window.COREGRE && window.COREGRE.onPageLoad) {
+            window.COREGRE.onPageLoad(initEtichetteDYMO);
         }
 
         // Inizializzazione

@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title><?= $pageTitle ?? 'WEBGRE' ?></title>
+    <title><?= $pageTitle ?? 'COREGRE' ?></title>
 
     <!-- Google Fonts - Montserrat -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -144,7 +144,7 @@
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div class="flex justify-between items-center py-4">
                         <div class="flex items-center">
-                            <img class="h-8 w-8" src="<?= $this->url('/public/assets/logo.png') ?>" alt="WEBGRE">
+                            <img class="h-8 w-8" src="<?= $this->url('/public/assets/logo.png') ?>" alt="COREGRE">
                             <span class="ml-2 text-xl font-semibold text-gray-900 dark:text-white"><?= APP_NAME ?></span>
                         </div>
 
@@ -180,8 +180,8 @@
 
     <!-- JavaScript Globale -->
     <script>
-        // Configurazione globale WEBGRE
-        window.WEBGRE = {
+        // Configurazione globale COREGRE
+        window.COREGRE = {
             baseUrl: '<?= BASE_URL ?>',
             csrfToken: '<?= $this->generateCsrfToken() ?>',
             user: {
@@ -192,16 +192,16 @@
                 isAuthenticated: <?= $this->isAuthenticated() ? 'true' : 'false' ?>
             },
 
-            // Alias per WebgreModals (per retrocompatibilità)
+            // Alias per CoregreModals (per retrocompatibilità)
             openModal: function(modalId) {
-                if (window.WebgreModals) {
-                    return window.WebgreModals.openModal(modalId);
+                if (window.CoregreModals) {
+                    return window.CoregreModals.openModal(modalId);
                 }
             },
 
             closeModal: function(modalId, callback) {
-                if (window.WebgreModals) {
-                    return window.WebgreModals.closeModal(modalId, callback);
+                if (window.CoregreModals) {
+                    return window.CoregreModals.closeModal(modalId, callback);
                 }
             }
         };
@@ -276,7 +276,7 @@
             const defaultOptions = {
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': window.WEBGRE.csrfToken
+                    'X-CSRF-TOKEN': window.COREGRE.csrfToken
                 }
             };
 
@@ -286,7 +286,7 @@
             }
 
             try {
-                const response = await fetch(window.WEBGRE.baseUrl + url, mergedOptions);
+                const response = await fetch(window.COREGRE.baseUrl + url, mergedOptions);
                 const data = await response.json();
 
                 if (!response.ok) {
@@ -312,7 +312,7 @@
         });
 
         // PJAX Navigation System
-        class WebgrePjax {
+        class CoregrePjax {
             constructor() {
                 this.mainContent = document.getElementById('main-content') || document.querySelector('main > div');
                 this.currentUrl = window.location.href;
@@ -550,7 +550,7 @@
 
                 // Aggiungi CSRF token se non presente
                 if (!formData.has('csrf_token')) {
-                    formData.append('csrf_token', window.WEBGRE.csrfToken);
+                    formData.append('csrf_token', window.COREGRE.csrfToken);
                 }
 
                 fetch(form.action, {
@@ -558,7 +558,7 @@
                     body: formData,
                     headers: {
                         'X-Requested-With': 'XMLHttpRequest',
-                        'X-CSRF-TOKEN': window.WEBGRE.csrfToken
+                        'X-CSRF-TOKEN': window.COREGRE.csrfToken
                     }
                 })
                     .then(response => response.json())
@@ -610,7 +610,7 @@
                     headers: {
                         'Content-Type': 'application/json',
                         'X-Requested-With': 'XMLHttpRequest',
-                        'X-CSRF-TOKEN': window.WEBGRE.csrfToken
+                        'X-CSRF-TOKEN': window.COREGRE.csrfToken
                     },
                     body: JSON.stringify({ _method: 'DELETE' })
                 })
@@ -652,7 +652,7 @@
                 });
 
                 // Trova e attiva il link corrispondente
-                const currentLink = document.querySelector(`a[href="${url}"], a[href="${url.replace(window.WEBGRE.baseUrl, '')}"]`);
+                const currentLink = document.querySelector(`a[href="${url}"], a[href="${url.replace(window.COREGRE.baseUrl, '')}"]`);
                 if (currentLink) {
                     currentLink.classList.add('nav-active');
 
@@ -751,18 +751,18 @@
         }
 
         // Sistema di re-inizializzazione globale per le pagine
-        window.WEBGRE.pageInitializers = [];
+        window.COREGRE.pageInitializers = [];
 
         // Funzione per registrare initializzatori di pagina
-        window.WEBGRE.onPageLoad = function (callback) {
+        window.COREGRE.onPageLoad = function (callback) {
             if (typeof callback === 'function') {
-                window.WEBGRE.pageInitializers.push(callback);
+                window.COREGRE.pageInitializers.push(callback);
             }
         };
 
         // Funzione per eseguire tutti gli initializzatori registrati
-        window.WEBGRE.runPageInitializers = function () {
-            window.WEBGRE.pageInitializers.forEach(callback => {
+        window.COREGRE.runPageInitializers = function () {
+            window.COREGRE.pageInitializers.forEach(callback => {
                 try {
                     callback();
                 } catch (e) {
@@ -773,12 +773,12 @@
 
         // Event listener per il custom event del PJAX
         document.addEventListener('pjax:contentLoaded', (e) => {
-            window.WEBGRE.runPageInitializers();
-            window.WEBGRE.animateNewContent();
+            window.COREGRE.runPageInitializers();
+            window.COREGRE.animateNewContent();
         });
 
         // Funzione per animare i nuovi contenuti caricati
-        window.WEBGRE.animateNewContent = function() {
+        window.COREGRE.animateNewContent = function() {
             const mainContent = document.getElementById('main-content');
             if (mainContent) {
                 // Aggiunge classe di animazione
@@ -996,16 +996,16 @@
         }
 
         // Registra l'inizializzazione come page initializer
-        window.WEBGRE.onPageLoad(initializeGlobalSearch);
+        window.COREGRE.onPageLoad(initializeGlobalSearch);
 
         // Inizializza PJAX quando il DOM è pronto
-        if (window.WEBGRE.user.isAuthenticated) {
+        if (window.COREGRE.user.isAuthenticated) {
             document.addEventListener('DOMContentLoaded', () => {
-                window.pjax = new WebgrePjax();
+                window.pjax = new CoregrePjax();
                 // Esegui inizializzatori anche al primo caricamento
-                window.WEBGRE.runPageInitializers();
+                window.COREGRE.runPageInitializers();
                 // Anima il contenuto iniziale
-                setTimeout(() => window.WEBGRE.animateNewContent(), 100);
+                setTimeout(() => window.COREGRE.animateNewContent(), 100);
             });
         }
     </script>

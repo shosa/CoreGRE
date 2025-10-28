@@ -264,7 +264,7 @@ class TrackingController extends BaseController
             $pdf = new \TCPDF('P', 'mm', 'A4', true, 'UTF-8', false);
             
             // Impostazioni del documento PDF
-            $pdf->SetCreator('WebGRE');
+            $pdf->SetCreator('CoreGRE');
             $pdf->SetAuthor('Emmegiemme');
             $pdf->SetTitle('Fiches Cartellini');
             $pdf->SetSubject('Report');
@@ -982,7 +982,7 @@ class TrackingController extends BaseController
 
             // Genera PDF usando TCPDF
             $pdf = new \TCPDF('P', 'mm', 'A4', true, 'UTF-8', false);
-            $pdf->SetCreator('WebGre System');
+            $pdf->SetCreator('Coregre System');
             $pdf->SetAuthor('Emmegiemme');
             $pdf->SetTitle('Packing List - Per Lotto');
             $pdf->SetSubject('Report');
@@ -1102,7 +1102,7 @@ class TrackingController extends BaseController
 
             // Genera PDF usando TCPDF
             $pdf = new \TCPDF('P', 'mm', 'A4', true, 'UTF-8', false);
-            $pdf->SetCreator('WebGre System');
+            $pdf->SetCreator('Coregre System');
             $pdf->SetAuthor('Emmegiemme');
             $pdf->SetTitle('Packing List - Per Cartellino');
             $pdf->SetSubject('Report');
@@ -2196,8 +2196,8 @@ class TrackingController extends BaseController
         }
         
         // Registra per PJAX
-        if (window.WEBGRE && window.WEBGRE.onPageLoad) {
-            window.WEBGRE.onPageLoad(initTrackingIndex);
+        if (window.COREGRE && window.COREGRE.onPageLoad) {
+            window.COREGRE.onPageLoad(initTrackingIndex);
         }
         ";
     }
@@ -2213,8 +2213,8 @@ class TrackingController extends BaseController
             // Implementazione ricerca multipla
         }
         
-        if (window.WEBGRE && window.WEBGRE.onPageLoad) {
-            window.WEBGRE.onPageLoad(initMultiSearch);
+        if (window.COREGRE && window.COREGRE.onPageLoad) {
+            window.COREGRE.onPageLoad(initMultiSearch);
         }
         ";
     }
@@ -2338,7 +2338,7 @@ class TrackingController extends BaseController
             });
 
             if (invalidInput) {
-                WebgreModals.alert('Errore', 'Uno o più campi non sono validi. Correggi i campi evidenziati in rosso.');
+                CoregreModals.alert('Errore', 'Uno o più campi non sono validi. Correggi i campi evidenziati in rosso.');
                 return;
             }
 
@@ -2413,7 +2413,7 @@ class TrackingController extends BaseController
             });
 
             if (commessas.length === 0) {
-                WebgreModals.alert('Errore', 'Nessun cartellino valido da inviare.');
+                CoregreModals.alert('Errore', 'Nessun cartellino valido da inviare.');
                 return;
             }
 
@@ -2427,8 +2427,8 @@ class TrackingController extends BaseController
         window.loadSummary = loadSummary;
         window.inviaDati = inviaDati;
 
-        if (window.WEBGRE && window.WEBGRE.onPageLoad) {
-            window.WEBGRE.onPageLoad(function() {
+        if (window.COREGRE && window.COREGRE.onPageLoad) {
+            window.COREGRE.onPageLoad(function() {
                 // Inizializzazione completata
             });
         }
@@ -2515,7 +2515,7 @@ class TrackingController extends BaseController
                 const deleteBtn = event.target.closest('.delete-lot-btn');
                 if (deleteBtn) {
                     const id = deleteBtn.dataset.id;
-                    WebgreModals.confirmDelete('Sei sicuro di voler eliminare questa associazione?', function() {
+                    CoregreModals.confirmDelete('Sei sicuro di voler eliminare questa associazione?', function() {
                         fetch('" . $this->url('/tracking/delete-lot') . "', {
                             method: 'POST',
                             headers: {
@@ -2578,8 +2578,8 @@ class TrackingController extends BaseController
             document.getElementById('editLotModal').classList.add('hidden');
         }
         
-        if (window.WEBGRE && window.WEBGRE.onPageLoad) {
-            window.WEBGRE.onPageLoad(function() {
+        if (window.COREGRE && window.COREGRE.onPageLoad) {
+            window.COREGRE.onPageLoad(function() {
                 // Inizializzazione completata
             });
         }
@@ -2598,7 +2598,7 @@ class TrackingController extends BaseController
             
             var searchLot = document.getElementById('search_lot').value.trim();
             if (!searchLot) {
-                WebgreModals.alert('Errore', 'Inserisci un numero di lotto');
+                CoregreModals.alert('Errore', 'Inserisci un numero di lotto');
                 return;
             }
             
@@ -2714,7 +2714,7 @@ class TrackingController extends BaseController
             if (emptyFields.length > 0) {
                 event.preventDefault();
                 var message = 'Alcuni campi sono vuoti. Continuare comunque?';
-                WebgreModals.confirm({
+                CoregreModals.confirm({
                     title: 'Campi vuoti',
                     message: message,
                     confirmText: 'Continua',
@@ -2734,7 +2734,7 @@ class TrackingController extends BaseController
             var lotNumber = document.getElementById('lot_number').value;
             var message = 'Confermi di voler aggiornare i dettagli del lotto ' + lotNumber + '?';
             
-            WebgreModals.confirm({
+            CoregreModals.confirm({
                 title: 'Conferma aggiornamento',
                 message: message,
                 confirmText: 'Aggiorna',
@@ -2746,8 +2746,8 @@ class TrackingController extends BaseController
             });
         });
         
-        if (window.WEBGRE && window.WEBGRE.onPageLoad) {
-            window.WEBGRE.onPageLoad(function() {
+        if (window.COREGRE && window.COREGRE.onPageLoad) {
+            window.COREGRE.onPageLoad(function() {
                 // Inizializzazione completata
             });
         }
@@ -2765,8 +2765,8 @@ class TrackingController extends BaseController
             // Implementazione packing list
         }
         
-        if (window.WEBGRE && window.WEBGRE.onPageLoad) {
-            window.WEBGRE.onPageLoad(initPackingList);
+        if (window.COREGRE && window.COREGRE.onPageLoad) {
+            window.COREGRE.onPageLoad(initPackingList);
         }
         ";
     }
@@ -2781,8 +2781,8 @@ class TrackingController extends BaseController
             // Implementazione make fiches
         }
         
-        if (window.WEBGRE && window.WEBGRE.onPageLoad) {
-            window.WEBGRE.onPageLoad(initMakeFiches);
+        if (window.COREGRE && window.COREGRE.onPageLoad) {
+            window.COREGRE.onPageLoad(initMakeFiches);
         }
         ";
     }
@@ -2842,19 +2842,19 @@ class TrackingController extends BaseController
             var cartelli = $cartelsJson;
 
             if (!type_id) {
-                WebgreModals.alert('Errore', 'Seleziona un tipo di tracking');
+                CoregreModals.alert('Errore', 'Seleziona un tipo di tracking');
                 return;
             }
             
             if (!lotNumbers) {
-                WebgreModals.alert('Errore', 'Inserisci almeno un numero di lotto');
+                CoregreModals.alert('Errore', 'Inserisci almeno un numero di lotto');
                 return;
             }
 
             // Mostra conferma
             var confirmMessage = 'Confermi di voler associare ' + cartelli.length + ' cartellini a ' + lotNumbers.split('\\n').length + ' lotti?';
             
-            WebgreModals.confirm({
+            CoregreModals.confirm({
                 title: 'Conferma Associazione',
                 message: confirmMessage,
                 confirmText: 'Associa',
@@ -2891,19 +2891,19 @@ class TrackingController extends BaseController
                         var response = JSON.parse(xhr.responseText);
 
                         if (response.success) {
-                            WebgreModals.alert('Successo', 'Associazione salvata con successo!', function() {
-                                if (window.WEBGRE && window.WEBGRE.navigateTo) {
-                                    window.WEBGRE.navigateTo('" . $this->url('/tracking') . "');
+                            CoregreModals.alert('Successo', 'Associazione salvata con successo!', function() {
+                                if (window.COREGRE && window.COREGRE.navigateTo) {
+                                    window.COREGRE.navigateTo('" . $this->url('/tracking') . "');
                                 } else {
                                     window.location.href = '" . $this->url('/tracking') . "';
                                 }
                             });
                         } else {
                             var errorMsg = 'Errore durante il salvataggio: ' + (response.error || 'Errore sconosciuto');
-                            WebgreModals.alert('Errore', errorMsg);
+                            CoregreModals.alert('Errore', errorMsg);
                         }
                     } else {
-                        WebgreModals.alert('Errore', 'Errore durante il salvataggio');
+                        CoregreModals.alert('Errore', 'Errore durante il salvataggio');
                     }
                 }
             };
@@ -2918,8 +2918,8 @@ class TrackingController extends BaseController
             } // Fine processAssociation
         });
         
-        if (window.WEBGRE && window.WEBGRE.onPageLoad) {
-            window.WEBGRE.onPageLoad(function() {
+        if (window.COREGRE && window.COREGRE.onPageLoad) {
+            window.COREGRE.onPageLoad(function() {
                 // Inizializzazione pagina
             });
         }

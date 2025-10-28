@@ -425,7 +425,7 @@ if ($totalPages > 1): ?>
             const content = document.getElementById('document-details-content');
 
             // Mostra modal con loading
-            WebgreModals.openModal('document-details-modal');
+            CoregreModals.openModal('document-details-modal');
             content.innerHTML = `
                 <div class="text-center py-8">
                     <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
@@ -434,11 +434,11 @@ if ($totalPages > 1): ?>
             `;
             
             // Carica dettagli via AJAX
-            fetch(window.WEBGRE.baseUrl + '/export/getDdtDetails', {
+            fetch(window.COREGRE.baseUrl + '/export/getDdtDetails', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
-                    'X-CSRF-TOKEN': window.WEBGRE.csrfToken
+                    'X-CSRF-TOKEN': window.COREGRE.csrfToken
                 },
                 body: 'id=' + encodeURIComponent(id)
             })
@@ -460,14 +460,14 @@ if ($totalPages > 1): ?>
         };
         
         window.confirmDelete = function(id) {
-            if (window.WebgreModals && window.WebgreModals.confirmDelete) {
-                window.WebgreModals.confirmDelete(
+            if (window.CoregreModals && window.CoregreModals.confirmDelete) {
+                window.CoregreModals.confirmDelete(
                     'Sei sicuro di voler eliminare questo documento? Questa operazione non può essere annullata!',
                     () => deleteDocument(id),
                     1
                 );
             } else {
-                // Fallback semplice se WebgreModals non disponibile
+                // Fallback semplice se CoregreModals non disponibile
                 if (confirm('Sei sicuro di voler eliminare questo documento? Questa operazione non può essere annullata!')) {
                     deleteDocument(id);
                 }
@@ -475,7 +475,7 @@ if ($totalPages > 1): ?>
         };
         
         window.closeModal = function(modalId) {
-            WebgreModals.closeModal(modalId);
+            CoregreModals.closeModal(modalId);
         };
         
         window.stampaSegnacolli = function() {
@@ -491,14 +491,14 @@ if ($totalPages > 1): ?>
                 return;
             }
             
-            window.open(window.WEBGRE.baseUrl + '/export/segnacolli/' + idDocumento, '_blank');
+            window.open(window.COREGRE.baseUrl + '/export/segnacolli/' + idDocumento, '_blank');
         };
         
         // Event listener per bottoni che aprono modal segnacolli
         const segnacolliButtons = document.querySelectorAll('[data-modal-target="segnacolli-modal"]');
         segnacolliButtons.forEach(button => {
             function clickHandler() {
-                WebgreModals.openModal('segnacolli-modal');
+                CoregreModals.openModal('segnacolli-modal');
                 // Qui potresti caricare la lista dei documenti disponibili
             }
             button.addEventListener('click', clickHandler);
@@ -510,7 +510,7 @@ if ($totalPages > 1): ?>
         modals.forEach(modal => {
             function clickHandler(e) {
                 if (e.target === modal) {
-                    WebgreModals.closeModal(modal.id);
+                    CoregreModals.closeModal(modal.id);
                 }
             }
             modal.addEventListener('click', clickHandler);
@@ -519,7 +519,7 @@ if ($totalPages > 1): ?>
     }
     
     function deleteDocument(id) {
-        fetch(window.WEBGRE.baseUrl + '/export/delete', {
+        fetch(window.COREGRE.baseUrl + '/export/delete', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded'
@@ -531,8 +531,8 @@ if ($totalPages > 1): ?>
             if (data.success) {
                 if (window.showAlert) {
                     window.showAlert(data.message || 'Documento eliminato con successo', 'success');
-                } else if (window.WebgreNotifications) {
-                    window.WebgreNotifications.success(data.message || 'Documento eliminato con successo');
+                } else if (window.CoregreNotifications) {
+                    window.CoregreNotifications.success(data.message || 'Documento eliminato con successo');
                 }
                 // Ricarica la pagina dopo un breve delay
                 setTimeout(() => {
@@ -541,8 +541,8 @@ if ($totalPages > 1): ?>
             } else {
                 if (window.showAlert) {
                     window.showAlert(data.message || 'Errore durante l\'eliminazione', 'error');
-                } else if (window.WebgreNotifications) {
-                    window.WebgreNotifications.error(data.message || 'Errore durante l\'eliminazione');
+                } else if (window.CoregreNotifications) {
+                    window.CoregreNotifications.error(data.message || 'Errore durante l\'eliminazione');
                 }
             }
         })
@@ -550,8 +550,8 @@ if ($totalPages > 1): ?>
             console.error('Error:', error);
             if (window.showAlert) {
                 window.showAlert('Errore durante l\'eliminazione del documento', 'error');
-            } else if (window.WebgreNotifications) {
-                window.WebgreNotifications.error('Errore durante l\'eliminazione del documento');
+            } else if (window.CoregreNotifications) {
+                window.CoregreNotifications.error('Errore durante l\'eliminazione del documento');
             }
         });
     }
@@ -564,8 +564,8 @@ if ($totalPages > 1): ?>
     }
     
     // Registrazione PJAX
-    if (window.WEBGRE && window.WEBGRE.onPageLoad) {
-        window.WEBGRE.onPageLoad(initExportIndex);
+    if (window.COREGRE && window.COREGRE.onPageLoad) {
+        window.COREGRE.onPageLoad(initExportIndex);
     }
     
     // Fallback primo caricamento

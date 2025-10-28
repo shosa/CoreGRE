@@ -303,7 +303,7 @@
     }
 
     function deleteOperator(operatorId) {
-        WebgreModals.confirmDelete(
+        CoregreModals.confirmDelete(
             'Sei sicuro di voler eliminare questo operatore?',
             () => {
 
@@ -321,15 +321,15 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    WebgreNotifications.success('Operatore eliminato con successo');
+                    CoregreNotifications.success('Operatore eliminato con successo');
                     location.reload();
                 } else {
-                    WebgreNotifications.error('Errore durante l\'eliminazione: ' + (data.error || 'Errore sconosciuto'));
+                    CoregreNotifications.error('Errore durante l\'eliminazione: ' + (data.error || 'Errore sconosciuto'));
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                WebgreNotifications.error('Errore di connessione');
+                CoregreNotifications.error('Errore di connessione');
             });
         });
     }
@@ -350,15 +350,15 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    WebgreNotifications.success('Operatore salvato con successo');
+                    CoregreNotifications.success('Operatore salvato con successo');
                     location.reload();
                 } else {
-                    WebgreNotifications.error('Errore durante il salvataggio: ' + (data.error || 'Errore sconosciuto'));
+                    CoregreNotifications.error('Errore durante il salvataggio: ' + (data.error || 'Errore sconosciuto'));
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                WebgreNotifications.error('Errore di connessione');
+                CoregreNotifications.error('Errore di connessione');
             });
     });
 
@@ -393,7 +393,7 @@
     }
 
     function bulkActions() {
-        WebgreNotifications.info('Funzionalità in sviluppo');
+        CoregreNotifications.info('Funzionalità in sviluppo');
     }
 
     // Close modal on outside click

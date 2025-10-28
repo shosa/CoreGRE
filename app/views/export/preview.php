@@ -270,7 +270,7 @@
             const infoPaia = document.getElementById('file-paia');
             
             // Mostra modal con loading
-            WebgreModals.openModal('file-modal');
+            CoregreModals.openModal('file-modal');
             content.innerHTML = `
                 <div class="text-center py-8">
                     <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
@@ -280,7 +280,7 @@
             
             // Chiamata API reale per processare il file Excel dalla directory temp
             const progressivo = <?= json_encode($progressivo) ?>;
-            fetch(window.WEBGRE.baseUrl + '/export/api/processExcel?fileName=' + encodeURIComponent(fileName) + '&progressivo=' + progressivo, {
+            fetch(window.COREGRE.baseUrl + '/export/api/processExcel?fileName=' + encodeURIComponent(fileName) + '&progressivo=' + progressivo, {
                 method: 'GET',
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest'
@@ -391,7 +391,7 @@
         };
         
         window.closeModal = function(modalId) {
-            WebgreModals.closeModal(modalId);
+            CoregreModals.closeModal(modalId);
         };
         
         window.generaDDT = function() {
@@ -399,15 +399,15 @@
             
             if (window.showAlert) {
                 window.showAlert('Generazione DDT in corso...', 'info');
-            } else if (window.WebgreNotifications) {
-                window.WebgreNotifications.info('Generazione DDT in corso...');
+            } else if (window.CoregreNotifications) {
+                window.CoregreNotifications.info('Generazione DDT in corso...');
             }
             
-            fetch(window.WEBGRE.baseUrl + '/export/api/generaDdt', {
+            fetch(window.COREGRE.baseUrl + '/export/api/generaDdt', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
-                    'X-CSRF-TOKEN': window.WEBGRE.csrfToken
+                    'X-CSRF-TOKEN': window.COREGRE.csrfToken
                 },
                 body: 'progressivo=' + encodeURIComponent(progressivo)
             })
@@ -416,13 +416,13 @@
                 if (data.success) {
                     if (window.showAlert) {
                         window.showAlert(data.message || 'DDT generato con successo!', 'success');
-                    } else if (window.WebgreNotifications) {
-                        window.WebgreNotifications.success(data.message || 'DDT generato con successo!');
+                    } else if (window.CoregreNotifications) {
+                        window.CoregreNotifications.success(data.message || 'DDT generato con successo!');
                     }
                     
                     // Reindirizza alla gestione del documento
                     setTimeout(() => {
-                        const continueUrl = window.WEBGRE.baseUrl + '/export/continue/' + progressivo;
+                        const continueUrl = window.COREGRE.baseUrl + '/export/continue/' + progressivo;
                         if (window.pjax) {
                             window.pjax.navigateTo(continueUrl);
                         } else {
@@ -432,8 +432,8 @@
                 } else {
                     if (window.showAlert) {
                         window.showAlert(data.message || 'Errore nella generazione del DDT', 'error');
-                    } else if (window.WebgreNotifications) {
-                        window.WebgreNotifications.error(data.message || 'Errore nella generazione del DDT');
+                    } else if (window.CoregreNotifications) {
+                        window.CoregreNotifications.error(data.message || 'Errore nella generazione del DDT');
                     }
                 }
             })
@@ -441,8 +441,8 @@
                 console.error('Error:', error);
                 if (window.showAlert) {
                     window.showAlert('Errore nella generazione del DDT', 'error');
-                } else if (window.WebgreNotifications) {
-                    window.WebgreNotifications.error('Errore nella generazione del DDT');
+                } else if (window.CoregreNotifications) {
+                    window.CoregreNotifications.error('Errore nella generazione del DDT');
                 }
             });
         };
@@ -452,7 +452,7 @@
         modals.forEach(modal => {
             function clickHandler(e) {
                 if (e.target === modal) {
-                    WebgreModals.closeModal(modal.id);
+                    CoregreModals.closeModal(modal.id);
                 }
             }
             modal.addEventListener('click', clickHandler);
@@ -468,8 +468,8 @@
     }
     
     // Registrazione PJAX
-    if (window.WEBGRE && window.WEBGRE.onPageLoad) {
-        window.WEBGRE.onPageLoad(initExportPreview);
+    if (window.COREGRE && window.COREGRE.onPageLoad) {
+        window.COREGRE.onPageLoad(initExportPreview);
     }
     
     // Fallback primo caricamento

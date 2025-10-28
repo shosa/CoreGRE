@@ -459,7 +459,7 @@ SELECT * FROM users WHERE active = 1 LIMIT 10;
                 const response = await fetch('<?= $this->url('/database/execute-query') ?>', {
                     method: 'POST',
                     headers: {
-                        'X-CSRF-TOKEN': window.WEBGRE ? window.WEBGRE.csrfToken : ''
+                        'X-CSRF-TOKEN': window.COREGRE ? window.COREGRE.csrfToken : ''
                     },
                     body: formData
                 });
@@ -876,19 +876,19 @@ SELECT * FROM users WHERE active = 1 LIMIT 10;
         }
 
         function showQueryHistoryModal() {
-            WebgreModals.openModal('query-history-modal');
+            CoregreModals.openModal('query-history-modal');
         }
 
         window.hideQueryHistoryModal = function() {
-            WebgreModals.closeModal('query-history-modal');
+            CoregreModals.closeModal('query-history-modal');
         };
 
         function showSavedQueriesModal() {
-            WebgreModals.openModal('saved-queries-modal');
+            CoregreModals.openModal('saved-queries-modal');
         }
 
         window.hideSavedQueriesModal = function() {
-            WebgreModals.closeModal('saved-queries-modal');
+            CoregreModals.closeModal('saved-queries-modal');
         };
 
         window.clearQueryHistory = function() {
@@ -1072,8 +1072,8 @@ SELECT * FROM users WHERE active = 1 LIMIT 10;
         }
 
         // Registra l'inizializzatore per PJAX
-        if (window.WEBGRE && window.WEBGRE.onPageLoad) {
-            window.WEBGRE.onPageLoad(initSQLConsole);
+        if (window.COREGRE && window.COREGRE.onPageLoad) {
+            window.COREGRE.onPageLoad(initSQLConsole);
         }
 
         // Inizializza anche al primo caricamento

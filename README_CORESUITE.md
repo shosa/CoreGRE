@@ -1,6 +1,6 @@
 # CoreGre - ERP System
 
-**CoreGre** è la componente ERP della **CoreSuite**, precedentemente nota come WEBGRE3.
+**CoreGre** è la componente ERP della **CoreSuite**, precedentemente nota come COREGRE.
 
 ## 🎯 Overview
 

@@ -271,7 +271,7 @@
                     Gestione Utenti
                 </h3>
                 <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                    Gestione Utenti WEBGRE
+                    Gestione Utenti COREGRE
                 </p>
             </div>
             <div class="p-6">
@@ -462,8 +462,8 @@
                 e.preventDefault();
                 
                 // Usa modal system invece di confirm
-                if (window.WebgreModals) {
-                    window.WebgreModals.confirm({
+                if (window.CoregreModals) {
+                    window.CoregreModals.confirm({
                         title: 'Conferma Aggiornamento Permessi',
                         message: 'Sei sicuro di voler aggiornare i permessi di questo utente?',
                         type: 'info',
@@ -471,15 +471,15 @@
                         cancelText: 'Annulla',
                         onConfirm: () => {
                             // Mostra notifica di caricamento
-                            if (window.WebgreNotifications) {
-                                window.WebgreNotifications.loading('Salvataggio permessi in corso...');
+                            if (window.CoregreNotifications) {
+                                window.CoregreNotifications.loading('Salvataggio permessi in corso...');
                             }
                             form.submit();
                         }
                     });
                 } else {
                     // Fallback
-                    WebgreModals.confirm({
+                    CoregreModals.confirm({
                         message: 'Sei sicuro di voler aggiornare i permessi di questo utente?',
                         onConfirm: () => {
                             form.submit();
@@ -513,7 +513,7 @@
     };
 
     window.clearAllPermissions = function() {
-        WebgreModals.confirm({
+        CoregreModals.confirm({
             message: 'Sei sicuro di voler deselezionare tutti i permessi?',
             onConfirm: () => {
                 const checkboxes = document.querySelectorAll('input[type="checkbox"][name]');
@@ -521,15 +521,15 @@
                     checkbox.checked = false;
                 });
 
-                WebgreNotifications.success('Tutti i permessi deselezionati');
+                CoregreNotifications.success('Tutti i permessi deselezionati');
                 window.showAlert('Tutti i permessi rimossi', 'warning');
             }
         }
     };
 
     // Registra l'inizializzatore per PJAX
-    if (window.WEBGRE && window.WEBGRE.onPageLoad) {
-        window.WEBGRE.onPageLoad(initUsersPermissions);
+    if (window.COREGRE && window.COREGRE.onPageLoad) {
+        window.COREGRE.onPageLoad(initUsersPermissions);
     }
 
     // Inizializza anche al primo caricamento

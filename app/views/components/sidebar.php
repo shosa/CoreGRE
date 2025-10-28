@@ -19,7 +19,7 @@
         <a href="<?= $this->url('/') ?>" class="flex items-center group">
             <div
                 class="p-2 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 shadow-lg group-hover:shadow-xl transition-all duration-200 group-hover:-translate-y-0.5">
-                <img class="h-6 w-6" src="<?= $this->url('/public/assets/logo-white.png') ?>" alt="WEBGRE" />
+                <img class="h-6 w-6" src="<?= $this->url('/public/assets/logo-white.png') ?>" alt="COREGRE" />
             </div>
             <span
                 class="sidebar-text ml-3 text-xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">

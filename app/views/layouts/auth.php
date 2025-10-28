@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title><?= $pageTitle ?? 'WEBGRE' ?></title>
+    <title><?= $pageTitle ?? 'COREGRE' ?></title>
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -44,7 +44,7 @@
                     <div class="text-center text-white">
                         <div class="mb-8">
                             <img class="h-16 w-16 mx-auto mb-4" src="<?= $this->url('/public/assets/logo-white.png') ?>"
-                                alt="WEBGRE">
+                                alt="COREGRE">
                             <h1 class="text-4xl font-bold mb-2"><?= APP_NAME ?></h1>
                         </div>
                         <div class="mt-8 text-sm text-orange-200">
@@ -59,7 +59,7 @@
     <!-- JavaScript -->
     <script>
         // Configurazione globale
-        window.WEBGRE = {
+        window.COREGRE = {
             baseUrl: '<?= BASE_URL ?>',
             csrfToken: '<?= $csrfToken ?? '' ?>'
         };

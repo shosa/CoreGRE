@@ -774,7 +774,7 @@ $files = $files ?? [];
     }
 
     function closeModal(modalId) {
-        WebgreModals.closeModal(modalId);
+        CoregreModals.closeModal(modalId);
     }
 
     // ======================
@@ -785,7 +785,7 @@ $files = $files ?? [];
      * Esporta i dati degli articoli in un file Excel
      */
     function exportToExcel() {
-        const loadingId = WebgreNotifications.loading('Generazione file Excel in corso...');
+        const loadingId = CoregreNotifications.loading('Generazione file Excel in corso...');
 
         const workbook = new ExcelJS.Workbook();
         const worksheet = workbook.addWorksheet('DDT');
@@ -814,15 +814,15 @@ $files = $files ?? [];
 
         // Generazione e download del file Excel
         workbook.xlsx.writeBuffer().then((data) => {
-            WebgreNotifications.remove(loadingId);
+            CoregreNotifications.remove(loadingId);
             const blob = new Blob([data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
             saveAs(blob, `DDT_<?= $progressivo ?>.xlsx`);
 
-            WebgreNotifications.success('File Excel generato e download avviato!');
+            CoregreNotifications.success('File Excel generato e download avviato!');
         }).catch(error => {
-            WebgreNotifications.remove(loadingId);
+            CoregreNotifications.remove(loadingId);
             console.error('Error:', error);
-            WebgreNotifications.error('Errore durante la generazione del file Excel');
+            CoregreNotifications.error('Errore durante la generazione del file Excel');
         });
     }
 
@@ -830,14 +830,14 @@ $files = $files ?? [];
      * Avvia l'elaborazione dei mancanti
      */
     function elaboraMancanti() {
-        WebgreModals.confirm({
+        CoregreModals.confirm({
             title: 'Conferma Elaborazione',
             message: 'I mancanti del documento in questione verranno ricalcolati. Continuare?',
             confirmText: 'Conferma',
             cancelText: 'Annulla',
             type: 'warning',
             onConfirm: () => {
-                const loadingId = WebgreNotifications.loading('Elaborazione mancanti in corso...');
+                const loadingId = CoregreNotifications.loading('Elaborazione mancanti in corso...');
 
                 fetch('<?= $this->url('/export/elabora_mancanti') ?>', {
                     method: 'POST',
@@ -848,20 +848,20 @@ $files = $files ?? [];
                 })
                     .then(response => response.json())
                     .then(data => {
-                        WebgreNotifications.remove(loadingId);
+                        CoregreNotifications.remove(loadingId);
                         if (data.success) {
-                            WebgreNotifications.success(data.message || 'Elaborazione completata con successo!');
+                            CoregreNotifications.success(data.message || 'Elaborazione completata con successo!');
                             setTimeout(() => {
                                 location.reload();
                             }, 1500);
                         } else {
-                            WebgreNotifications.error(data.message || 'Errore durante l\'elaborazione');
+                            CoregreNotifications.error(data.message || 'Errore durante l\'elaborazione');
                         }
                     })
                     .catch(error => {
-                        WebgreNotifications.remove(loadingId);
+                        CoregreNotifications.remove(loadingId);
                         console.error('Error:', error);
-                        WebgreNotifications.error('Si è verificato un errore durante l\'elaborazione dei mancanti');
+                        CoregreNotifications.error('Si è verificato un errore durante l\'elaborazione dei mancanti');
                     });
             }
         });
@@ -911,7 +911,7 @@ $files = $files ?? [];
                 element.innerText = originalText;
 
                 if (!data.success) {
-                    WebgreNotifications.error(data.message || 'Errore durante l\'aggiornamento');
+                    CoregreNotifications.error(data.message || 'Errore durante l\'aggiornamento');
                 } else {
                     // Feedback visivo di successo
                     element.style.backgroundColor = '#dcfce7';
@@ -927,7 +927,7 @@ $files = $files ?? [];
                 // Ripristina il testo originale in caso di errore
                 element.innerText = originalText;
                 console.error('Error:', error);
-                WebgreNotifications.error('Si è verificato un errore durante l\'aggiornamento dei dati');
+                CoregreNotifications.error('Si è verificato un errore durante l\'aggiornamento dei dati');
             })
             .finally(() => {
                 // Rimuovi il flag di aggiornamento
@@ -1047,7 +1047,7 @@ $files = $files ?? [];
     // Funzione per caricare la lista dei mancanti
     function loadMancanti() {
         const container = document.getElementById('mancantiContainer');
-        const loadingId = WebgreNotifications.loading('Caricamento mancanti...');
+        const loadingId = CoregreNotifications.loading('Caricamento mancanti...');
 
         fetch('<?= $this->url('/export/get_mancanti') ?>', {
             method: 'POST',
@@ -1058,7 +1058,7 @@ $files = $files ?? [];
         })
             .then(response => response.json())
             .then(data => {
-                WebgreNotifications.remove(loadingId);
+                CoregreNotifications.remove(loadingId);
                 if (data.success) {
                     let html = '';
                     if (data.mancanti && data.mancanti.length > 0) {
@@ -1083,7 +1083,7 @@ $files = $files ?? [];
                 }
             })
             .catch(error => {
-                WebgreNotifications.remove(loadingId);
+                CoregreNotifications.remove(loadingId);
                 console.error('Error:', error);
                 container.innerHTML = '<div class="text-center py-8 text-red-500">Errore di connessione</div>';
             });
@@ -1094,14 +1094,14 @@ $files = $files ?? [];
     // ======================
 
     function completaDdt() {
-        WebgreModals.confirm({
+        CoregreModals.confirm({
             title: 'Conferma Completamento',
             message: 'Sei sicuro di voler completare questo DDT? Questa azione non può essere annullata.',
             confirmText: 'Sì, completa!',
             cancelText: 'Annulla',
             type: 'warning',
             onConfirm: () => {
-                const loadingId = WebgreNotifications.loading('Completamento DDT in corso...');
+                const loadingId = CoregreNotifications.loading('Completamento DDT in corso...');
 
                 fetch('<?= $this->url('/export/completa_ddt') ?>', {
                     method: 'POST',
@@ -1112,27 +1112,27 @@ $files = $files ?? [];
                 })
                     .then(response => response.json())
                     .then(data => {
-                        WebgreNotifications.remove(loadingId);
+                        CoregreNotifications.remove(loadingId);
                         if (data.success) {
-                            WebgreNotifications.success('DDT completato con successo!');
+                            CoregreNotifications.success('DDT completato con successo!');
                             setTimeout(() => {
                                 location.reload();
                             }, 1500);
                         } else {
-                            WebgreNotifications.error(data.message || 'Errore durante il completamento');
+                            CoregreNotifications.error(data.message || 'Errore durante il completamento');
                         }
                     })
                     .catch(error => {
-                        WebgreNotifications.remove(loadingId);
+                        CoregreNotifications.remove(loadingId);
                         console.error('Error:', error);
-                        WebgreNotifications.error('Si è verificato un errore durante il completamento del DDT');
+                        CoregreNotifications.error('Si è verificato un errore durante il completamento del DDT');
                     });
             }
         });
     }
 
     function cercaNcECosti() {
-        const loadingId = WebgreNotifications.loading('Ricerca voci e costi in corso...');
+        const loadingId = CoregreNotifications.loading('Ricerca voci e costi in corso...');
 
         fetch('<?= $this->url('/export/cerca_nc_costi') ?>', {
             method: 'POST',
@@ -1143,25 +1143,25 @@ $files = $files ?? [];
         })
             .then(response => response.json())
             .then(data => {
-                WebgreNotifications.remove(loadingId);
+                CoregreNotifications.remove(loadingId);
                 if (data.success) {
-                    WebgreNotifications.success(data.message || 'Ricerca completata con successo!');
+                    CoregreNotifications.success(data.message || 'Ricerca completata con successo!');
                     setTimeout(() => {
                         location.reload();
                     }, 1500);
                 } else {
-                    WebgreNotifications.error(data.message || 'Errore durante la ricerca');
+                    CoregreNotifications.error(data.message || 'Errore durante la ricerca');
                 }
             })
             .catch(error => {
-                WebgreNotifications.remove(loadingId);
+                CoregreNotifications.remove(loadingId);
                 console.error('Error:', error);
-                WebgreNotifications.error('Si è verificato un errore durante la ricerca delle voci e dei costi');
+                CoregreNotifications.error('Si è verificato un errore durante la ricerca delle voci e dei costi');
             });
     }
 
     function savePesiData() {
-        const loadingId = WebgreNotifications.loading('Salvataggio dati piede documento...');
+        const loadingId = CoregreNotifications.loading('Salvataggio dati piede documento...');
 
         const datiPiede = {
             progressivo: <?= $progressivo ?>,
@@ -1182,30 +1182,30 @@ $files = $files ?? [];
         })
             .then(response => response.json())
             .then(data => {
-                WebgreNotifications.remove(loadingId);
+                CoregreNotifications.remove(loadingId);
                 if (data.success) {
-                    WebgreNotifications.success('Dati salvati con successo!');
+                    CoregreNotifications.success('Dati salvati con successo!');
                     closeModal('pesiModal');
                 } else {
-                    WebgreNotifications.error(data.message || 'Errore durante il salvataggio');
+                    CoregreNotifications.error(data.message || 'Errore durante il salvataggio');
                 }
             })
             .catch(error => {
-                WebgreNotifications.remove(loadingId);
+                CoregreNotifications.remove(loadingId);
                 console.error('Error:', error);
-                WebgreNotifications.error('Si è verificato un errore durante il salvataggio');
+                CoregreNotifications.error('Si è verificato un errore durante il salvataggio');
             });
     }
 
     function resetPesiData() {
-        WebgreModals.confirm({
+        CoregreModals.confirm({
             title: 'Conferma Reset',
             message: 'Sei sicuro di voler resettare tutti i dati? Questa azione cancellerà tutti i dati del piede documento dal database.',
             confirmText: 'Sì, resetta',
             cancelText: 'Annulla',
             type: 'warning',
             onConfirm: () => {
-                const loadingId = WebgreNotifications.loading('Reset dati in corso...');
+                const loadingId = CoregreNotifications.loading('Reset dati in corso...');
 
                 // Cancella dal database
                 fetch('<?= $this->url('/export/reset_piede_documento') ?>', {
@@ -1217,7 +1217,7 @@ $files = $files ?? [];
                 })
                     .then(response => response.json())
                     .then(data => {
-                        WebgreNotifications.remove(loadingId);
+                        CoregreNotifications.remove(loadingId);
                         if (data.success) {
                             // Reset form
                             document.getElementById('aspettoMerce').value = '';
@@ -1234,20 +1234,20 @@ $files = $files ?? [];
                             // Deseleziona checkbox sottopiedi
                             document.getElementById('presentiSottopiedi').checked = false;
 
-                            WebgreNotifications.success('Dati resettati con successo!');
+                            CoregreNotifications.success('Dati resettati con successo!');
 
                             // Chiudi il modale
                             setTimeout(() => {
                                 closeModal('pesiModal');
                             }, 1000);
                         } else {
-                            WebgreNotifications.error(data.message || 'Errore durante il reset');
+                            CoregreNotifications.error(data.message || 'Errore durante il reset');
                         }
                     })
                     .catch(error => {
-                        WebgreNotifications.remove(loadingId);
+                        CoregreNotifications.remove(loadingId);
                         console.error('Error:', error);
-                        WebgreNotifications.error('Si è verificato un errore durante il reset');
+                        CoregreNotifications.error('Si è verificato un errore durante il reset');
                     });
             }
         });
@@ -1257,11 +1257,11 @@ $files = $files ?? [];
         const commento = document.getElementById('commento').value.trim();
 
         if (!commento) {
-            WebgreNotifications.warning('Inserisci un commento prima di salvare');
+            CoregreNotifications.warning('Inserisci un commento prima di salvare');
             return;
         }
 
-        const loadingId = WebgreNotifications.loading('Salvataggio commento...');
+        const loadingId = CoregreNotifications.loading('Salvataggio commento...');
 
         fetch('<?= $this->url('/export/save_commento') ?>', {
             method: 'POST',
@@ -1272,18 +1272,18 @@ $files = $files ?? [];
         })
             .then(response => response.json())
             .then(data => {
-                WebgreNotifications.remove(loadingId);
+                CoregreNotifications.remove(loadingId);
                 if (data.success) {
-                    WebgreNotifications.success('Commento salvato con successo!');
+                    CoregreNotifications.success('Commento salvato con successo!');
                     closeModal('commentoModal');
                 } else {
-                    WebgreNotifications.error(data.message || 'Errore durante il salvataggio del commento');
+                    CoregreNotifications.error(data.message || 'Errore durante il salvataggio del commento');
                 }
             })
             .catch(error => {
-                WebgreNotifications.remove(loadingId);
+                CoregreNotifications.remove(loadingId);
                 console.error('Error:', error);
-                WebgreNotifications.error('Si è verificato un errore durante il salvataggio del commento');
+                CoregreNotifications.error('Si è verificato un errore durante il salvataggio del commento');
             });
     }
 
@@ -1295,11 +1295,11 @@ $files = $files ?? [];
         const autorizzazione = document.getElementById('autorizzazione').value.trim();
 
         if (!autorizzazione) {
-            WebgreNotifications.warning('Inserisci un testo per l\'autorizzazione prima di salvare');
+            CoregreNotifications.warning('Inserisci un testo per l\'autorizzazione prima di salvare');
             return;
         }
 
-        const loadingId = WebgreNotifications.loading('Salvataggio autorizzazione...');
+        const loadingId = CoregreNotifications.loading('Salvataggio autorizzazione...');
 
         fetch('<?= $this->url('/export/save_autorizzazione') ?>', {
             method: 'POST',
@@ -1310,18 +1310,18 @@ $files = $files ?? [];
         })
             .then(response => response.json())
             .then(data => {
-                WebgreNotifications.remove(loadingId);
+                CoregreNotifications.remove(loadingId);
                 if (data.success) {
-                    WebgreNotifications.success('Autorizzazione salvata con successo!');
+                    CoregreNotifications.success('Autorizzazione salvata con successo!');
                     closeModal('autorizzazioneModal');
                 } else {
-                    WebgreNotifications.error(data.message || 'Errore durante il salvataggio dell\'autorizzazione');
+                    CoregreNotifications.error(data.message || 'Errore durante il salvataggio dell\'autorizzazione');
                 }
             })
             .catch(error => {
-                WebgreNotifications.remove(loadingId);
+                CoregreNotifications.remove(loadingId);
                 console.error('Error:', error);
-                WebgreNotifications.error('Si è verificato un errore durante il salvataggio dell\'autorizzazione');
+                CoregreNotifications.error('Si è verificato un errore durante il salvataggio dell\'autorizzazione');
             });
     }
 
@@ -1333,12 +1333,12 @@ $files = $files ?? [];
         const checkboxes = document.querySelectorAll('#mancantiModal input[type="checkbox"]:checked');
 
         if (checkboxes.length === 0) {
-            WebgreNotifications.warning('Seleziona almeno un elemento da aggiungere');
+            CoregreNotifications.warning('Seleziona almeno un elemento da aggiungere');
             return;
         }
 
         const ids = Array.from(checkboxes).map(cb => cb.value);
-        const loadingId = WebgreNotifications.loading('Aggiunta mancanti in corso...');
+        const loadingId = CoregreNotifications.loading('Aggiunta mancanti in corso...');
 
         fetch('<?= $this->url('/export/aggiungi_mancanti') ?>', {
             method: 'POST',
@@ -1352,21 +1352,21 @@ $files = $files ?? [];
         })
             .then(response => response.json())
             .then(data => {
-                WebgreNotifications.remove(loadingId);
+                CoregreNotifications.remove(loadingId);
                 if (data.success) {
-                    WebgreNotifications.success(`${ids.length} elemento${ids.length > 1 ? 'i' : ''} aggiunto${ids.length > 1 ? 'i' : ''} con successo!`);
+                    CoregreNotifications.success(`${ids.length} elemento${ids.length > 1 ? 'i' : ''} aggiunto${ids.length > 1 ? 'i' : ''} con successo!`);
                     closeModal('mancantiModal');
                     setTimeout(() => {
                         location.reload();
                     }, 1500);
                 } else {
-                    WebgreNotifications.error(data.message || 'Errore durante l\'aggiunta dei mancanti');
+                    CoregreNotifications.error(data.message || 'Errore durante l\'aggiunta dei mancanti');
                 }
             })
             .catch(error => {
-                WebgreNotifications.remove(loadingId);
+                CoregreNotifications.remove(loadingId);
                 console.error('Error:', error);
-                WebgreNotifications.error('Si è verificato un errore durante l\'aggiunta dei mancanti');
+                CoregreNotifications.error('Si è verificato un errore durante l\'aggiunta dei mancanti');
             });
     }
 
@@ -1385,7 +1385,7 @@ $files = $files ?? [];
 
     function loadDoganaleData(includeSottopiedi = false) {
         const tableBody = document.getElementById('doganaleTableBody');
-        const loadingId = WebgreNotifications.loading('Caricamento dati voci doganali...');
+        const loadingId = CoregreNotifications.loading('Caricamento dati voci doganali...');
 
         fetch('<?= $this->url('/export/get_doganale_data') ?>', {
             method: 'POST',
@@ -1396,7 +1396,7 @@ $files = $files ?? [];
         })
             .then(response => response.json())
             .then(data => {
-                WebgreNotifications.remove(loadingId);
+                CoregreNotifications.remove(loadingId);
                 if (data.success) {
                     let html = '';
                     data.voci.forEach(voce => {
@@ -1418,13 +1418,13 @@ $files = $files ?? [];
                     });
                     tableBody.innerHTML = html;
                 } else {
-                    WebgreNotifications.error(data.message || 'Errore nel caricamento dei dati');
+                    CoregreNotifications.error(data.message || 'Errore nel caricamento dei dati');
                 }
             })
             .catch(error => {
-                WebgreNotifications.remove(loadingId);
+                CoregreNotifications.remove(loadingId);
                 console.error('Error:', error);
-                WebgreNotifications.error('Errore nel caricamento delle voci doganali');
+                CoregreNotifications.error('Errore nel caricamento delle voci doganali');
             });
     }
 
@@ -1440,14 +1440,14 @@ $files = $files ?? [];
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    WebgreNotifications.success('Peso aggiornato!', 1000);
+                    CoregreNotifications.success('Peso aggiornato!', 1000);
                 } else {
-                    WebgreNotifications.error('Errore nell\'aggiornamento del peso');
+                    CoregreNotifications.error('Errore nell\'aggiornamento del peso');
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                WebgreNotifications.error('Errore di connessione');
+                CoregreNotifications.error('Errore di connessione');
             });
     }
 

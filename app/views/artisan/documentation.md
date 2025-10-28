@@ -1,6 +1,6 @@
-# 🔧 WEBGRE Migration & Model System v2.0
+# 🔧 COREGRE Migration & Model System v2.0
 
-Sistema professionale per gestione migrations, schema builder e generazione modelli per WEBGRE Framework.
+Sistema professionale per gestione migrations, schema builder e generazione modelli per COREGRE Framework.
 
 ## 📋 Indice
 
@@ -17,7 +17,7 @@ Sistema professionale per gestione migrations, schema builder e generazione mode
 
 ## 🎯 Panoramica
 
-Il sistema WEBGRE v2.0 introduce un approccio moderno e professionale per la gestione del database, ispirato ai migliori framework come Laravel ma completamente integrato con l'architettura WEBGRE esistente.
+Il sistema COREGRE v2.0 introduce un approccio moderno e professionale per la gestione del database, ispirato ai migliori framework come Laravel ma completamente integrato con l'architettura COREGRE esistente.
 
 ### ✨ Caratteristiche Principali
 
@@ -320,7 +320,7 @@ php artisan model:list
  * User Model
  * Auto-generated from table: users
  *
- * @author WEBGRE Generator
+ * @author COREGRE Generator
  * @created 2025-01-26 10:30:00
  */
 
@@ -589,12 +589,12 @@ php artisan model:generate role_permissions
 
 ### Database Connection
 
-Il sistema usa la configurazione esistente di WEBGRE in `core/config.php`:
+Il sistema usa la configurazione esistente di COREGRE in `core/config.php`:
 
 ```php
 // Assicurati che queste costanti siano definite
 define('DB_HOST', 'localhost');
-define('DB_NAME', 'webgre3');
+define('DB_NAME', 'coregre');
 define('DB_USER', 'root');
 define('DB_PASS', '');
 ```
@@ -813,7 +813,7 @@ Il sistema calcola SHA256 dei file migration per rilevare modifiche post-esecuzi
 #### Ripristino da backup
 ```bash
 # Ripristina backup
-mysql -u root -p webgre3 < database/backups/backup_2025_01_26_103000.sql
+mysql -u root -p coregre < database/backups/backup_2025_01_26_103000.sql
 ```
 
 #### Reset completo
@@ -844,7 +844,7 @@ Per supporto tecnico o domande sul sistema:
 
 ## 🎉 Conclusione
 
-Il sistema WEBGRE Migration & Model v2.0 fornisce un framework robusto e professionale per la gestione del database, mantenendo la semplicità d'uso tipica di WEBGRE.
+Il sistema COREGRE Migration & Model v2.0 fornisce un framework robusto e professionale per la gestione del database, mantenendo la semplicità d'uso tipica di COREGRE.
 
 **Vantaggi chiave:**
 - ✅ **Versionamento Database** - Tracciamento completo modifiche
@@ -852,7 +852,7 @@ Il sistema WEBGRE Migration & Model v2.0 fornisce un framework robusto e profess
 - ✅ **Auto-generation** - Modelli generati automaticamente
 - ✅ **CLI Powerful** - Tool completo da linea di comando
 - ✅ **Backup Safety** - Backup automatici e rollback sicuri
-- ✅ **Integration Ready** - Integrato con l'architettura WEBGRE esistente
+- ✅ **Integration Ready** - Integrato con l'architettura COREGRE esistente
 
 Il sistema è pronto per essere usato in produzione e scala facilmente con la crescita del progetto.
 

@@ -260,7 +260,7 @@
 
         // Validation
         if (!cartellinoValue && !commessaValue) {
-            WebgreNotifications.warning('Inserisci un cartellino o una commessa');
+            CoregreNotifications.warning('Inserisci un cartellino o una commessa');
             return;
         }
 
@@ -295,7 +295,7 @@
                     window.location.href = `<?= $this->url('/quality/add') ?>?cartellino=${encodeURIComponent(cartellino)}`;
                 }
             } else {
-                WebgreNotifications.error('Il cartellino non esiste. Verificare o contattare l\'amministratore.');
+                CoregreNotifications.error('Il cartellino non esiste. Verificare o contattare l\'amministratore.');
             }
         })
         .catch(error => {
@@ -325,7 +325,7 @@
                     window.location.href = `<?= $this->url('/quality/add') ?>?cartellino=${encodeURIComponent(data.cartellino)}`;
                 }
             } else {
-                WebgreNotifications.error('La commessa non esiste. Verificare o contattare l\'amministratore.');
+                CoregreNotifications.error('La commessa non esiste. Verificare o contattare l\'amministratore.');
                 }
             }
         })
@@ -349,8 +349,8 @@
     }
 
     // Registra l'inizializzatore per PJAX
-    if (window.WEBGRE && window.WEBGRE.onPageLoad) {
-        window.WEBGRE.onPageLoad(initQualityCreate);
+    if (window.COREGRE && window.COREGRE.onPageLoad) {
+        window.COREGRE.onPageLoad(initQualityCreate);
     }
 
     // Inizializza anche al primo caricamento

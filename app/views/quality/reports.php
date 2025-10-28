@@ -231,8 +231,8 @@
 
 
     // Registra l'inizializzatore per PJAX
-    if (window.WEBGRE && window.WEBGRE.onPageLoad) {
-        window.WEBGRE.onPageLoad(initReportsPage);
+    if (window.COREGRE && window.COREGRE.onPageLoad) {
+        window.COREGRE.onPageLoad(initReportsPage);
     }
 
     // Inizializza anche al primo caricamento

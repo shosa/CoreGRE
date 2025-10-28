@@ -873,7 +873,7 @@ class QualityController extends BaseController
         // Footer professionale
         $html .= '<div class="footer">';
         $html .= '<p><strong>Report CQ Hermes</strong> - Sistema Controllo Qualit</p>';
-        $html .= '<p>Report generato il ' . date('d/m/Y \a\l\l\e H:i:s') . ' | WEBGRE Sistema Gestionale</p>';
+        $html .= '<p>Report generato il ' . date('d/m/Y \a\l\l\e H:i:s') . ' | COREGRE Sistema Gestionale</p>';
         $html .= '</div>';
 
         // Scrivi HTML nel PDF
@@ -901,7 +901,7 @@ class QualityController extends BaseController
         // Imposta titolo del documento
         $spreadsheet->getProperties()
             ->setTitle($data['title'])
-            ->setCreator('WEBGRE CQ System')
+            ->setCreator('COREGRE CQ System')
             ->setDescription('Report CQ Hermes generato automaticamente');
 
         // Titolo principale

@@ -1,4 +1,4 @@
-# WEBGRE3 - Sistema ERP per la Gestione Aziendale
+# COREGRE - Sistema ERP per la Gestione Aziendale
 
 **Sistema di gestione completo per aziende manifatturiere con architettura MVC personalizzata, API mobile unificate e interfaccia web moderna.**
 
@@ -29,7 +29,7 @@
 
 ## Panoramica del Sistema
 
-WEBGRE3 è un sistema ERP completo progettato per aziende manifatturiere, con focus sul settore calzaturiero. Il sistema gestisce l'intero ciclo produttivo dall'ordine fino alla spedizione, includendo controllo qualità, riparazioni, tracking genealogico dei prodotti e gestione terzisti.
+COREGRE è un sistema ERP completo progettato per aziende manifatturiere, con focus sul settore calzaturiero. Il sistema gestisce l'intero ciclo produttivo dall'ordine fino alla spedizione, includendo controllo qualità, riparazioni, tracking genealogico dei prodotti e gestione terzisti.
 
 ### Caratteristiche Principali
 
@@ -111,7 +111,7 @@ pichesi/tcpdf-php8        - Generazione PDF alternativo
 ## Struttura della Codebase
 
 ```
-webgre3/
+coregre/
 ├── app/
 │   ├── controllers/              # Controller applicativi (26 files)
 │   │   ├── HomeController.php              # Dashboard e homepage
@@ -621,22 +621,22 @@ Sistema di notifiche toast con animazioni fluide.
 
 ```javascript
 // Mostra notifica
-WebgreNotifications.show(message, type, duration);
+CoregreNotifications.show(message, type, duration);
 
 // Shortcuts
-WebgreNotifications.success('Operazione completata!');
-WebgreNotifications.error('Si e verificato un errore');
-WebgreNotifications.warning('Attenzione!');
-WebgreNotifications.info('Informazione');
+CoregreNotifications.success('Operazione completata!');
+CoregreNotifications.error('Si e verificato un errore');
+CoregreNotifications.warning('Attenzione!');
+CoregreNotifications.info('Informazione');
 
 // Notifica senza auto-hide
-const id = WebgreNotifications.loading('Caricamento in corso...');
+const id = CoregreNotifications.loading('Caricamento in corso...');
 
 // Rimuovi notifica specifica
-WebgreNotifications.remove(id);
+CoregreNotifications.remove(id);
 
 // Rimuovi per testo
-WebgreNotifications.removeByText('Caricamento');
+CoregreNotifications.removeByText('Caricamento');
 ```
 
 #### Parametri
@@ -656,9 +656,9 @@ fetch('/api/save', {
 .then(response => response.json())
 .then(data => {
     if (data.status === 'success') {
-        WebgreNotifications.success('Dati salvati con successo');
+        CoregreNotifications.success('Dati salvati con successo');
     } else {
-        WebgreNotifications.error(data.message);
+        CoregreNotifications.error(data.message);
     }
 });
 ```
@@ -674,7 +674,7 @@ Sistema di modali con animazioni e tipologie predefinite.
 ##### Modale di Conferma
 
 ```javascript
-WebgreModals.confirm({
+CoregreModals.confirm({
     title: 'Conferma Operazione',
     message: 'Sei sicuro di voler procedere?',
     confirmText: 'Conferma',
@@ -692,7 +692,7 @@ WebgreModals.confirm({
 ##### Modale di Eliminazione
 
 ```javascript
-WebgreModals.confirmDelete(
+CoregreModals.confirmDelete(
     'Sei sicuro di voler eliminare questo elemento?',
     function() {
         // Esegui eliminazione
@@ -704,7 +704,7 @@ WebgreModals.confirmDelete(
 ##### Modale Alert
 
 ```javascript
-WebgreModals.alert(
+CoregreModals.alert(
     'Titolo',
     'Messaggio informativo',
     function() {
@@ -719,10 +719,10 @@ Per modali definiti nell'HTML:
 
 ```javascript
 // Apri modale
-WebgreModals.openModal('myModalId');
+CoregreModals.openModal('myModalId');
 
 // Chiudi modale
-WebgreModals.closeModal('myModalId', function() {
+CoregreModals.closeModal('myModalId', function() {
     // Callback opzionale
 });
 ```
@@ -738,10 +738,10 @@ WebgreModals.closeModal('myModalId', function() {
 ```html
 <div id="editModal" class="hidden fixed inset-0 z-[99999]" aria-labelledby="modal-title" role="dialog">
     <div class="flex items-center justify-center min-h-screen">
-        <div class="fixed inset-0 bg-gray-500 bg-opacity-75" onclick="WebgreModals.closeModal('editModal')"></div>
+        <div class="fixed inset-0 bg-gray-500 bg-opacity-75" onclick="CoregreModals.closeModal('editModal')"></div>
         <div class="relative bg-white dark:bg-gray-800 rounded-2xl p-6">
             <!-- Contenuto modale -->
-            <button onclick="WebgreModals.closeModal('editModal')">Chiudi</button>
+            <button onclick="CoregreModals.closeModal('editModal')">Chiudi</button>
         </div>
     </div>
 </div>
@@ -776,7 +776,7 @@ Aggiungere una singola entry al crontab del server:
 crontab -e
 
 # Aggiungi questa linea (esegue ogni minuto)
-* * * * * php /path/to/webgre3/cron.php >> /dev/null 2>&1
+* * * * * php /path/to/coregre/cron.php >> /dev/null 2>&1
 ```
 
 Il CronManager gestisce internamente quali job eseguire e quando.
@@ -1438,8 +1438,8 @@ Composer >= 2.0
 
 ```bash
 cd /var/www  # o C:\xampp\htdocs su Windows
-git clone [repository-url] webgre3
-cd webgre3
+git clone [repository-url] coregre
+cd coregre
 ```
 
 #### 2. Installa Dipendenze
@@ -1464,15 +1464,15 @@ Configura `.env`:
 ```env
 # Database
 DB_HOST=localhost
-DB_NAME=webgre3_production
-DB_USER=webgre3_user
+DB_NAME=coregre_production
+DB_USER=coregre_user
 DB_PASS=your_secure_password
 
 # Application
 APP_ENV=production
 APP_DEBUG=false
-APP_NAME="WEBGRE"
-APP_SUBDIRECTORY=""  # vuoto se in document root, "webgre3" se in subdirectory
+APP_NAME="COREGRE"
+APP_SUBDIRECTORY=""  # vuoto se in document root, "coregre" se in subdirectory
 APP_TIMEZONE=Europe/Rome
 
 # Security
@@ -1488,14 +1488,14 @@ ALLOWED_EXTENSIONS=jpg,jpeg,png,gif,pdf,doc,docx,xls,xlsx
 #### 4. Crea Database
 
 ```sql
-CREATE DATABASE webgre3_production
+CREATE DATABASE coregre_production
 CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
-CREATE USER 'webgre3_user'@'localhost'
+CREATE USER 'coregre_user'@'localhost'
 IDENTIFIED BY 'your_secure_password';
 
-GRANT ALL PRIVILEGES ON webgre3_production.*
-TO 'webgre3_user'@'localhost';
+GRANT ALL PRIVILEGES ON coregre_production.*
+TO 'coregre_user'@'localhost';
 
 FLUSH PRIVILEGES;
 ```
@@ -1542,7 +1542,7 @@ Configurazione esempio:
 server {
     listen 80;
     server_name your-domain.com;
-    root /var/www/webgre3/public;
+    root /var/www/coregre/public;
 
     index index.php;
 
@@ -1569,7 +1569,7 @@ server {
 crontab -e
 
 # Aggiungi:
-* * * * * php /var/www/webgre3/cron.php >> /dev/null 2>&1
+* * * * * php /var/www/coregre/cron.php >> /dev/null 2>&1
 ```
 
 #### 9. Primo Accesso
@@ -1770,7 +1770,7 @@ sudo systemctl restart apache2
 ```bash
 # Verifica credenziali in .env
 # Test connessione MySQL
-mysql -u webgre3_user -p -h localhost webgre3_production
+mysql -u coregre_user -p -h localhost coregre_production
 ```
 
 ### Problema: Permessi file
@@ -1793,7 +1793,7 @@ chown -R www-data:www-data storage/
 crontab -l
 
 # Test manuale
-php /path/to/webgre3/cron.php
+php /path/to/coregre/cron.php
 
 # Verifica log
 tail -f storage/logs/cron-$(date +%Y-%m-% d).log
@@ -1836,5 +1836,5 @@ Copyright 2024-2025 Stefano Solidoro
 
 ---
 
-**WEBGRE3** - Sistema supplementare per sistema ERP Calzaturifici
+**COREGRE** - Sistema supplementare per sistema ERP Calzaturifici
 

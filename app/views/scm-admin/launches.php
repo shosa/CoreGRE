@@ -381,8 +381,8 @@
 
 <script>
 function deleteLaunch(id, launchNumber) {
-    if (window.WebgreModals && window.WebgreModals.confirmDelete) {
-        window.WebgreModals.confirmDelete(
+    if (window.CoregreModals && window.CoregreModals.confirmDelete) {
+        window.CoregreModals.confirmDelete(
             `Sei sicuro di voler eliminare il lancio "${launchNumber}"?\n\nQuesta operazione è irreversibile e eliminerà anche tutti gli articoli e i dati di avanzamento associati.`,
             () => {
                 window.location.href = `<?= $this->url('/scm-admin/launches/') ?>${id}/delete`;
@@ -390,7 +390,7 @@ function deleteLaunch(id, launchNumber) {
             1
         );
     } else {
-        // Fallback se WebgreModals non disponibile
+        // Fallback se CoregreModals non disponibile
         if (confirm(`Sei sicuro di voler eliminare il lancio "${launchNumber}"?\n\nQuesta operazione è irreversibile e eliminerà anche tutti gli articoli e i dati di avanzamento associati.`)) {
             window.location.href = `<?= $this->url('/scm-admin/launches/') ?>${id}/delete`;
         }

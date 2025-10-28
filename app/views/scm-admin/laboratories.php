@@ -245,8 +245,8 @@
 function toggleLaboratory(id, activate) {
     const action = activate ? 'attivare' : 'disattivare';
 
-    if (window.WebgreModals && window.WebgreModals.confirm) {
-        window.WebgreModals.confirm({
+    if (window.CoregreModals && window.CoregreModals.confirm) {
+        window.CoregreModals.confirm({
             title: activate ? 'Attiva Laboratorio' : 'Disattiva Laboratorio',
             message: `Sei sicuro di voler ${action} questo laboratorio?`,
             type: activate ? 'info' : 'warning',
@@ -256,8 +256,8 @@ function toggleLaboratory(id, activate) {
             }
         });
     } else {
-        // Fallback usando WebgreModals
-        WebgreModals.confirm({
+        // Fallback usando CoregreModals
+        CoregreModals.confirm({
             message: `Sei sicuro di voler ${action} questo laboratorio?`,
             onConfirm: () => {
                 window.location.href = `<?= $this->url('/scm-admin/laboratories/') ?>${id}/toggle`;

@@ -81,7 +81,7 @@
 </head>
 
 <body class="bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 min-h-screen">
-    <!-- Header - Stile WEBGRE Moderno -->
+    <!-- Header - Stile COREGRE Moderno -->
     <nav class="bg-gradient-to-r from-slate-900 via-blue-900 to-indigo-900 shadow-2xl">
         <div class="max-w-7xl mx-auto px-4">
             <div class="flex justify-between items-center h-20">
@@ -113,7 +113,7 @@
     <!-- Main Content -->
     <div class="max-w-7xl mx-auto px-4 py-8">
 
-        <!-- Lancio Header - Stile WEBGRE Moderno -->
+        <!-- Lancio Header - Stile COREGRE Moderno -->
         <div
             class="relative overflow-hidden bg-gradient-to-br from-white via-blue-50 to-indigo-100 rounded-2xl shadow-2xl border border-white/50 p-8 mb-8">
             <div class="absolute inset-0 bg-gradient-to-br from-white/40 to-transparent"></div>

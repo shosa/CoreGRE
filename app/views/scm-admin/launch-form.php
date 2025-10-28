@@ -457,8 +457,8 @@
 
     // Carica fasi standard
     function loadStandardPhases() {
-        if (window.WebgreModals && window.WebgreModals.confirm) {
-            window.WebgreModals.confirm({
+        if (window.CoregreModals && window.CoregreModals.confirm) {
+            window.CoregreModals.confirm({
                 title: 'Carica Fasi Standard',
                 message: 'Vuoi caricare le fasi standard? Questo sostituirà le fasi attuali.',
                 type: 'warning',
@@ -466,8 +466,8 @@
                 onConfirm: () => loadStandardPhasesConfirmed()
             });
         } else {
-            // Fallback usando WebgreModals
-            WebgreModals.confirm({
+            // Fallback usando CoregreModals
+            CoregreModals.confirm({
                 message: 'Vuoi caricare le fasi standard? Questo sostituirà le fasi attuali.',
                 onConfirm: () => loadStandardPhasesConfirmed()
             });
@@ -503,12 +503,12 @@
 
                     updateCounts();
                 } else {
-                    WebgreNotifications.error('Errore nel caricamento delle fasi standard: ' + (data.error || 'Nessuna fase trovata'));
+                    CoregreNotifications.error('Errore nel caricamento delle fasi standard: ' + (data.error || 'Nessuna fase trovata'));
                 }
             })
             .catch(error => {
                 console.error('Errore nel caricamento fasi standard:', error);
-                WebgreNotifications.error('Errore nel caricamento delle fasi standard');
+                CoregreNotifications.error('Errore nel caricamento delle fasi standard');
             });
     }
 

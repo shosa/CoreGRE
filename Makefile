@@ -1,5 +1,5 @@
 # ============================================================================
-# WEBGRE3 - Makefile per comandi Docker
+# COREGRE - Makefile per comandi Docker
 # ============================================================================
 # Uso: make [comando]
 # Esempio: make up, make logs, make shell
@@ -12,15 +12,15 @@
 
 # Variables
 DOCKER_COMPOSE = docker-compose
-CONTAINER_APP = webgre3-app
-CONTAINER_REDIS = webgre3-redis
+CONTAINER_APP = coregre-app
+CONTAINER_REDIS = coregre-redis
 
 # ============================================================================
 # HELP
 # ============================================================================
 help: ## Mostra questo help
 	@echo "============================================"
-	@echo "WEBGRE3 - Docker Commands"
+	@echo "COREGRE - Docker Commands"
 	@echo "============================================"
 	@echo ""
 	@echo "Comandi disponibili:"
@@ -55,7 +55,7 @@ rebuild: down build up ## Rebuild completo (down + build + up)
 logs: ## Mostra i logs in real-time
 	$(DOCKER_COMPOSE) logs -f
 
-logs-app: ## Logs solo webgre3-app
+logs-app: ## Logs solo coregre-app
 	$(DOCKER_COMPOSE) logs -f $(CONTAINER_APP)
 
 logs-redis: ## Logs solo redis
@@ -70,7 +70,7 @@ top: ## Processi in esecuzione nei container
 # ============================================================================
 # SHELL ACCESS
 # ============================================================================
-shell: ## Entra nella shell del container webgre3-app
+shell: ## Entra nella shell del container coregre-app
 	docker exec -it $(CONTAINER_APP) /bin/sh
 
 bash: shell ## Alias di 'shell'
@@ -165,26 +165,26 @@ phpstan: ## PHPStan static analysis
 # HEALTH & MONITORING
 # ============================================================================
 health: ## Check application health
-	@curl -s http://localhost:$$(grep WEBGRE3_PORT .env | cut -d '=' -f2)/health
+	@curl -s http://localhost:$$(grep COREGRE_PORT .env | cut -d '=' -f2)/health
 	@echo ""
 
 status-fpm: ## PHP-FPM status
-	@curl -s http://localhost:$$(grep WEBGRE3_PORT .env | cut -d '=' -f2)/status
+	@curl -s http://localhost:$$(grep COREGRE_PORT .env | cut -d '=' -f2)/status
 	@echo ""
 
 ping: ## Ping PHP-FPM
-	@curl -s http://localhost:$$(grep WEBGRE3_PORT .env | cut -d '=' -f2)/ping
+	@curl -s http://localhost:$$(grep COREGRE_PORT .env | cut -d '=' -f2)/ping
 	@echo ""
 
 info: ## Container info
 	@echo "============================================"
-	@echo "WEBGRE3 Container Info"
+	@echo "COREGRE Container Info"
 	@echo "============================================"
 	@echo "Status:    $$(docker inspect -f '{{.State.Status}}' $(CONTAINER_APP))"
 	@echo "Uptime:    $$(docker inspect -f '{{.State.StartedAt}}' $(CONTAINER_APP))"
 	@echo "Image:     $$(docker inspect -f '{{.Config.Image}}' $(CONTAINER_APP))"
 	@echo "Network:   $$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.NetworkID}}{{end}}' $(CONTAINER_APP))"
-	@echo "Port:      $$(grep WEBGRE3_PORT .env | cut -d '=' -f2)"
+	@echo "Port:      $$(grep COREGRE_PORT .env | cut -d '=' -f2)"
 	@echo "============================================"
 
 # ============================================================================
@@ -195,7 +195,7 @@ clean: ## Rimuovi container, volumi e network
 	@echo "✓ Containers, volumes, and networks removed"
 
 clean-all: clean ## Rimuovi tutto incluse immagini
-	docker rmi webgre3-app || true
+	docker rmi coregre-app || true
 	@echo "✓ Images removed"
 
 prune: ## Pulisci Docker (attenzione!)
@@ -232,7 +232,7 @@ ports: ## Mostra porte in uso
 	docker port $(CONTAINER_APP)
 
 size: ## Dimensione immagine
-	docker images webgre3-app --format "table {{.Repository}}\t{{.Size}}"
+	docker images coregre-app --format "table {{.Repository}}\t{{.Size}}"
 
 inspect: ## Inspect container
 	docker inspect $(CONTAINER_APP)
@@ -243,8 +243,8 @@ inspect: ## Inspect container
 network-ls: ## Lista network Docker
 	docker network ls
 
-network-inspect: ## Ispeziona network webgre3
-	docker network inspect webgre3-network
+network-inspect: ## Ispeziona network coregre
+	docker network inspect coregre-network
 
 network-core: ## Ispeziona network core-services
 	docker network inspect core-services_default
@@ -255,8 +255,8 @@ network-core: ## Ispeziona network core-services
 backup-volumes: ## Backup di tutti i volumi
 	@echo "Backing up volumes..."
 	@mkdir -p backups/volumes
-	docker run --rm -v webgre3-storage:/data -v $$(pwd)/backups/volumes:/backup alpine tar czf /backup/storage_$$(date +%Y%m%d_%H%M%S).tar.gz /data
-	docker run --rm -v webgre3-uploads:/data -v $$(pwd)/backups/volumes:/backup alpine tar czf /backup/uploads_$$(date +%Y%m%d_%H%M%S).tar.gz /data
+	docker run --rm -v coregre-storage:/data -v $$(pwd)/backups/volumes:/backup alpine tar czf /backup/storage_$$(date +%Y%m%d_%H%M%S).tar.gz /data
+	docker run --rm -v coregre-uploads:/data -v $$(pwd)/backups/volumes:/backup alpine tar czf /backup/uploads_$$(date +%Y%m%d_%H%M%S).tar.gz /data
 	@echo "✓ Volumes backed up to backups/volumes/"
 
 # ============================================================================

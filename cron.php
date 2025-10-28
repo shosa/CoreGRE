@@ -4,10 +4,10 @@
  * File unico da configurare nel cronjob del server
  *
  * Setup webserver cronjob:
- *   * * * * * php /path/to/webgre3/cron.php >> /dev/null 2>&1
+ *   * * * * * php /path/to/coregre/cron.php >> /dev/null 2>&1
  *
  * Oppure con log:
- *   * * * * * php /path/to/webgre3/cron.php >> /path/to/logs/cron.log 2>&1
+ *   * * * * * php /path/to/coregre/cron.php >> /path/to/logs/cron.log 2>&1
  */
 
 // Bootstrap applicazione
@@ -29,7 +29,7 @@ foreach (glob(APP_ROOT . '/app/cron/*.php') as $jobFile) {
 
 // Header output
 echo "╔═══════════════════════════════════════════════════════════╗\n";
-echo "║              WEBGRE3 CRON MANAGER - " . date('Y-m-d H:i:s') . "          ║\n";
+echo "║              COREGRE CRON MANAGER - " . date('Y-m-d H:i:s') . "          ║\n";
 echo "╚═══════════════════════════════════════════════════════════╝\n\n";
 
 try {

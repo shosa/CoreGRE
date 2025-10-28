@@ -1,10 +1,10 @@
 #!/usr/bin/env php
 <?php
 /**
- * WEBGRE Artisan CLI with Eloquent ORM
+ * COREGRE Artisan CLI with Eloquent ORM
  * Simplified Command Line Interface
  *
- * @author WEBGRE Team
+ * @author COREGRE Team
  * @version 3.0 - Eloquent Edition
  */
 
@@ -13,9 +13,9 @@ define('APP_ROOT', __DIR__);
 require_once __DIR__ . '/config/config.php';
 
 /**
- * WEBGRE Artisan Application - Simplified
+ * COREGRE Artisan Application - Simplified
  */
-class WebgreArtisan
+class CoregreArtisan
 {
     private $commands = [
         'db:status' => 'Stato connessione database',
@@ -376,7 +376,7 @@ class {$className} extends BaseModel
 
     private function listCommands()
     {
-        $this->success("WEBGRE Artisan Console");
+        $this->success("COREGRE Artisan Console");
         $this->info("======================");
         $this->info("");
         $this->info("Comandi disponibili:");
@@ -389,7 +389,7 @@ class {$className} extends BaseModel
 
     private function showHelp()
     {
-        $this->info("WEBGRE Artisan Console");
+        $this->info("COREGRE Artisan Console");
         $this->info("Uso: php artisan [comando] [argomenti]");
         $this->info("");
         $this->info("Esegui 'php artisan list' per vedere tutti i comandi disponibili.");
@@ -1752,7 +1752,7 @@ class {$className}
 
 // Run the application
 try {
-    $app = new WebgreArtisan();
+    $app = new CoregreArtisan();
     $app->run($argv);
 } catch (Exception $e) {
     echo "\033[31mError: " . $e->getMessage() . "\033[0m\n";

@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * Permission Model
- * Gestisce i permessi degli utenti nel sistema WEBGRE
+ * Gestisce i permessi degli utenti nel sistema COREGRE
  *
  * @property int $ID
  * @property int $id_utente

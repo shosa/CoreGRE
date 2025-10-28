@@ -398,8 +398,8 @@
         };
 
         // Registra inizializzatore PJAX
-        if (window.WEBGRE && window.WEBGRE.onPageLoad) {
-            window.WEBGRE.onPageLoad(initBarcodeList);
+        if (window.COREGRE && window.COREGRE.onPageLoad) {
+            window.COREGRE.onPageLoad(initBarcodeList);
         }
 
         // Inizializzazione

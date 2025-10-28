@@ -257,7 +257,7 @@ foreach ($widgets as $widget) {
         // Carica attività recenti
         async function loadRecentActivities() {
             try {
-                const response = await fetch(window.WEBGRE.baseUrl + '/api/dashboard/recent-activities');
+                const response = await fetch(window.COREGRE.baseUrl + '/api/dashboard/recent-activities');
                 const activities = await response.json();
 
                 const container = document.getElementById('recent-activities');
@@ -335,7 +335,7 @@ foreach ($widgets as $widget) {
         // Refresh intelligente dei dati senza ricaricare la pagina
         async function refreshStats() {
             try {
-                const response = await fetch(window.WEBGRE.baseUrl + '/api/dashboard/stats');
+                const response = await fetch(window.COREGRE.baseUrl + '/api/dashboard/stats');
                 const newStats = await response.json();
 
                 // Aggiorna i contatori con i nuovi valori
@@ -392,8 +392,8 @@ foreach ($widgets as $widget) {
         }
 
         // Registra l'inizializzatore per PJAX
-        if (window.WEBGRE && window.WEBGRE.onPageLoad) {
-            window.WEBGRE.onPageLoad(initDashboard);
+        if (window.COREGRE && window.COREGRE.onPageLoad) {
+            window.COREGRE.onPageLoad(initDashboard);
         }
 
         // Inizializza anche al primo caricamento
