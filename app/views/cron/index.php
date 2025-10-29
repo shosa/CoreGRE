@@ -372,6 +372,7 @@
 
     function initCronIndex() {
         cleanupEventListeners();
+        cleanupModals();
 
         // Funzioni globali
         window.refreshPage = function() {
@@ -414,6 +415,55 @@
                 if (window.showAlert) {
                     window.showAlert('Errore durante esecuzione job', 'error');
                 }
+            }
+        };
+
+        // Helper per formattare output
+        function formatOutput(output, mode) {
+            if (!output) return 'Nessun output';
+
+            try {
+                const parsed = JSON.parse(output);
+                if (mode === 'beauty') {
+                    return JSON.stringify(parsed, null, 2);
+                }
+            } catch (e) {
+                // Non è JSON valido, ritorna come stringa
+            }
+            return output;
+        }
+
+        window.toggleJsonView = function(mode) {
+            const content = document.getElementById('output-content');
+            const btnRaw = document.getElementById('btn-raw');
+            const btnBeauty = document.getElementById('btn-beauty');
+
+            if (!content) return;
+
+            const currentText = content.textContent;
+
+            if (mode === 'raw') {
+                try {
+                    const parsed = JSON.parse(currentText);
+                    content.textContent = JSON.stringify(parsed);
+                } catch (e) {
+                    // Già in formato raw
+                }
+                btnRaw.classList.remove('bg-gray-200', 'dark:bg-gray-700');
+                btnRaw.classList.add('bg-purple-100', 'dark:bg-purple-900', 'text-purple-700', 'dark:text-purple-300');
+                btnBeauty.classList.remove('bg-purple-100', 'dark:bg-purple-900', 'text-purple-700', 'dark:text-purple-300');
+                btnBeauty.classList.add('bg-gray-200', 'dark:bg-gray-700');
+            } else {
+                try {
+                    const parsed = JSON.parse(currentText);
+                    content.textContent = JSON.stringify(parsed, null, 2);
+                } catch (e) {
+                    // Non è JSON valido
+                }
+                btnBeauty.classList.remove('bg-gray-200', 'dark:bg-gray-700');
+                btnBeauty.classList.add('bg-purple-100', 'dark:bg-purple-900', 'text-purple-700', 'dark:text-purple-300');
+                btnRaw.classList.remove('bg-purple-100', 'dark:bg-purple-900', 'text-purple-700', 'dark:text-purple-300');
+                btnRaw.classList.add('bg-gray-200', 'dark:bg-gray-700');
             }
         };
 
@@ -470,8 +520,14 @@
                                 </div>
                             </div>
                             <div>
-                                <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Output</label>
-                                <pre class="mt-2 p-4 bg-gray-100 dark:bg-gray-900 rounded-lg text-xs overflow-auto max-h-96 font-mono text-gray-900 dark:text-gray-100">${log.output || 'Nessun output'}</pre>
+                                <div class="flex items-center justify-between mb-2">
+                                    <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Output</label>
+                                    <div class="flex items-center space-x-2">
+                                        <button onclick="toggleJsonView('raw')" id="btn-raw" class="px-3 py-1 text-xs font-medium rounded-lg bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 hover:bg-purple-200 dark:hover:bg-purple-800 transition-colors">Raw</button>
+                                        <button onclick="toggleJsonView('beauty')" id="btn-beauty" class="px-3 py-1 text-xs font-medium rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">Beautified</button>
+                                    </div>
+                                </div>
+                                <pre id="output-content" class="mt-2 p-4 bg-gray-100 dark:bg-gray-900 rounded-lg text-xs overflow-auto max-h-96 font-mono text-gray-900 dark:text-gray-100">${formatOutput(log.output, 'raw')}</pre>
                             </div>
                         </div>
                     `;
@@ -539,6 +595,21 @@
             element.removeEventListener(event, handler);
         });
         eventListeners = [];
+    }
+
+    function cleanupModals() {
+        // Chiudi tutti i modali aperti quando la pagina viene ricaricata via PJAX
+        const modals = document.querySelectorAll('[id$="-modal"]');
+        modals.forEach(modal => {
+            modal.classList.add('hidden');
+        });
+        // Rimuovi backdrop se presente
+        const backdrops = document.querySelectorAll('.fixed.inset-0.bg-gray-500');
+        backdrops.forEach(backdrop => {
+            if (backdrop.parentElement && backdrop.parentElement.classList.contains('hidden')) {
+                backdrop.style.display = 'none';
+            }
+        });
     }
 
     // Registrazione PJAX
