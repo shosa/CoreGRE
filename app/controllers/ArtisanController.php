@@ -113,7 +113,6 @@ class ArtisanController extends BaseController
     public function index()
     {
         $this->requireAuth();
-        $this->requirePermission('artisan');
 
         $commands = $this->getAvailableCommands();
 
