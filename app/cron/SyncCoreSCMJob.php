@@ -150,6 +150,11 @@ class SyncCoreSCMJob extends CronJob
             $this->log("Nessun aggiornamento locale da inviare");
         }
 
+        // === STEP 3: DELETE MISSING - Cancella lanci che non esistono più su CoreGre ===
+        $this->log("--- DELETE MISSING FROM CORESCM ---");
+        $deletedCount = $this->deleteOrphanedRecords($pdo);
+        $this->log("Cancellati {$deletedCount} record orfani da CoreSCM");
+
         // Aggiorna timestamp sync
         $newTimestamp = date('Y-m-d H:i:s');
         $this->saveLastSyncTimestamp($newTimestamp);
@@ -163,6 +168,7 @@ class SyncCoreSCMJob extends CronJob
         return [
             'pulled_records' => $pulledRecords,
             'pushed_records' => $pushedRecords,
+            'deleted_records' => ,
             'push_errors' => count($pushErrors),
             'last_sync' => $lastSync,
             'new_sync' => $newTimestamp,
@@ -341,6 +347,30 @@ class SyncCoreSCMJob extends CronJob
     }
 
     /**
+     * Cancella record orfani da CoreSCM (che non esistono più su CoreGre)
+     */
+    private function deleteOrphanedRecords($pdo)
+    {
+        $totalDeleted = 0;
+
+        // Ottieni tutti gli ID dei lanci locali (CoreGre)
+        $stmt = $pdo->query("SELECT id FROM scm_launches");
+        $localIds = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+        // Invia richiesta a CoreSCM per cancellare lanci che NON sono in questa lista
+        $result = $this->apiRequest('delete_missing', 'POST', [
+            'table' => 'scm_launches',
+            'valid_ids' => $localIds
+        ]);
+
+        if ($result['success']) {
+            $totalDeleted += $result['deleted_count'] ?? 0;
+        }
+
+        return $totalDeleted;
+    }
+
+    /**
      * Callback successo
      */
     public function onSuccess($result = null)
@@ -349,6 +379,7 @@ class SyncCoreSCMJob extends CronJob
             $this->log("Riepilogo sync:");
             $this->log("  - Record ricevuti da CoreSCM: {$result['pulled_records']}");
             $this->log("  - Record inviati a CoreSCM: {$result['pushed_records']}");
+            ->log("  - Record cancellati da CoreSCM: {['deleted_records']}");
 
             if ($result['push_errors'] > 0) {
                 $this->log("  - Errori durante push: {$result['push_errors']}", 'warning');
