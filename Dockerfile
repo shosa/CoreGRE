@@ -129,7 +129,7 @@ RUN mkdir -p \
     /var/www/html/storage/uploads \
     /var/www/html/storage/cache/mpdf \
     && chown -R www-data:www-data /var/www/html/storage \
-    && chmod -R 755 /var/www/html/storage \
+    && chmod -R 755 /var/www/html/storage
 
 # Copy PHP configuration
 COPY --chmod=644 docker/php/php.ini /usr/local/etc/php/conf.d/99-coregre.ini
