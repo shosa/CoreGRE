@@ -1,0 +1,4 @@
+# CoreGre Crontab
+# Esegue cron.php ogni minuto - il CronManager interno gestisce gli schedule dei job
+
+* * * * * cd /var/www/html && php cron.php >> /var/www/html/storage/logs/cron-output.log 2>&1

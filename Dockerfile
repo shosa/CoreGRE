@@ -141,6 +141,9 @@ COPY --chmod=644 docker/nginx/default.conf /etc/nginx/http.d/default.conf
 # Copy Supervisor configuration
 COPY --chmod=644 docker/supervisor/supervisord.conf /etc/supervisord.conf
 
+# Copy crontab configuration
+COPY --chmod=644 docker/crontab /etc/crontabs/root
+
 # Copy entrypoint script with proper line endings and permissions
 COPY --chmod=755 docker/entrypoint.sh /usr/local/bin/entrypoint.sh
 # Convert line endings to Unix format (in case of Windows CRLF)
