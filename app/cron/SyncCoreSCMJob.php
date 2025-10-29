@@ -168,7 +168,7 @@ class SyncCoreSCMJob extends CronJob
         return [
             'pulled_records' => $pulledRecords,
             'pushed_records' => $pushedRecords,
-            'deleted_records' => ,
+            'deleted_records' => $deletedCount,
             'push_errors' => count($pushErrors),
             'last_sync' => $lastSync,
             'new_sync' => $newTimestamp,
@@ -379,7 +379,7 @@ class SyncCoreSCMJob extends CronJob
             $this->log("Riepilogo sync:");
             $this->log("  - Record ricevuti da CoreSCM: {$result['pulled_records']}");
             $this->log("  - Record inviati a CoreSCM: {$result['pushed_records']}");
-            ->log("  - Record cancellati da CoreSCM: {['deleted_records']}");
+            $this->log("  - Record cancellati da CoreSCM: {$result["deleted_records"]}");
 
             if ($result['push_errors'] > 0) {
                 $this->log("  - Errori durante push: {$result['push_errors']}", 'warning');
