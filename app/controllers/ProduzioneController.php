@@ -1314,7 +1314,8 @@ class ProduzioneController extends BaseController
                 'margin_top' => 20,
                 'margin_bottom' => 20,
                 'margin_header' => 10,
-                'margin_footer' => 10
+                'margin_footer' => 10,
+                'tempDir' => __DIR__ . '/../../storage/cache/mpdf'
             ]);
 
             // Imposta le proprietà del documento
