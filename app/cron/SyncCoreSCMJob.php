@@ -11,7 +11,7 @@ class SyncCoreSCMJob extends CronJob
     private $syncEnabled;
     private $syncStateFile;
     private $syncTables = [
-        'scm_laboratories',
+        'scm_laboratories',  // Sincronizzato senza campi autenticazione
         'scm_launches',
         'scm_launch_articles',
         'scm_launch_phases',
@@ -57,10 +57,10 @@ class SyncCoreSCMJob extends CronJob
      */
     protected function canRun()
     {
-        // Carica configurazione
-        $this->apiUrl = $_ENV['CORESCM_API_URL'] ?? '';
-        $this->apiSecret = $_ENV['CORESCM_API_SECRET'] ?? '';
-        $this->syncEnabled = filter_var($_ENV['CORESCM_SYNC_ENABLED'] ?? true, FILTER_VALIDATE_BOOLEAN);
+        // Carica configurazione usando Env::get()
+        $this->apiUrl = Env::get('CORESCM_API_URL', '');
+        $this->apiSecret = Env::get('CORESCM_API_SECRET', '');
+        $this->syncEnabled = Env::getBool('CORESCM_SYNC_ENABLED', true);
         $this->syncStateFile = APP_ROOT . '/storage/logs/corescm-sync-state.json';
 
         if (!$this->syncEnabled) {
@@ -81,7 +81,13 @@ class SyncCoreSCMJob extends CronJob
      */
     public function handle()
     {
+        // Carica configurazione (ricarica in caso non fosse stata caricata in canRun)
+        $this->apiUrl = Env::get('CORESCM_API_URL', '');
+        $this->apiSecret = Env::get('CORESCM_API_SECRET', '');
+        $this->syncStateFile = APP_ROOT . '/storage/logs/corescm-sync-state.json';
+
         $this->log("Inizio sincronizzazione CoreSCM...");
+        $this->log("API URL: " . ($this->apiUrl ?: '(vuoto!)'));
 
         // Connessione DB locale
         $pdo = $this->getDatabaseConnection();
@@ -274,7 +280,29 @@ class SyncCoreSCMJob extends CronJob
     private function applyUpdatesToLocal($pdo, $updates)
     {
         foreach ($updates as $table => $records) {
+            // Gestione scm_launches_status: solo UPDATE
+            if ($table === 'scm_launches_status') {
+                foreach ($records as $record) {
+                    foreach ($record as $key => $value) {
+                        if (is_string($value) && preg_match('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/', $value)) {
+                            $record[$key] = date('Y-m-d H:i:s', strtotime($value));
+                        }
+                    }
+                    $sql = "UPDATE scm_launches SET status = ?, blocked_reason = ?, updated_at = ? WHERE id = ?";
+                    $stmt = $pdo->prepare($sql);
+                    $stmt->execute([$record['status'] ?? null, $record['blocked_reason'] ?? null, $record['updated_at'] ?? date('Y-m-d H:i:s'), $record['id']]);
+                }
+                continue;
+            }
+
+            // Gestione normale
             foreach ($records as $record) {
+                foreach ($record as $key => $value) {
+                    if (is_string($value) && preg_match('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/', $value)) {
+                        $record[$key] = date('Y-m-d H:i:s', strtotime($value));
+                    }
+                }
+
                 $columns = array_keys($record);
                 $placeholders = array_fill(0, count($columns), '?');
 
