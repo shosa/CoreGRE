@@ -269,6 +269,7 @@ $router->post('/etichette/create-article', 'Etichette@createArticle');
 $router->post('/database/record/create', 'Database@createRecord');
 $router->post('/database/record/update', 'Database@updateRecord');
 $router->post('/database/record/delete', 'Database@deleteRecord');
+$router->post('/database/delete-record', 'Database@deleteRecord'); // Alias
 $router->get('/database/record/get', 'Database@getRecord');
 
 
