@@ -298,8 +298,13 @@ class SyncCoreSCMJob extends CronJob
             // Gestione normale
             foreach ($records as $record) {
                 foreach ($record as $key => $value) {
+                    // Converti date ISO 8601
                     if (is_string($value) && preg_match('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/', $value)) {
                         $record[$key] = date('Y-m-d H:i:s', strtotime($value));
+                    }
+                    // Converti booleani SOLO per campi che iniziano con "is_"
+                    if (strpos($key, 'is_') === 0) {
+                        $record[$key] = ($value === true || $value === 'true' || $value === '1' || $value === 1) ? 1 : 0;
                     }
                 }
 
