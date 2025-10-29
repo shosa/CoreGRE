@@ -462,22 +462,30 @@
         // Funzione per convertire JSON in tabella HTML
         function jsonToTable(obj, depth = 0) {
             if (typeof obj !== 'object' || obj === null) {
-                return `<span class="text-gray-900 dark:text-gray-100">${escapeHtml(String(obj))}</span>`;
+                return formatValue(obj);
             }
 
             if (Array.isArray(obj)) {
-                if (obj.length === 0) return '<span class="text-gray-500 dark:text-gray-400">[]</span>';
+                if (obj.length === 0) return '<span class="text-gray-500 dark:text-gray-400 italic">array vuoto</span>';
 
-                let html = '<table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">';
+                // Se tutti gli elementi sono primitivi, mostra come lista
+                const allPrimitive = obj.every(item => typeof item !== 'object' || item === null);
+                if (allPrimitive) {
+                    return '<ul class="list-disc list-inside space-y-1">' +
+                           obj.map(item => `<li class="text-gray-900 dark:text-gray-100">${formatValue(item)}</li>`).join('') +
+                           '</ul>';
+                }
+
+                let html = '<table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden mt-2">';
                 html += '<thead class="bg-gray-50 dark:bg-gray-800"><tr>';
-                html += '<th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">#</th>';
-                html += '<th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Value</th>';
+                html += '<th class="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-16">#</th>';
+                html += '<th class="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Value</th>';
                 html += '</tr></thead><tbody class="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">';
 
                 obj.forEach((item, index) => {
                     html += '<tr class="hover:bg-gray-50 dark:hover:bg-gray-800">';
-                    html += `<td class="px-4 py-2 text-sm text-gray-500 dark:text-gray-400">${index}</td>`;
-                    html += `<td class="px-4 py-2 text-sm">${jsonToTable(item, depth + 1)}</td>`;
+                    html += `<td class="px-3 py-2 text-xs text-gray-500 dark:text-gray-400 font-mono">${index}</td>`;
+                    html += `<td class="px-3 py-2 text-sm">${jsonToTable(item, depth + 1)}</td>`;
                     html += '</tr>';
                 });
 
@@ -487,23 +495,62 @@
 
             // Object
             const keys = Object.keys(obj);
-            if (keys.length === 0) return '<span class="text-gray-500 dark:text-gray-400">{}</span>';
+            if (keys.length === 0) return '<span class="text-gray-500 dark:text-gray-400 italic">oggetto vuoto</span>';
 
-            let html = '<table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">';
+            let html = '<table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden' + (depth > 0 ? ' mt-2' : '') + '">';
             html += '<thead class="bg-gray-50 dark:bg-gray-800"><tr>';
-            html += '<th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Key</th>';
-            html += '<th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Value</th>';
+            html += '<th class="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Campo</th>';
+            html += '<th class="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Valore</th>';
             html += '</tr></thead><tbody class="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">';
 
             keys.forEach(key => {
                 html += '<tr class="hover:bg-gray-50 dark:hover:bg-gray-800">';
-                html += `<td class="px-4 py-2 text-sm font-medium text-gray-900 dark:text-white">${escapeHtml(key)}</td>`;
-                html += `<td class="px-4 py-2 text-sm">${jsonToTable(obj[key], depth + 1)}</td>`;
+                html += `<td class="px-3 py-2 text-sm font-semibold text-purple-600 dark:text-purple-400">${formatKey(key)}</td>`;
+                html += `<td class="px-3 py-2 text-sm">${jsonToTable(obj[key], depth + 1)}</td>`;
                 html += '</tr>';
             });
 
             html += '</tbody></table>';
             return html;
+        }
+
+        // Formatta le chiavi rendendole più leggibili
+        function formatKey(key) {
+            // Converte snake_case in Title Case
+            return escapeHtml(key)
+                .split('_')
+                .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                .join(' ');
+        }
+
+        // Formatta i valori primitivi con badge colorati
+        function formatValue(value) {
+            if (value === null || value === undefined) {
+                return '<span class="px-2 py-0.5 text-xs font-medium rounded bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400">null</span>';
+            }
+
+            if (typeof value === 'boolean') {
+                const color = value ? 'green' : 'red';
+                return `<span class="px-2 py-0.5 text-xs font-medium rounded bg-${color}-100 dark:bg-${color}-900/30 text-${color}-700 dark:text-${color}-300">${value ? 'true' : 'false'}</span>`;
+            }
+
+            if (typeof value === 'number') {
+                return `<span class="font-mono text-blue-600 dark:text-blue-400 font-semibold">${value}</span>`;
+            }
+
+            if (typeof value === 'string') {
+                // Se sembra una data
+                if (/^\d{4}-\d{2}-\d{2}/.test(value)) {
+                    return `<span class="font-mono text-sm text-gray-900 dark:text-gray-100"><i class="far fa-calendar mr-1 text-gray-400"></i>${escapeHtml(value)}</span>`;
+                }
+                // Se è un URL
+                if (/^https?:\/\//.test(value)) {
+                    return `<a href="${escapeHtml(value)}" target="_blank" class="text-purple-600 dark:text-purple-400 hover:underline"><i class="fas fa-external-link-alt mr-1"></i>${escapeHtml(value)}</a>`;
+                }
+                return `<span class="text-gray-900 dark:text-gray-100">${escapeHtml(value)}</span>`;
+            }
+
+            return `<span class="text-gray-900 dark:text-gray-100">${escapeHtml(String(value))}</span>`;
         }
 
         function escapeHtml(text) {
@@ -541,6 +588,9 @@
 
                 if (result.success) {
                     const log = result.log;
+                    // Salva l'output originale per il toggle
+                    originalOutput = log.output || 'Nessun output';
+
                     content.innerHTML = `
                         <div class="space-y-4">
                             <div class="grid grid-cols-2 gap-4">

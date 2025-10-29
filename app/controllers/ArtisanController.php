@@ -133,12 +133,12 @@ class ArtisanController extends BaseController
             // Estrai l'array dei comandi con una regex
             if (preg_match('/private \$commands = ([^;]+);/s', $artisanContent, $matches)) {
                 // Esegui il codice PHP dell'array per ottenerlo come variabile
-                $commandsArray = eval("return {$matches[1]};");
+                $commandsArray = @ @eval("return {$matches[1]};");
                 if (is_array($commandsArray)) {
                     return $commandsArray;
                 }
             }
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             // Fallback in caso di errore
             error_log("ArtisanController: Impossibile parsare i comandi da file artisan: " . $e->getMessage());
         }
