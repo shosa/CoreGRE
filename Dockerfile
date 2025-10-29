@@ -7,7 +7,7 @@
 # ============================================================================
 # STAGE 1: Composer Dependencies
 # ============================================================================
-FROM php:8.2-fpm-alpine3.18 AS composer-build
+FROM php:8.3-fpm-alpine3.19 AS composer-build
 
 WORKDIR /app
 
@@ -64,7 +64,7 @@ RUN composer dump-autoload --optimize --classmap-authoritative --no-dev
 # ============================================================================
 # STAGE 2: Production Image
 # ============================================================================
-FROM php:8.2-fpm-alpine3.18
+FROM php:8.3-fpm-alpine3.19
 
 LABEL maintainer="CoreSuite Team"
 LABEL description="CoreGre - ERP System - Production Container"
