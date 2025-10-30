@@ -264,7 +264,9 @@ window.executeCommand = function() {
         headers: {
             'Content-Type': 'application/json',
             'X-Requested-With': 'XMLHttpRequest'
+            'X-CSRF-TOKEN': window.COREGRE ? window.COREGRE.csrfToken : '',
         },
+        credentials: 'same-origin',
         body: JSON.stringify({ command: command })
     })
     .then(response => response.json())
