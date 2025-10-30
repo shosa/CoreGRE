@@ -196,9 +196,8 @@ class ArtisanController extends BaseController
         error_log("PHP Binary: " . $this->phpBinary);
 
         // Esegui il comando e cattura l'output
-        ob_start();
-        passthru($fullCommand . " 2>&1", $exitCode);
-        $output = ob_get_clean();
+        exec($fullCommand . " 2>&1", $outputLines, $exitCode);
+        $output = implode("\n", $outputLines);
 
         // Se il comando fallisce, includi informazioni di debug
         if ($exitCode !== 0) {
