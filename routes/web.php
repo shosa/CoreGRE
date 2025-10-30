@@ -12,6 +12,11 @@ $router->get('/login', 'Auth@showLogin');
 $router->post('/login', 'Auth@processLogin');
 $router->get('/logout', 'Auth@logout');
 
+// Discovery & Health Routes (pubbliche per network scan)
+$router->get('/api/discovery', 'Discovery@discover');
+$router->get('/api/health', 'Discovery@health');
+$router->get('/api/ping', 'Discovery@ping');
+
 // Routes protette (richiedono autenticazione)
 
 // Dashboard
