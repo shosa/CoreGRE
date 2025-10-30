@@ -6,163 +6,19 @@
     <title>CoreGRE API Documentation</title>
     <link rel="stylesheet" type="text/css" href="https://unpkg.com/swagger-ui-dist@5.10.5/swagger-ui.css">
     <style>
-        html {
-            box-sizing: border-box;
-            overflow: -moz-scrollbars-vertical;
-            overflow-y: scroll;
-        }
-
-        *,
-        *:before,
-        *:after {
-            box-sizing: inherit;
-        }
-
         body {
             margin: 0;
             padding: 0;
-            background: #fafafa;
+            background: #f3f4f6;
         }
-
-        .topbar {
-            background-color: #1e3a8a !important;
-        }
-
-        .topbar-wrapper img {
-            content: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 50'%3E%3Ctext x='10' y='35' font-family='Arial' font-size='28' font-weight='bold' fill='white'%3ECoreGRE%3C/text%3E%3C/svg%3E");
-        }
-
-        .swagger-ui .topbar .download-url-wrapper .select-label {
-            color: #fff;
-        }
-
-        .swagger-ui .topbar .download-url-wrapper input[type=text] {
-            border: 2px solid #3b82f6;
-        }
-
-        .swagger-ui .info .title {
-            color: #1e3a8a;
-        }
-
-        .swagger-ui .scheme-container {
-            background: #fff;
-            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
-        }
-
-        /* Custom header */
-        .custom-header {
-            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
-            color: white;
-            padding: 20px;
-            text-align: center;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        }
-
-        .custom-header h1 {
-            margin: 0;
-            font-size: 2em;
-            font-weight: bold;
-        }
-
-        .custom-header p {
-            margin: 10px 0 0 0;
-            font-size: 1.1em;
-            opacity: 0.9;
-        }
-
-        /* Info box */
-        .info-box {
-            background: white;
-            border-left: 4px solid #3b82f6;
-            padding: 15px 20px;
+        #swagger-ui {
             margin: 20px;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
             border-radius: 4px;
-            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
-        }
-
-        .info-box h3 {
-            margin: 0 0 10px 0;
-            color: #1e3a8a;
-        }
-
-        .info-box ul {
-            margin: 5px 0;
-            padding-left: 20px;
-        }
-
-        .info-box li {
-            margin: 5px 0;
-        }
-
-        .info-box code {
-            background: #f1f5f9;
-            padding: 2px 6px;
-            border-radius: 3px;
-            font-family: monospace;
-            color: #dc2626;
-        }
-
-        /* Quick links */
-        .quick-links {
-            background: white;
-            padding: 15px 20px;
-            margin: 20px;
-            border-radius: 4px;
-            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
-        }
-
-        .quick-links h3 {
-            margin: 0 0 15px 0;
-            color: #1e3a8a;
-        }
-
-        .quick-links a {
-            display: inline-block;
-            background: #3b82f6;
-            color: white;
-            padding: 8px 16px;
-            margin: 5px;
-            border-radius: 4px;
-            text-decoration: none;
-            font-weight: 500;
-            transition: background 0.2s;
-        }
-
-        .quick-links a:hover {
-            background: #2563eb;
         }
     </style>
 </head>
-
 <body>
-    <!-- Custom Header -->
-    <div class="custom-header">
-        <h1>CoreGRE API Documentation</h1>
-        <p>Sistema ERP per l'Industria Calzaturiera - API REST v1.0.0</p>
-    </div>
-
-    <!-- Info Box -->
-    <div class="info-box">
-        <h3>Benvenuto nella documentazione API di CoreGRE</h3>
-        <p>Questa documentazione interattiva ti permette di:</p>
-        <ul>
-            <li>Esplorare tutti gli endpoint API disponibili</li>
-            <li>Testare le chiamate API direttamente dal browser</li>
-            <li>Visualizzare schemi di richiesta e risposta</li>
-            <li>Comprendere i parametri richiesti per ogni endpoint</li>
-        </ul>
-        <p><strong>Nota:</strong> Le API mobile utilizzano autenticazione tramite username/password (PIN). Alcune API richiedono header specifici come <code>X-App-Type</code>.</p>
-    </div>
-
-    <!-- Quick Links -->
-    <div class="quick-links">
-        <h3>Collegamenti Rapidi</h3>
-        <a href="#/Mobile%20API">Mobile API</a>
-        <a href="#/Quality%20API">Quality API</a>
-        <a href="#/Riparazioni%20API">Riparazioni API</a>
-        <a href="#/Dashboard">Dashboard API</a>
-        <a href="#/Discovery">Discovery & Health</a>
-    </div>
 
     <!-- Swagger UI Container -->
     <div id="swagger-ui"></div>

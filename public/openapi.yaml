@@ -15,15 +15,15 @@ info:
 
   version: 1.0.0
   contact:
-    name: CoreGRE Support
-    email: support@coregre.local
+    name: Stefano Solidoro
+    email: kishosa@me.com
   license:
     name: Proprietary
 
 servers:
-  - url: http://localhost
+  - url: http://localhost:84
     description: Server di sviluppo locale
-  - url: https://api.coregre.local
+  - url: https://localhost:84
     description: Server di produzione
 
 tags:

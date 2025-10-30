@@ -16,11 +16,11 @@ class ApiDocsController extends BaseController
         error_log("ApiDocsController::index() called");
 
         // Redirect to static file (served by nginx directly)
-        header('Location: /api-docs.html');
-        exit;
+        //header('Location: /api-docs.html');
+        //exit;
 
         // Alternative: serve directly
-        // $html_path = APP_ROOT . '/public/api-docs.html';
+        $html_path = APP_ROOT . '/public/api-docs.html';
 
         if (file_exists($html_path)) {
             header('Content-Type: text/html; charset=UTF-8');
@@ -187,12 +187,6 @@ class ApiDocsController extends BaseController
         ]);
     }
 
-    /**
-     * Redirect da /api-docs.html a /api-docs
-     */
-    public function redirect()
-    {
-        header('Location: ' . BASE_URL . '/api-docs');
-        exit;
-    }
+
+
 }
