@@ -22,6 +22,7 @@ class ArtisanController extends BaseController
      */
     private function detectPhpBinary()
     {
+        try {
         // Controlla prima se c'è un percorso configurato in settings
         $configuredPath = Setting::getValue('php_cli_path');
         if ($configuredPath && is_executable($configuredPath)) {
@@ -108,6 +109,10 @@ class ArtisanController extends BaseController
         }
 
         return $phpPath ?: 'php';
+        } catch (Throwable $e) {
+            error_log("ArtisanController detectPhpBinary error: " . $e->getMessage());
+            return PHP_BINARY ?: 'php';
+        }
     }
 
     public function index()
