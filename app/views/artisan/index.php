@@ -263,7 +263,7 @@ window.executeCommand = function() {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'X-Requested-With': 'XMLHttpRequest'
+            'X-Requested-With': 'XMLHttpRequest',
             'X-CSRF-TOKEN': window.COREGRE ? window.COREGRE.csrfToken : '',
         },
         credentials: 'same-origin',
