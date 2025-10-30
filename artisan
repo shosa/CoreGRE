@@ -130,7 +130,8 @@ class CoregreArtisan
         $phpBinary = $this->getPhpBinary();
 
         // Path composer.phar locale
-        $composerPath = 'composer.phar';
+        $composerPath = APP_ROOT . '/composer.phar';
+       
 
         if (file_exists($composerPath)) {
             // Usa composer.phar locale
@@ -142,11 +143,11 @@ class CoregreArtisan
                 ? '"' . $composerPath . '"'
                 : escapeshellarg($composerPath);
 
-            $command = "{$phpBinary} {$composerPathQuoted} dump-autoload --optimize --classmap-authoritative 2>&1";
+            $command = "{$phpBinary} {$composerPathQuoted} dump-autoload -d /var/www/html --optimize --classmap-authoritative 2>&1";
         } else {
             // Prova composer globale
             $this->info("Usando composer globale...");
-            $command = "composer dump-autoload --optimize --classmap-authoritative 2>&1";
+            $command = "composer dump-autoload -d /var/www/html --optimize --classmap-authoritative 2>&1";
         }
 
         $this->info("Eseguendo: {$command}");
