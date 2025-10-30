@@ -17,6 +17,14 @@ $router->get('/api/discovery', 'Discovery@discover');
 $router->get('/api/health', 'Discovery@health');
 $router->get('/api/ping', 'Discovery@ping');
 
+// API Documentation Routes (pubbliche)
+$router->get('/api-docs', 'ApiDocs@index');
+$router->get('/api-docs.html', 'ApiDocs@redirect');
+$router->get('/api-docs/openapi', 'ApiDocs@openapi');
+$router->get('/api-docs/openapi.json', 'ApiDocs@openapiJson');
+$router->get('/api-docs/discovery', 'ApiDocs@discovery');
+$router->get('/api-docs/stats', 'ApiDocs@stats');
+
 // Routes protette (richiedono autenticazione)
 
 // Dashboard

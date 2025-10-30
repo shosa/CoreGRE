@@ -1,0 +1,1260 @@
+openapi: 3.0.3
+info:
+  title: CoreGRE API Documentation
+  description: |
+    API REST per il sistema ERP CoreGRE - Gestione calzaturiera
+
+    ## Autenticazione
+    Le API mobile utilizzano autenticazione tramite username/password (PIN).
+
+    ## Versioning
+    Versione corrente: 1.0.0
+
+    ## Rate Limiting
+    Nessun rate limiting attualmente implementato.
+
+  version: 1.0.0
+  contact:
+    name: CoreGRE Support
+    email: support@coregre.local
+  license:
+    name: Proprietary
+
+servers:
+  - url: http://localhost
+    description: Server di sviluppo locale
+  - url: https://api.coregre.local
+    description: Server di produzione
+
+tags:
+  - name: Discovery
+    description: Endpoints pubblici per discovery di rete e health check
+  - name: Mobile API
+    description: API unificate per applicazioni mobile (Quality + Repairs)
+  - name: Quality API
+    description: API per controllo qualità (retrocompatibilità)
+  - name: Riparazioni API
+    description: API per riparazioni interne (retrocompatibilità)
+  - name: Operators API
+    description: API per operatori (retrocompatibilità)
+  - name: Dashboard
+    description: API per dashboard e widgets
+  - name: Search
+    description: API per ricerca globale
+
+paths:
+  # ==================== DISCOVERY & HEALTH ====================
+  /api/discovery:
+    get:
+      tags:
+        - Discovery
+      summary: Network discovery
+      description: Endpoint pubblico per discovery di rete
+      responses:
+        '200':
+          description: Informazioni di discovery
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  service:
+                    type: string
+                    example: CoreGRE
+                  version:
+                    type: string
+                    example: 1.0.0
+                  hostname:
+                    type: string
+                    example: COREGRE-SERVER
+
+  /api/health:
+    get:
+      tags:
+        - Discovery
+      summary: Health check
+      description: Verifica stato di salute del sistema
+      responses:
+        '200':
+          description: Sistema operativo
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: healthy
+                  timestamp:
+                    type: string
+                    format: date-time
+                  database:
+                    type: string
+                    example: connected
+
+  /api/ping:
+    get:
+      tags:
+        - Discovery
+      summary: Simple ping
+      description: Endpoint di ping semplice
+      responses:
+        '200':
+          description: Pong response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: pong
+                  timestamp:
+                    type: integer
+                    example: 1735564800
+
+  # ==================== MOBILE API UNIFICATO ====================
+  /api/mobile/login:
+    post:
+      tags:
+        - Mobile API
+      summary: Login unificato per app mobile
+      description: |
+        Endpoint di login centralizzato per tutte le app mobile.
+        Supporta due azioni:
+        - `get_users`: Recupera lista operatori
+        - `login`: Autentica un operatore
+      parameters:
+        - name: X-App-Type
+          in: header
+          description: Tipo di app (quality, repairs)
+          schema:
+            type: string
+            enum: [quality, repairs]
+            default: quality
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - type: object
+                  title: Get Users
+                  properties:
+                    action:
+                      type: string
+                      enum: [get_users]
+                  required:
+                    - action
+                - type: object
+                  title: Login
+                  properties:
+                    action:
+                      type: string
+                      enum: [login]
+                    username:
+                      type: string
+                      example: "OP001"
+                    password:
+                      type: string
+                      example: "1234"
+                    app_type:
+                      type: string
+                      enum: [quality, repairs]
+                      example: quality
+                  required:
+                    - action
+                    - username
+                    - password
+      responses:
+        '200':
+          description: Operazione completata
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: object
+                    title: Users List Response
+                    properties:
+                      status:
+                        type: string
+                        example: success
+                      message:
+                        type: string
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Operator'
+                  - type: object
+                    title: Login Response
+                    properties:
+                      status:
+                        type: string
+                        example: success
+                      message:
+                        type: string
+                      data:
+                        type: object
+                        properties:
+                          id:
+                            type: integer
+                          user:
+                            type: string
+                          full_name:
+                            type: string
+                          reparto:
+                            type: string
+                          app_type:
+                            type: string
+                          permissions:
+                            type: array
+                            items:
+                              type: string
+                          features:
+                            type: array
+                            items:
+                              type: string
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+
+  /api/mobile/profile:
+    get:
+      tags:
+        - Mobile API
+      summary: Ottiene profilo operatore
+      description: Recupera profilo completo e statistiche operatore
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: integer
+          description: ID operatore
+        - name: X-App-Type
+          in: header
+          schema:
+            type: string
+            enum: [quality, repairs]
+            default: quality
+      responses:
+        '200':
+          description: Profilo recuperato
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  message:
+                    type: string
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      user:
+                        type: string
+                      full_name:
+                        type: string
+                      reparto:
+                        type: string
+                      statistiche:
+                        type: object
+                      app_type:
+                        type: string
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /api/mobile/daily-summary:
+    get:
+      tags:
+        - Mobile API
+      summary: Riepilogo giornaliero operatore
+      description: Recupera riepilogo attività giornaliera per operatore
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: integer
+          description: ID operatore
+        - name: data
+          in: query
+          schema:
+            type: string
+            format: date
+            example: "2025-01-15"
+          description: Data (default oggi)
+        - name: X-App-Type
+          in: header
+          schema:
+            type: string
+            enum: [quality, repairs]
+      responses:
+        '200':
+          description: Riepilogo recuperato
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  message:
+                    type: string
+                  data:
+                    type: object
+                    properties:
+                      operatore:
+                        type: object
+                      data:
+                        type: string
+                      app_type:
+                        type: string
+                      summary:
+                        type: object
+
+  /api/mobile/system-data:
+    get:
+      tags:
+        - Mobile API
+      summary: Dati di sistema comuni
+      description: |
+        Recupera dati di sistema (reparti, linee, taglie, ecc.)
+        Supporta filtri per tipo di dati richiesti
+      parameters:
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [all, reparti, linee, taglie, quality, repairs]
+            default: all
+        - name: nu
+          in: query
+          schema:
+            type: string
+          description: ID numerata (richiesto per type=taglie)
+      responses:
+        '200':
+          description: Dati recuperati
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  message:
+                    type: string
+                  data:
+                    type: object
+                    properties:
+                      reparti:
+                        type: array
+                        items:
+                          type: object
+                      linee:
+                        type: array
+                        items:
+                          type: object
+                      taglie:
+                        type: object
+                      reparti_hermes:
+                        type: array
+                        items:
+                          type: object
+                      difetti:
+                        type: array
+                        items:
+                          type: object
+                      laboratori:
+                        type: array
+                        items:
+                          type: object
+                      causali_frequenti:
+                        type: array
+                        items:
+                          type: string
+
+  /api/mobile/check-data:
+    post:
+      tags:
+        - Mobile API
+      summary: Verifica cartellino o commessa
+      description: |
+        Endpoint unificato per verificare esistenza di cartellino o commessa
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                type:
+                  type: string
+                  enum: [cartellino, commessa]
+                  description: Tipo di dato da verificare
+                value:
+                  type: string
+                  description: Valore da cercare
+              required:
+                - type
+                - value
+      responses:
+        '200':
+          description: Verifica completata
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  exists:
+                    type: boolean
+                  message:
+                    type: string
+                  data:
+                    type: object
+                    description: Dettagli cartellino/commessa se trovato
+
+  # ==================== QUALITY API ====================
+  /api/quality/login:
+    post:
+      tags:
+        - Quality API
+      summary: Login Quality (legacy)
+      description: Endpoint di login per app Quality - mantenuto per retrocompatibilità
+      deprecated: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                action:
+                  type: string
+                  enum: [get_users, login]
+                username:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Operazione completata
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  message:
+                    type: string
+                  data:
+                    type: object
+
+  /api/quality/check-cartellino:
+    post:
+      tags:
+        - Quality API
+      summary: Verifica esistenza cartellino
+      description: Controlla se un cartellino esiste nel sistema
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                cartellino:
+                  type: string
+                  example: "24123456"
+              required:
+                - cartellino
+      responses:
+        '200':
+          description: Verifica completata
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  exists:
+                    type: boolean
+                  message:
+                    type: string
+                  data:
+                    type: object
+
+  /api/quality/check-commessa:
+    post:
+      tags:
+        - Quality API
+      summary: Verifica esistenza commessa
+      description: Controlla se una commessa esiste e recupera il cartellino associato
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                commessa:
+                  type: string
+                  example: "COM123"
+              required:
+                - commessa
+      responses:
+        '200':
+          description: Verifica completata
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  exists:
+                    type: boolean
+                  message:
+                    type: string
+                  data:
+                    type: object
+                    properties:
+                      cartellino:
+                        type: string
+
+  /api/quality/cartellino-details:
+    post:
+      tags:
+        - Quality API
+      summary: Dettagli completi cartellino
+      description: Recupera tutte le informazioni di un cartellino per il controllo qualità
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                cartellino:
+                  type: string
+              required:
+                - cartellino
+      responses:
+        '200':
+          description: Dettagli recuperati
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  message:
+                    type: string
+                  data:
+                    type: object
+                    properties:
+                      cartellino_info:
+                        $ref: '#/components/schemas/CartellinoInfo'
+                      linea_info:
+                        type: object
+                      test_info:
+                        type: object
+
+  /api/quality/options:
+    post:
+      tags:
+        - Quality API
+      summary: Opzioni per controllo qualità
+      description: Recupera calzate, reparti e tipi difetti
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                cartellino:
+                  type: string
+                  description: Cartellino per recuperare calzate specifiche
+      responses:
+        '200':
+          description: Opzioni recuperate
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  message:
+                    type: string
+                  data:
+                    type: object
+                    properties:
+                      calzate:
+                        type: array
+                        items:
+                          type: string
+                      reparti:
+                        type: array
+                        items:
+                          type: string
+                      reparti_hermes:
+                        type: array
+                        items:
+                          type: object
+                      difetti:
+                        type: array
+                        items:
+                          type: object
+
+  /api/quality/save-hermes-cq:
+    post:
+      tags:
+        - Quality API
+      summary: Salva controllo qualità Hermes
+      description: Salva un nuovo record di controllo qualità con eventuali eccezioni
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                numero_cartellino:
+                  type: string
+                reparto:
+                  type: string
+                operatore:
+                  type: string
+                tipo_cq:
+                  type: string
+                  enum: [interno, esterno]
+                paia_totali:
+                  type: integer
+                cod_articolo:
+                  type: string
+                articolo:
+                  type: string
+                linea:
+                  type: string
+                note:
+                  type: string
+                user:
+                  type: string
+                eccezioni:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      taglia:
+                        type: string
+                      tipo_difetto:
+                        type: string
+                      note_operatore:
+                        type: string
+                      fotoPath:
+                        type: string
+              required:
+                - numero_cartellino
+                - reparto
+                - operatore
+                - tipo_cq
+                - paia_totali
+                - cod_articolo
+                - articolo
+                - linea
+                - note
+                - user
+      responses:
+        '200':
+          description: Record salvato
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  message:
+                    type: string
+                  data:
+                    type: object
+                    properties:
+                      record_id:
+                        type: integer
+
+  /api/quality/operator-daily-summary:
+    get:
+      tags:
+        - Quality API
+      summary: Riepilogo giornaliero operatore CQ
+      description: Statistiche e lista controlli giornalieri per operatore
+      parameters:
+        - name: operatore
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: data
+          in: query
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Riepilogo recuperato
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  message:
+                    type: string
+                  data:
+                    type: object
+                    properties:
+                      data:
+                        type: string
+                      total_controls:
+                        type: integer
+                      total_exceptions:
+                        type: integer
+                      controls_list:
+                        type: array
+                        items:
+                          type: object
+                      top_defects:
+                        type: array
+                        items:
+                          type: object
+                      top_departments:
+                        type: array
+                        items:
+                          type: object
+
+  /api/quality/record-details:
+    get:
+      tags:
+        - Quality API
+      summary: Dettagli record controllo
+      description: Recupera dettagli completi di un record di controllo qualità
+      parameters:
+        - name: record_id
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Dettagli recuperati
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  message:
+                    type: string
+                  data:
+                    type: object
+                    properties:
+                      record:
+                        type: object
+                      exceptions:
+                        type: array
+                        items:
+                          type: object
+
+  /api/quality/upload-photo:
+    post:
+      tags:
+        - Quality API
+      summary: Upload foto eccezione
+      description: Carica foto di un difetto/eccezione
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                photo:
+                  type: string
+                  format: binary
+                cartellino_id:
+                  type: integer
+                tipo_difetto:
+                  type: string
+                calzata:
+                  type: string
+                note:
+                  type: string
+              required:
+                - photo
+                - cartellino_id
+                - tipo_difetto
+      responses:
+        '200':
+          description: Foto caricata
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  message:
+                    type: string
+                  data:
+                    type: object
+                    properties:
+                      photo_id:
+                        type: integer
+                      filename:
+                        type: string
+                      url:
+                        type: string
+
+  # ==================== RIPARAZIONI INTERNE API ====================
+  /api/riparazioni-interne:
+    get:
+      tags:
+        - Riparazioni API
+      summary: Lista riparazioni
+      description: Recupera lista riparazioni con filtri opzionali
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [complete, incomplete, all]
+        - name: operatore
+          in: query
+          schema:
+            type: string
+        - name: data
+          in: query
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Lista riparazioni
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/InternalRepair'
+    post:
+      tags:
+        - Riparazioni API
+      summary: Crea nuova riparazione
+      description: Crea un nuovo record di riparazione interna
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InternalRepairCreate'
+      responses:
+        '201':
+          description: Riparazione creata
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  message:
+                    type: string
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+
+  /api/riparazioni-interne/show:
+    get:
+      tags:
+        - Riparazioni API
+      summary: Dettagli riparazione
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Dettagli riparazione
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  data:
+                    $ref: '#/components/schemas/InternalRepair'
+
+  /api/riparazioni-interne/update:
+    post:
+      tags:
+        - Riparazioni API
+      summary: Aggiorna riparazione
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - type: object
+                  properties:
+                    id:
+                      type: integer
+                  required:
+                    - id
+                - $ref: '#/components/schemas/InternalRepairCreate'
+      responses:
+        '200':
+          description: Riparazione aggiornata
+
+  /api/riparazioni-interne/complete:
+    post:
+      tags:
+        - Riparazioni API
+      summary: Completa riparazione
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: integer
+              required:
+                - id
+      responses:
+        '200':
+          description: Riparazione completata
+
+  /api/riparazioni-interne/delete:
+    post:
+      tags:
+        - Riparazioni API
+      summary: Elimina riparazione
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: integer
+              required:
+                - id
+      responses:
+        '200':
+          description: Riparazione eliminata
+
+  /api/riparazioni-interne/check-cartellino:
+    post:
+      tags:
+        - Riparazioni API
+      summary: Verifica cartellino per riparazione
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                cartellino:
+                  type: string
+              required:
+                - cartellino
+      responses:
+        '200':
+          description: Verifica completata
+
+  /api/riparazioni-interne/stats:
+    get:
+      tags:
+        - Riparazioni API
+      summary: Statistiche riparazioni
+      parameters:
+        - name: operatore
+          in: query
+          schema:
+            type: string
+        - name: periodo
+          in: query
+          schema:
+            type: string
+            enum: [today, week, month]
+      responses:
+        '200':
+          description: Statistiche recuperate
+
+  # ==================== DASHBOARD API ====================
+  /api/dashboard/preferences:
+    get:
+      tags:
+        - Dashboard
+      summary: Preferenze dashboard
+      responses:
+        '200':
+          description: Preferenze recuperate
+
+  /api/dashboard/stats:
+    get:
+      tags:
+        - Dashboard
+      summary: Statistiche dashboard
+      responses:
+        '200':
+          description: Statistiche recuperate
+
+  /api/dashboard/recent-activities:
+    get:
+      tags:
+        - Dashboard
+      summary: Attività recenti
+      responses:
+        '200':
+          description: Attività recuperate
+
+  /api/widgets/available:
+    get:
+      tags:
+        - Dashboard
+      summary: Widget disponibili
+      responses:
+        '200':
+          description: Lista widget disponibili
+
+  /api/widgets/enabled:
+    get:
+      tags:
+        - Dashboard
+      summary: Widget abilitati
+      responses:
+        '200':
+          description: Lista widget abilitati per utente
+
+  # ==================== SEARCH API ====================
+  /api/search:
+    get:
+      tags:
+        - Search
+      summary: Ricerca globale
+      description: Ricerca full-text nel sistema
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Query di ricerca
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [all, cartellini, commesse, articoli, operatori]
+      responses:
+        '200':
+          description: Risultati ricerca
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  results:
+                    type: array
+                    items:
+                      type: object
+
+# ==================== COMPONENTS ====================
+components:
+  schemas:
+    Operator:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        user:
+          type: string
+          example: "OP001"
+        full_name:
+          type: string
+          example: "Mario Rossi"
+        reparto:
+          type: string
+          example: "PROD"
+
+    CartellinoInfo:
+      type: object
+      properties:
+        cartellino:
+          type: string
+          example: "24123456"
+        commessa:
+          type: string
+          example: "COM123"
+        codice_articolo:
+          type: string
+          example: "ART001"
+        descrizione_articolo:
+          type: string
+          example: "Scarpa sportiva"
+        cliente:
+          type: string
+          example: "Cliente SPA"
+        paia:
+          type: integer
+          example: 100
+
+    InternalRepair:
+      type: object
+      properties:
+        ID:
+          type: integer
+        CARTELLINO:
+          type: string
+        COMMESSA:
+          type: string
+        CAUSALE:
+          type: string
+        OPERATORE:
+          type: string
+        REPARTO:
+          type: string
+        LABORATORIO:
+          type: integer
+        DATA:
+          type: string
+        COMPLETA:
+          type: integer
+          enum: [0, 1]
+        P01:
+          type: integer
+        P02:
+          type: integer
+        # ... P03-P20
+        NOTE:
+          type: string
+
+    InternalRepairCreate:
+      type: object
+      properties:
+        cartellino:
+          type: string
+        commessa:
+          type: string
+        causale:
+          type: string
+        operatore:
+          type: string
+        reparto:
+          type: string
+        laboratorio:
+          type: integer
+        data:
+          type: string
+          format: date
+        taglie:
+          type: object
+          description: Oggetto con P01-P20 e quantità
+        note:
+          type: string
+      required:
+        - cartellino
+        - operatore
+        - reparto
+
+    Error:
+      type: object
+      properties:
+        status:
+          type: string
+          example: error
+        message:
+          type: string
+          example: Si è verificato un errore
+        code:
+          type: string
+          example: ERR_001
+
+  responses:
+    UnauthorizedError:
+      description: Credenziali non valide
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    NotFoundError:
+      description: Risorsa non trovata
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    MethodNotAllowed:
+      description: Metodo HTTP non consentito
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    ValidationError:
+      description: Errore di validazione
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/Error'
+              - type: object
+                properties:
+                  errors:
+                    type: object
+                    description: Dettagli errori di validazione
+
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: API Key per autenticazione (futuro)
+
+# Security applicata globalmente (attualmente non implementata)
+# security:
+#   - ApiKeyAuth: []

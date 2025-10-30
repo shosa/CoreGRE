@@ -5,7 +5,7 @@
  */
 
 // Definisce la costante APP_ROOT per prevenire accessi diretti ai file
-define('APP_ROOT', __DIR__);
+define('APP_ROOT', dirname(__DIR__));
 
 // Include la configurazione principale
 require_once APP_ROOT . '/config/config.php';
