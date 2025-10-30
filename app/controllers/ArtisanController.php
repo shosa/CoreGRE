@@ -158,6 +158,7 @@ class ArtisanController extends BaseController
 
     public function execute()
     {
+        try {
         $input = null;
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             $this->json(['success' => false, 'message' => 'Method Not Allowed'], 405);
@@ -214,5 +215,11 @@ class ArtisanController extends BaseController
             'command' => $command,
             'exit_code' => $exitCode
         ]);
+        } catch (Throwable $e) {
+            error_log("ArtisanController execute error: " . $e->getMessage());
+            error_log("Stack trace: " . $e->getTraceAsString());
+            $this->json(['success' => false, 'message' => 'Errore interno: ' . $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            return;
+        }
     }
 }
