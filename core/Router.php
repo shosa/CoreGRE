@@ -251,6 +251,8 @@ class Router
     private function show404()
     {
         http_response_code(404);
+        // Log dettagliato per diagnosi 404 lato applicazione
+        error_log('[Router] 404 Not Found method=' . ($this->requestMethod ?? '-') . ' uri=' . ($this->requestUri ?? '-') );
         if (class_exists('ErrorController')) {
             $controller = new ErrorController();
             if (method_exists($controller, 'notFound')) {
