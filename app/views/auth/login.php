@@ -1,7 +1,7 @@
 <div>
     <!-- Logo per mobile -->
     <div class="lg:hidden text-center mb-8">
-        <img class="h-12 mx-auto mb-4" src="<?= $this->url('/public/assets/logo.png') ?>" alt="COREGRE">
+        <img class="h-12 mx-auto mb-4" src="<?= $this->url('assets/logo.png') ?>" alt="COREGRE">
         <h2 class="text-2xl font-bold text-gray-900"><?= APP_NAME ?></h2>
     </div>
 

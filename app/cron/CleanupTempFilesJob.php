@@ -9,7 +9,7 @@ class CleanupTempFilesJob extends CronJob
     private $daysOld = 7;
     private $tempDirs = [
         '/storage/tmp',
-        '/public/uploads/temp',
+        'uploads/temp',
         '/storage/cache/old'
     ];
 

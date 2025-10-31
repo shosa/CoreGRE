@@ -186,7 +186,7 @@
     // Carica DYMO Framework solo se non è già presente
     if (typeof dymo === 'undefined') {
         const script = document.createElement('script');
-        script.src = '<?= $this->url('/public/js/dymo.js') ?>';
+        script.src = '<?= $this->url('js/dymo.js') ?>';
         script.onload = function() {
             console.log('DYMO Framework caricato');
         };
@@ -343,7 +343,7 @@
 
         function loadLabelTemplate() {
             // Carica template XML etichetta DYMO da file esterno
-            fetch('<?= $this->url('/public/templates/dymo-label-template.xml') ?>')
+            fetch('<?= $this->url('templates/dymo-label-template.xml') ?>')
                 .then(response => {
                     if (!response.ok) {
                         throw new Error('Errore nel caricamento del template XML');

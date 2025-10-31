@@ -15,13 +15,13 @@
         href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap"
         rel="stylesheet">
 
-    <link rel="stylesheet" href="<?= $this->url('/public/css/app.css') ?>">
+    <link rel="stylesheet" href="<?= $this->url('css/app.css') ?>">
 
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="<?= $this->url('/public/assets/favicon.ico') ?>">
+    <link rel="icon" type="image/x-icon" href="<?= $this->url('assets/favicon.ico') ?>">
 </head>
 
 <body class="h-full">
@@ -43,7 +43,7 @@
                 <div class="absolute inset-0 flex items-center justify-center p-12">
                     <div class="text-center text-white">
                         <div class="mb-8">
-                            <img class="h-16 w-16 mx-auto mb-4" src="<?= $this->url('/public/assets/logo-white.png') ?>"
+                            <img class="h-16 w-16 mx-auto mb-4" src="<?= $this->url('assets/logo-white.png') ?>"
                                 alt="COREGRE">
                             <h1 class="text-4xl font-bold mb-2"><?= APP_NAME ?></h1>
                         </div>

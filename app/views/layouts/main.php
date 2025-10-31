@@ -13,7 +13,7 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap"
         rel="stylesheet">
-    <link href="<?= $this->url('/public/css/app.css') ?>" rel="stylesheet">
+    <link href="<?= $this->url('css/app.css') ?>" rel="stylesheet">
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -27,7 +27,7 @@
 
 
     <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="<?= $this->url('/public/assets/favicon.ico') ?>">
+    <link rel="icon" type="image/x-icon" href="<?= $this->url('assets/favicon.ico') ?>">
 
     <!-- CSRF Token -->
     <meta name="csrf-token" content="<?= $this->generateCsrfToken() ?>">
@@ -144,7 +144,7 @@
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div class="flex justify-between items-center py-4">
                         <div class="flex items-center">
-                            <img class="h-8 w-8" src="<?= $this->url('/public/assets/logo.png') ?>" alt="COREGRE">
+                            <img class="h-8 w-8" src="<?= $this->url('assets/logo.png') ?>" alt="COREGRE">
                             <span class="ml-2 text-xl font-semibold text-gray-900 dark:text-white"><?= APP_NAME ?></span>
                         </div>
 

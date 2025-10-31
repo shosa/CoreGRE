@@ -20,7 +20,7 @@ class ApiDocsController extends BaseController
         //exit;
 
         // Alternative: serve directly
-        $html_path = APP_ROOT . '/public/api-docs.html';
+        $html_path = APP_ROOT . 'api-docs.html';
 
         if (file_exists($html_path)) {
             header('Content-Type: text/html; charset=UTF-8');
@@ -39,7 +39,7 @@ class ApiDocsController extends BaseController
      */
     public function openapi()
     {
-        $yaml_path = APP_ROOT . '/public/openapi.yaml';
+        $yaml_path = APP_ROOT . 'openapi.yaml';
 
         if (file_exists($yaml_path)) {
             header('Content-Type: application/x-yaml; charset=UTF-8');
@@ -59,7 +59,7 @@ class ApiDocsController extends BaseController
      */
     public function openapiJson()
     {
-        $yaml_path = APP_ROOT . '/public/openapi.yaml';
+        $yaml_path = APP_ROOT . 'openapi.yaml';
 
         if (!file_exists($yaml_path)) {
             $this->json(['error' => 'File OpenAPI non trovato'], 404);
