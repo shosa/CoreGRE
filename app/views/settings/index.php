@@ -487,5 +487,5 @@
 
 <script>
 // Include inline JavaScript from settings-tabs.js
-<?php include APP_ROOT . 'js/settings-tabs.js'; ?>
+<?php include APP_ROOT . '/public/js/settings-tabs.js'; ?>
 </script>
