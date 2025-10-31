@@ -16,10 +16,13 @@ class Laboratory extends BaseModel
     const UPDATED_AT = null;
 
     protected $fillable = [
-            'Nome',
-        ];
+        'Nome',
+    ];
 
-    protected $casts = [];
+    protected $casts = [
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime'
+    ];
 
     // TODO: Add relationships here
 }

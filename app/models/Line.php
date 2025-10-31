@@ -13,14 +13,17 @@ class Line extends BaseModel
     protected $table = 'rip_linee';
     protected $primaryKey = 'ID';
 
-    const UPDATED_AT = null;
+   
 
     protected $fillable = [
-            'sigla',
-            'descrizione',
-        ];
+        'sigla',
+        'descrizione',
+    ];
 
-    protected $casts = [];
+    protected $casts = [
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime'
+    ];
 
     // TODO: Add relationships here
 }

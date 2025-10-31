@@ -13,16 +13,18 @@ class Department extends BaseModel
     protected $table = 'rip_reparti';
     protected $primaryKey = 'ID';
 
-    const UPDATED_AT = null;
+   
 
     protected $fillable = [
-            'Nome',
-        ];
+        'Nome',
+    ];
 
     protected $casts = [
 
         'ID' => 'integer',
-        
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime'
+
 
     ];
 
