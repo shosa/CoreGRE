@@ -792,7 +792,7 @@ class ExportController extends BaseController
 
             // Genera una pagina per ogni collo
             for ($i = 1; $i <= $n_colli; $i++) {
-                $logoPath = APP_ROOT . 'assets/small_logo.png';
+                $logoPath = APP_ROOT . '/public/assets/small_logo.png';
                 $logoSrc = file_exists($logoPath) ? $logoPath : '';
 
                 $html = '
