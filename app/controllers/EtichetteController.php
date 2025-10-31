@@ -300,7 +300,7 @@ class EtichetteController extends BaseController
         // Carica gli script DYMO se non già presenti
         if (!window.dymo) {
             const dymoScript = document.createElement("script");
-            dymoScript.src = "' . $this->url('/public/js/dymo.js') . '";
+            dymoScript.src = "' . $this->url('/js/dymo.js') . '";
             dymoScript.charset = "UTF-8";
             document.head.appendChild(dymoScript);
         }

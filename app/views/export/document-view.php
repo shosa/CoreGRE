@@ -112,7 +112,7 @@ function separateArticlesByVoceDoganale($articoli)
                         <tr>
                             <td>
                                 <div class="text-left">
-                                    <img src="<?= $this->url('/public/assets/top_logo.jpg') ?>" alt="Logo" style="max-width: 400px;">
+                                    <img src="<?= $this->url('/assets/top_logo.jpg') ?>" alt="Logo" style="max-width: 400px;">
                                 </div>
                             </td>
                             <td>
