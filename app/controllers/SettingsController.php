@@ -135,7 +135,15 @@ class SettingsController extends BaseController
      */
     public function uploadXlsx()
     {
+        // Debug logging to confirm route is reached inside container
+        error_log('[SettingsController::uploadXlsx] HIT ' . (
+            ($_SERVER['REQUEST_METHOD'] ?? 'UNKNOWN') . ' ' . ($_SERVER['REQUEST_URI'] ?? '') .
+            ' CT=' . ($_SERVER['CONTENT_TYPE'] ?? '-') . ' CL=' . ($_SERVER['CONTENT_LENGTH'] ?? '-') .
+            ' FILES=' . (isset($_FILES) && is_array($_FILES) ? implode(',', array_keys($_FILES)) : 'none')
+        ));
+
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            error_log('[SettingsController::uploadXlsx] Wrong method: ' . ($_SERVER['REQUEST_METHOD'] ?? 'UNKNOWN'));
             http_response_code(405);
             echo json_encode(['error' => 'Method not allowed']);
             return;
@@ -143,6 +151,7 @@ class SettingsController extends BaseController
 
         try {
             if (!isset($_FILES['xlsx_file'])) {
+                error_log('[SettingsController::uploadXlsx] Missing file field xlsx_file. Available keys: ' . (isset($_FILES) && is_array($_FILES) ? implode(',', array_keys($_FILES)) : 'none'));
                 throw new Exception('Nessun file selezionato');
             }
 
