@@ -486,6 +486,9 @@
 </div>
 
 <script>
+// Definisci il base URL delle impostazioni per generare endpoint corretti
+window.SETTINGS_BASE_URL = '<?= $this->url('/settings') ?>';
+
 // Include inline JavaScript from settings-tabs.js
 <?php include APP_ROOT . '/public/js/settings-tabs.js'; ?>
 </script>

@@ -4,6 +4,14 @@
 (function() {
     'use strict';
 
+    // Calcola il base URL della sezione impostazioni, robusto a PJAX/subdirectory
+    function getSettingsBaseUrl() {
+        if (window.SETTINGS_BASE_URL) {
+            return window.SETTINGS_BASE_URL.replace(/\/$/, '');
+        }
+        return window.location.pathname.replace(/\/$/, '');
+    }
+
     // Tab switching function
     window.switchTab = function(tabName) {
         // Hide all tab contents
@@ -83,7 +91,7 @@
 
     // Save general settings
     function saveGeneralSettings(formData, section) {
-        const baseUrl = window.location.pathname.replace(/\/$/, '');
+        const baseUrl = getSettingsBaseUrl();
 
         fetch(`${baseUrl}/save`, {
             method: 'POST',
@@ -105,7 +113,7 @@
 
     // Load email settings
     function loadEmailSettings() {
-        const baseUrl = window.location.pathname.replace(/\/$/, '');
+        const baseUrl = getSettingsBaseUrl();
 
         fetch(`${baseUrl}/load-section`, {
             method: 'POST',
@@ -137,7 +145,7 @@
         const container = document.getElementById('tables-content');
         if (!container) return;
 
-        const baseUrl = window.location.pathname.replace(/\/$/, '');
+        const baseUrl = getSettingsBaseUrl();
 
         fetch(`${baseUrl}/load-section`, {
             method: 'POST',
@@ -413,7 +421,7 @@
     };
 
     function manageCrudOperation(type, action, data) {
-        const baseUrl = window.location.pathname.replace(/\/$/, '');
+        const baseUrl = getSettingsBaseUrl();
         const formData = new FormData();
         formData.append('action', action);
 
@@ -554,7 +562,7 @@
     }
 
     function handleUploadMain(file) {
-        const baseUrl = window.location.pathname.replace(/\/$/, '');
+        const baseUrl = getSettingsBaseUrl();
         const progressDiv = document.getElementById('upload-progress-main');
         const uploadBtn = document.getElementById('upload-btn-main');
         const uploadIcon = document.getElementById('upload-icon-main');
