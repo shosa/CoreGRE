@@ -778,7 +778,9 @@ class ExportController extends BaseController
                 'margin_right' => 10,
                 'margin_top' => 10,
                 'margin_bottom' => 10,
-                'default_font' => 'dejavusans'
+                'default_font' => 'dejavusans',
+                // Forza directory temporanea scrivibile nel container
+                'tempDir' => APP_ROOT . '/storage/cache/mpdf'
             ]);
 
             $n_colli = (int) $piede->n_colli;
