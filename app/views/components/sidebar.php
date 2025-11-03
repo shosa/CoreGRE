@@ -385,15 +385,15 @@
                             <li>
                                 <a href="<?= $this->url('/inwork-admin') ?>" class="sidebar-item flex items-center gap-3 rounded-xl px-4
                                 py-3 font-medium text-gray-700 transition-all duration-200 hover:bg-gradient-to-r
-                                hover:from-purple-50 hover:to-indigo-100 hover:text-purple-600 dark:text-gray-300
-                                dark:hover:from-purple-900/20 dark:hover:to-indigo-800/20 dark:hover:text-purple-400 shadow-sm
+                                hover:from-cyan-50 hover:to-cyan-100 hover:text-gray-800 dark:text-gray-300
+                                dark:hover:from-gray-800/50 dark:hover:to-gray-700/50 dark:hover:text-gray-200 shadow-sm
                                 hover:shadow-lg hover:-translate-y-0.5 group">
                                     <div
                                         class="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-r
                                     from-purple-500 to-indigo-600 shadow-md group-hover:shadow-lg transition-all duration-200">
                                         <i class="fas fa-mobile-alt text-sm text-white"></i>
                                     </div>
-                                    <span class="sidebar-text">InWork Mobile</span>
+                                    <span class="sidebar-text">InWork</span>
                                 </a>
                             </li>
                         <?php endif; ?>
