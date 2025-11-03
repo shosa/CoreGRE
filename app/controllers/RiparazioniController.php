@@ -18,6 +18,55 @@ use App\Models\Line;
 class RiparazioniController extends BaseController
 {
     /**
+     * Dashboard Riparazioni
+     */
+    public function dashboard()
+    {
+        $this->requireAuth();
+        $this->requirePermission('riparazioni');
+
+        try {
+            // Statistiche generali
+            $stats = [
+                'totalRepairs' => Repair::count(),
+                'openRepairs' => Repair::pending()->count(),
+                'completedRepairs' => Repair::completed()->count(),
+                'highUrgency' => Repair::byUrgency('ALTA')->count(),
+                'mediumUrgency' => Repair::byUrgency('MEDIA')->count(),
+                'lowUrgency' => Repair::byUrgency('BASSA')->count(),
+            ];
+
+            // Ultime riparazioni (5 più recenti)
+            $recentRepairs = Repair::orderByDesc('DATA')
+                ->orderByDesc('IDRIP')
+                ->limit(5)
+                ->get();
+
+            // Riparazioni per reparto (top 5)
+            $repairsByDepartment = Repair::selectRaw('REPARTO, COUNT(*) as total')
+                ->where('COMPLETA', 0)
+                ->groupBy('REPARTO')
+                ->orderByDesc('total')
+                ->limit(5)
+                ->get();
+
+            $data = [
+                'pageTitle' => 'Dashboard Riparazioni - ' . APP_NAME,
+                'stats' => $stats,
+                'recentRepairs' => $recentRepairs,
+                'repairsByDepartment' => $repairsByDepartment
+            ];
+
+            $this->render('riparazioni.dashboard', $data);
+
+        } catch (Exception $e) {
+            error_log("Errore dashboard riparazioni: " . $e->getMessage());
+            $_SESSION['alert_error'] = 'Errore durante il caricamento della dashboard.';
+            $this->redirect($this->url('/'));
+        }
+    }
+
+    /**
      * Lista riparazioni
      */
     public function index()

@@ -37,7 +37,15 @@
         <li>
             <div class="flex items-center">
                 <i class="fas fa-chevron-right text-gray-400 mx-2"></i>
-                <span class="text-gray-700 dark:text-gray-300">Riparazioni</span>
+                <a href="<?= $this->url('/riparazioni') ?>" class="hover:text-gray-700 dark:hover:text-gray-300">
+                    Riparazioni
+                </a>
+            </div>
+        </li>
+        <li>
+            <div class="flex items-center">
+                <i class="fas fa-chevron-right text-gray-400 mx-2"></i>
+                <span class="text-gray-700 dark:text-gray-300">Lista</span>
             </div>
         </li>
     </ol>

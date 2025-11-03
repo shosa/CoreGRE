@@ -49,7 +49,8 @@ $router->get('/api/dashboard/recent-activities', 'Home@getRecentActivities');
 $router->get('/api/dashboard/stats', 'Home@getStats');
 
 // Routes per le riparazioni
-$router->get('/riparazioni', 'Riparazioni@index');
+$router->get('/riparazioni', 'Riparazioni@dashboard');
+$router->get('/riparazioni/list', 'Riparazioni@index');
 $router->get('/riparazioni/create', 'Riparazioni@create');
 $router->get('/riparazioni/create-step2', 'Riparazioni@createStep2');
 $router->post('/riparazioni/store', 'Riparazioni@store');
