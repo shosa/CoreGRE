@@ -390,7 +390,7 @@
                                 hover:shadow-lg hover:-translate-y-0.5 group">
                                     <div
                                         class="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-r
-                                    from-purple-500 to-indigo-600 shadow-md group-hover:shadow-lg transition-all duration-200">
+                                    from-cyan-500 to-cyan-600 shadow-md group-hover:shadow-lg transition-all duration-200">
                                         <i class="fas fa-mobile-alt text-sm text-white"></i>
                                     </div>
                                     <span class="sidebar-text">InWork</span>
