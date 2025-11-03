@@ -75,46 +75,54 @@
     function cleanupSettingsPage() {
         isInitialized = false;
         window.droppedFileMain = null;
+
+        // Abort tutti gli event listener
+        if (window.settingsFormController) {
+            window.settingsFormController.abort();
+            window.settingsFormController = null;
+        }
+        if (window.xlsxUploadController) {
+            window.xlsxUploadController.abort();
+            window.xlsxUploadController = null;
+        }
+
         console.log('[Settings] Cleanup complete');
     }
 
     // Form handlers
     function setupFormHandlers() {
+        // Usa AbortController per gestire i listener
+        if (window.settingsFormController) {
+            window.settingsFormController.abort();
+        }
+        window.settingsFormController = new AbortController();
+        const signal = window.settingsFormController.signal;
+
         // Sistema form
         const sistemaForm = document.getElementById('sistema-settings-form');
         if (sistemaForm) {
-            // Rimuovi handler precedenti (se esistenti) clonando il form
-            const newSistemaForm = sistemaForm.cloneNode(true);
-            sistemaForm.parentNode.replaceChild(newSistemaForm, sistemaForm);
-
-            newSistemaForm.addEventListener('submit', function(e) {
+            sistemaForm.addEventListener('submit', function(e) {
                 e.preventDefault();
                 saveGeneralSettings(new FormData(this), 'sistema');
-            });
+            }, { signal });
         }
 
         // Notifiche form
         const notificheForm = document.getElementById('notifiche-settings-form');
         if (notificheForm) {
-            const newNotificheForm = notificheForm.cloneNode(true);
-            notificheForm.parentNode.replaceChild(newNotificheForm, notificheForm);
-
-            newNotificheForm.addEventListener('submit', function(e) {
+            notificheForm.addEventListener('submit', function(e) {
                 e.preventDefault();
                 saveGeneralSettings(new FormData(this), 'notifiche');
-            });
+            }, { signal });
         }
 
         // Email form
         const emailForm = document.getElementById('email-settings-form');
         if (emailForm) {
-            const newEmailForm = emailForm.cloneNode(true);
-            emailForm.parentNode.replaceChild(newEmailForm, emailForm);
-
-            newEmailForm.addEventListener('submit', function(e) {
+            emailForm.addEventListener('submit', function(e) {
                 e.preventDefault();
                 saveGeneralSettings(new FormData(this), 'email');
-            });
+            }, { signal });
         }
     }
 
@@ -502,75 +510,74 @@
         const fileInput = document.getElementById('xlsx-file-input-main');
         const form = document.getElementById('xlsx-upload-form-main');
         const dropZone = document.getElementById('drop-zone-main');
-        const dragOverState = document.getElementById('drag-over-state-main');
-        const uploadState = document.getElementById('upload-state-main');
 
         if (!fileInput || !form || !dropZone) return;
 
-        // Clona elementi per rimuovere event listener duplicati
-        const newDropZone = dropZone.cloneNode(true);
-        dropZone.parentNode.replaceChild(newDropZone, dropZone);
+        // IMPORTANTE: Il dropZone e il form/fileInput sono elementi separati nel DOM
+        // Non clonare, ma rimuovere e ri-aggiungere gli event listener usando AbortController
 
-        const newForm = form.cloneNode(true);
-        form.parentNode.replaceChild(newForm, form);
+        // Crea un nuovo AbortController per poter rimuovere tutti gli listener facilmente
+        if (window.xlsxUploadController) {
+            window.xlsxUploadController.abort();
+        }
+        window.xlsxUploadController = new AbortController();
+        const signal = window.xlsxUploadController.signal;
 
-        const newFileInput = newForm.querySelector('#xlsx-file-input-main');
+        // Riferimenti agli stati
+        const dragOverState = document.getElementById('drag-over-state-main');
+        const uploadState = document.getElementById('upload-state-main');
 
-        newDropZone.addEventListener('click', () => newFileInput.click());
-
-        // Ri-ottieni i riferimenti agli stati dal nuovo drop zone
-        const newDragOverState = newDropZone.querySelector('#drag-over-state-main');
-        const newUploadState = newDropZone.querySelector('#upload-state-main');
+        dropZone.addEventListener('click', () => fileInput.click(), { signal });
 
         ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-            newDropZone.addEventListener(eventName, e => {
+            dropZone.addEventListener(eventName, e => {
                 e.preventDefault();
                 e.stopPropagation();
-            });
+            }, { signal });
         });
 
         ['dragenter', 'dragover'].forEach(eventName => {
-            newDropZone.addEventListener(eventName, () => {
-                if (newDragOverState) newDragOverState.classList.remove('hidden');
-                if (newUploadState) newUploadState.classList.add('hidden');
-            });
+            dropZone.addEventListener(eventName, () => {
+                if (dragOverState) dragOverState.classList.remove('hidden');
+                if (uploadState) uploadState.classList.add('hidden');
+            }, { signal });
         });
 
-        newDropZone.addEventListener('dragleave', (e) => {
-            if (!newDropZone.contains(e.relatedTarget)) {
-                if (newDragOverState) newDragOverState.classList.add('hidden');
-                if (newUploadState) newUploadState.classList.remove('hidden');
+        dropZone.addEventListener('dragleave', (e) => {
+            if (!dropZone.contains(e.relatedTarget)) {
+                if (dragOverState) dragOverState.classList.add('hidden');
+                if (uploadState) uploadState.classList.remove('hidden');
             }
-        });
+        }, { signal });
 
-        newDropZone.addEventListener('drop', (e) => {
-            if (newDragOverState) newDragOverState.classList.add('hidden');
-            if (newUploadState) newUploadState.classList.remove('hidden');
+        dropZone.addEventListener('drop', (e) => {
+            if (dragOverState) dragOverState.classList.add('hidden');
+            if (uploadState) uploadState.classList.remove('hidden');
 
             const files = e.dataTransfer.files;
             if (files.length > 0) {
                 showFileSelectedMain(files[0]);
                 window.droppedFileMain = files[0];
             }
-        });
+        }, { signal });
 
-        newFileInput.addEventListener('change', function(e) {
+        fileInput.addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (file) {
                 showFileSelectedMain(file);
                 window.droppedFileMain = null;
             }
-        });
+        }, { signal });
 
-        newForm.addEventListener('submit', function(e) {
+        form.addEventListener('submit', function(e) {
             e.preventDefault();
-            const file = window.droppedFileMain || newFileInput.files[0];
+            const file = window.droppedFileMain || fileInput.files[0];
             if (!file) {
                 addAlert('Seleziona un file prima di procedere', 'error');
                 return;
             }
             handleUploadMain(file);
-        });
+        }, { signal });
     }
 
     function showFileSelectedMain(file) {
