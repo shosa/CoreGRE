@@ -4,6 +4,9 @@
 (function() {
     'use strict';
 
+    // Flag per prevenire inizializzazioni multiple
+    let isInitialized = false;
+
     // Calcola il base URL della sezione impostazioni, robusto a PJAX/subdirectory
     function getSettingsBaseUrl() {
         if (window.SETTINGS_BASE_URL) {
@@ -51,6 +54,15 @@
 
     // Initialize on page load
     function initSettingsPage() {
+        // Prevent double initialization on same page
+        if (isInitialized) {
+            console.log('[Settings] Already initialized, skipping duplicate init');
+            return;
+        }
+
+        isInitialized = true;
+        console.log('[Settings] Initializing page');
+
         // Always default to 'import' tab (Excel import is the heart of the app)
         switchTab('import');
 
@@ -59,12 +71,23 @@
         setupMainXlsxUpload();
     }
 
+    // Cleanup function per PJAX navigation
+    function cleanupSettingsPage() {
+        isInitialized = false;
+        window.droppedFileMain = null;
+        console.log('[Settings] Cleanup complete');
+    }
+
     // Form handlers
     function setupFormHandlers() {
         // Sistema form
         const sistemaForm = document.getElementById('sistema-settings-form');
         if (sistemaForm) {
-            sistemaForm.addEventListener('submit', function(e) {
+            // Rimuovi handler precedenti (se esistenti) clonando il form
+            const newSistemaForm = sistemaForm.cloneNode(true);
+            sistemaForm.parentNode.replaceChild(newSistemaForm, sistemaForm);
+
+            newSistemaForm.addEventListener('submit', function(e) {
                 e.preventDefault();
                 saveGeneralSettings(new FormData(this), 'sistema');
             });
@@ -73,7 +96,10 @@
         // Notifiche form
         const notificheForm = document.getElementById('notifiche-settings-form');
         if (notificheForm) {
-            notificheForm.addEventListener('submit', function(e) {
+            const newNotificheForm = notificheForm.cloneNode(true);
+            notificheForm.parentNode.replaceChild(newNotificheForm, notificheForm);
+
+            newNotificheForm.addEventListener('submit', function(e) {
                 e.preventDefault();
                 saveGeneralSettings(new FormData(this), 'notifiche');
             });
@@ -82,7 +108,10 @@
         // Email form
         const emailForm = document.getElementById('email-settings-form');
         if (emailForm) {
-            emailForm.addEventListener('submit', function(e) {
+            const newEmailForm = emailForm.cloneNode(true);
+            emailForm.parentNode.replaceChild(newEmailForm, emailForm);
+
+            newEmailForm.addEventListener('submit', function(e) {
                 e.preventDefault();
                 saveGeneralSettings(new FormData(this), 'email');
             });
@@ -478,32 +507,45 @@
 
         if (!fileInput || !form || !dropZone) return;
 
-        dropZone.addEventListener('click', () => fileInput.click());
+        // Clona elementi per rimuovere event listener duplicati
+        const newDropZone = dropZone.cloneNode(true);
+        dropZone.parentNode.replaceChild(newDropZone, dropZone);
+
+        const newForm = form.cloneNode(true);
+        form.parentNode.replaceChild(newForm, form);
+
+        const newFileInput = newForm.querySelector('#xlsx-file-input-main');
+
+        newDropZone.addEventListener('click', () => newFileInput.click());
+
+        // Ri-ottieni i riferimenti agli stati dal nuovo drop zone
+        const newDragOverState = newDropZone.querySelector('#drag-over-state-main');
+        const newUploadState = newDropZone.querySelector('#upload-state-main');
 
         ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-            dropZone.addEventListener(eventName, e => {
+            newDropZone.addEventListener(eventName, e => {
                 e.preventDefault();
                 e.stopPropagation();
             });
         });
 
         ['dragenter', 'dragover'].forEach(eventName => {
-            dropZone.addEventListener(eventName, () => {
-                if (dragOverState) dragOverState.classList.remove('hidden');
-                if (uploadState) uploadState.classList.add('hidden');
+            newDropZone.addEventListener(eventName, () => {
+                if (newDragOverState) newDragOverState.classList.remove('hidden');
+                if (newUploadState) newUploadState.classList.add('hidden');
             });
         });
 
-        dropZone.addEventListener('dragleave', (e) => {
-            if (!dropZone.contains(e.relatedTarget)) {
-                if (dragOverState) dragOverState.classList.add('hidden');
-                if (uploadState) uploadState.classList.remove('hidden');
+        newDropZone.addEventListener('dragleave', (e) => {
+            if (!newDropZone.contains(e.relatedTarget)) {
+                if (newDragOverState) newDragOverState.classList.add('hidden');
+                if (newUploadState) newUploadState.classList.remove('hidden');
             }
         });
 
-        dropZone.addEventListener('drop', (e) => {
-            if (dragOverState) dragOverState.classList.add('hidden');
-            if (uploadState) uploadState.classList.remove('hidden');
+        newDropZone.addEventListener('drop', (e) => {
+            if (newDragOverState) newDragOverState.classList.add('hidden');
+            if (newUploadState) newUploadState.classList.remove('hidden');
 
             const files = e.dataTransfer.files;
             if (files.length > 0) {
@@ -512,7 +554,7 @@
             }
         });
 
-        fileInput.addEventListener('change', function(e) {
+        newFileInput.addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (file) {
                 showFileSelectedMain(file);
@@ -520,9 +562,9 @@
             }
         });
 
-        form.addEventListener('submit', function(e) {
+        newForm.addEventListener('submit', function(e) {
             e.preventDefault();
-            const file = window.droppedFileMain || fileInput.files[0];
+            const file = window.droppedFileMain || newFileInput.files[0];
             if (!file) {
                 addAlert('Seleziona un file prima di procedere', 'error');
                 return;
@@ -685,8 +727,11 @@
         initSettingsPage();
     }
 
-    // Re-initialize on PJAX load
+    // Register cleanup and re-initialization for PJAX navigation
     if (window.COREGRE && window.COREGRE.onPageLoad) {
+        // Cleanup before loading new content
+        window.COREGRE.onBeforeLoad(cleanupSettingsPage);
+        // Re-initialize after new content loaded
         window.COREGRE.onPageLoad(initSettingsPage);
     }
 
