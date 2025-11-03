@@ -80,6 +80,7 @@ echo "[3/7] Setting permissions..."
 
 # Create directories if not exist
 mkdir -p /var/www/html/storage/{cache,logs,sessions,uploads}
+mkdir -p /var/www/html/storage/import/temp
 mkdir -p /var/www/html/public/uploads
 mkdir -p /var/log/supervisor
 
@@ -94,11 +95,6 @@ chmod -R 775 /var/www/html/public/uploads
 # Set SGID bit to preserve group ownership on new files
 chmod -R g+s /var/www/html/storage
 chmod -R g+s /var/www/html/public/uploads
-
-# Fix nginx temp directory permissions (worker runs as www-data)
-mkdir -p /var/lib/nginx/tmp/client_body
-chown -R www-data:www-data /var/lib/nginx/tmp
-chmod -R 755 /var/lib/nginx/tmp
 
 echo "✓ Permissions set (775 with SGID)"
 
