@@ -225,6 +225,11 @@
 </div>
 
 <script>
+(function() {
+    'use strict';
+
+    // AbortController per gestire cleanup event listeners
+    let formController = null;
 
     function initSearchForm() {
         const form = document.getElementById('searchForm');
@@ -233,18 +238,25 @@
 
         if (!form || !cartellinoInput || !commessaInput) return;
 
+        // Abort vecchi listener se esistono
+        if (formController) {
+            formController.abort();
+        }
+        formController = new AbortController();
+        const signal = formController.signal;
+
         // Clear the other field when typing in one
         cartellinoInput.addEventListener('input', function () {
             if (this.value.trim()) {
                 commessaInput.value = '';
             }
-        });
+        }, { signal });
 
         commessaInput.addEventListener('input', function () {
             if (this.value.trim()) {
                 cartellinoInput.value = '';
             }
-        });
+        }, { signal });
 
         form.addEventListener('submit', function (e) {
             e.preventDefault();
@@ -270,7 +282,7 @@
                 console.log('Checking commessa:', commessaValue); // Debug
                 checkCommessa(commessaValue);
             }
-        });
+        }, { signal });
 
         async function checkCartellino(cartellino) {
             try {
@@ -403,14 +415,16 @@
         }
     }
 
-    // Initialize on DOM load
-    document.addEventListener('DOMContentLoaded', initSearchForm);
-
     // Registra l'inizializzatore per PJAX
     if (window.COREGRE && window.COREGRE.onPageLoad) {
         window.COREGRE.onPageLoad(initSearchForm);
     }
 
-    // Initialize after PJAX navigation
-    document.addEventListener('pjax:contentLoaded', initSearchForm);
+    // Initialize anche al primo caricamento
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initSearchForm);
+    } else {
+        initSearchForm();
+    }
+})();
 </script>
