@@ -295,11 +295,11 @@
         }, { signal });
 
         async function checkCartellino(cartellino) {
+            // Mostra modale di loading
+            const loadingModalId = showLoadingModal('Verifica Cartellino', `Ricerca del cartellino <strong>${cartellino}</strong> in corso...`);
+
             try {
                 console.log('Starting checkCartellino for:', cartellino); // Debug
-
-                // Show loading notification instead of global loader
-                const loadingId = CoregreNotifications.loading('Verifica cartellino in corso...');
 
                 const response = await fetch(`<?= $this->url('/api/riparazioni/check-cartellino') ?>?cartellino=${encodeURIComponent(cartellino)}`, {
                     headers: {
@@ -316,55 +316,62 @@
                 const data = await response.json();
                 console.log('Data received:', data); // Debug
 
-                // Remove loading notification
-                CoregreNotifications.remove(loadingId);
+                // Chiudi modale loading
+                CoregreModals.close(loadingModalId);
 
                 if (data.error) {
                     throw new Error(data.error);
                 }
 
                 if (data.exists) {
-                    // Cartellino exists, proceed to step 2
-                    CoregreNotifications.success(`Cartellino "${cartellino}" trovato! Reindirizzamento...`, 2000);
-                    setTimeout(() => {
-                        console.log('Redirecting to step 2'); // Debug
-                        console.log('window.pjax exists:', !!window.pjax); // Debug
-
-                        const url = `<?= $this->url('/riparazioni/create-step2') ?>?cartellino=${encodeURIComponent(cartellino)}`;
-
-                        if (window.pjax && typeof window.pjax.navigateTo === 'function') {
-                            console.log('Using PJAX navigation to:', url); // Debug
-                            window.pjax.navigateTo(url);
-                        } else {
-                            console.log('Fallback to location.href:', url); // Debug
-                            window.location.href = url;
+                    // Cartellino trovato - mostra successo e naviga
+                    showSuccessModal(
+                        'Cartellino Trovato!',
+                        `Il cartellino <strong>${cartellino}</strong> è stato trovato nel database.<br><br>Reindirizzamento allo step 2...`,
+                        () => {
+                            const url = `<?= $this->url('/riparazioni/create-step2') ?>?cartellino=${encodeURIComponent(cartellino)}`;
+                            if (window.pjax && typeof window.pjax.navigateTo === 'function') {
+                                window.pjax.navigateTo(url);
+                            } else {
+                                window.location.href = url;
+                            }
                         }
-                    }, 1000);
+                    );
                 } else {
-                    CoregreNotifications.error(`Cartellino "${cartellino}" non trovato nel database. Verifica il numero inserito.`);
-                    // Reset del campo per facilitare una nuova ricerca
-                    cartellinoInput.value = '';
-                    cartellinoInput.focus();
+                    // Cartellino non trovato
+                    showErrorModal(
+                        'Cartellino Non Trovato',
+                        `Il cartellino <strong>${cartellino}</strong> non è stato trovato nel database.<br><br>Verifica il numero inserito e riprova.`,
+                        () => {
+                            cartellinoInput.value = '';
+                            cartellinoInput.focus();
+                        }
+                    );
                 }
             } catch (error) {
                 console.error('Error checking cartellino:', error);
 
-                // Remove loading notification
-                CoregreNotifications.remove(loadingId);
+                // Chiudi modale loading
+                CoregreModals.close(loadingModalId);
 
-                CoregreNotifications.error(`Errore durante la verifica del cartellino: ${error.message}`);
-                // Reset del campo in caso di errore
-                cartellinoInput.value = '';
-                cartellinoInput.focus();
+                // Mostra errore
+                showErrorModal(
+                    'Errore di Verifica',
+                    `Si è verificato un errore durante la verifica del cartellino:<br><br><em>${error.message}</em>`,
+                    () => {
+                        cartellinoInput.value = '';
+                        cartellinoInput.focus();
+                    }
+                );
             }
         }
 
         async function checkCommessa(commessa) {
+            // Mostra modale di loading
+            const loadingModalId = showLoadingModal('Verifica Commessa', `Ricerca della commessa <strong>${commessa}</strong> in corso...`);
+
             try {
                 console.log('Starting checkCommessa for:', commessa); // Debug
-
-                // Show loading notification
-                const loadingId = CoregreNotifications.loading('Verifica commessa in corso...');
 
                 const response = await fetch(`<?= $this->url('/api/riparazioni/check-commessa') ?>?commessa=${encodeURIComponent(commessa)}`, {
                     headers: {
@@ -381,48 +388,197 @@
                 const data = await response.json();
                 console.log('Data received:', data); // Debug
 
-                // Remove loading notification
-                CoregreNotifications.remove(loadingId);
+                // Chiudi modale loading
+                CoregreModals.close(loadingModalId);
 
                 if (data.error) {
                     throw new Error(data.error);
                 }
 
                 if (data.exists && data.cartellino) {
-                    // Commessa exists, use the returned cartellino for step 2
-                    CoregreNotifications.success(`Commessa "${commessa}" trovata! Cartellino: ${data.cartellino}`, 2000);
-                    setTimeout(() => {
-                        console.log('Redirecting to step 2 with cartellino:', data.cartellino); // Debug
-                        console.log('window.pjax exists:', !!window.pjax); // Debug
-
-                        const url = `<?= $this->url('/riparazioni/create-step2') ?>?cartellino=${encodeURIComponent(data.cartellino)}`;
-
-                        if (window.pjax && typeof window.pjax.navigateTo === 'function') {
-                            console.log('Using PJAX navigation to:', url); // Debug
-                            window.pjax.navigateTo(url);
-                        } else {
-                            console.log('Fallback to location.href:', url); // Debug
-                            window.location.href = url;
+                    // Commessa trovata - mostra successo e naviga
+                    showSuccessModal(
+                        'Commessa Trovata!',
+                        `La commessa <strong>${commessa}</strong> è stata trovata!<br>Cartellino associato: <strong>${data.cartellino}</strong><br><br>Reindirizzamento allo step 2...`,
+                        () => {
+                            const url = `<?= $this->url('/riparazioni/create-step2') ?>?cartellino=${encodeURIComponent(data.cartellino)}`;
+                            if (window.pjax && typeof window.pjax.navigateTo === 'function') {
+                                window.pjax.navigateTo(url);
+                            } else {
+                                window.location.href = url;
+                            }
                         }
-                    }, 1000);
+                    );
                 } else {
-                    CoregreNotifications.error(`Commessa "${commessa}" non trovata nel database. Verifica il codice inserito.`);
-                    // Reset del campo per facilitare una nuova ricerca
-                    commessaInput.value = '';
-                    commessaInput.focus();
+                    // Commessa non trovata
+                    showErrorModal(
+                        'Commessa Non Trovata',
+                        `La commessa <strong>${commessa}</strong> non è stata trovata nel database.<br><br>Verifica il codice inserito e riprova.`,
+                        () => {
+                            commessaInput.value = '';
+                            commessaInput.focus();
+                        }
+                    );
                 }
             } catch (error) {
                 console.error('Error checking commessa:', error);
 
-                // Remove loading notification
-                CoregreNotifications.remove(loadingId);
+                // Chiudi modale loading
+                CoregreModals.close(loadingModalId);
 
-                CoregreNotifications.error(`Errore durante la verifica della commessa: ${error.message}`);
-                // Reset del campo in caso di errore
-                commessaInput.value = '';
-                commessaInput.focus();
+                // Mostra errore
+                showErrorModal(
+                    'Errore di Verifica',
+                    `Si è verificato un errore durante la verifica della commessa:<br><br><em>${error.message}</em>`,
+                    () => {
+                        commessaInput.value = '';
+                        commessaInput.focus();
+                    }
+                );
             }
         }
+    }
+
+    // ============================================================================
+    // Helper Functions per Modali Custom
+    // ============================================================================
+
+    /**
+     * Mostra modale di loading con spinner
+     */
+    function showLoadingModal(title, message) {
+        const modalId = 'loading-modal-' + Date.now();
+
+        const modalHtml = `
+            <div id="${modalId}" class="fixed inset-0 z-[99999] overflow-y-auto modal-backdrop" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+                <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-4 text-center">
+                    <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity backdrop-blur-sm"></div>
+
+                    <!-- Modal panel -->
+                    <div class="modal-content relative inline-block align-middle bg-white dark:bg-gray-800 rounded-2xl px-6 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all max-w-lg w-full mx-4 border border-gray-200 dark:border-gray-700">
+                        <div class="sm:flex sm:items-start">
+                            <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-xl bg-blue-100 dark:bg-blue-900/30 sm:mx-0 sm:h-10 sm:w-10">
+                                <i class="fas fa-spinner fa-spin text-blue-600 dark:text-blue-400 text-lg"></i>
+                            </div>
+                            <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left flex-1">
+                                <h3 class="text-lg leading-6 font-bold text-gray-900 dark:text-white" id="modal-title">
+                                    ${title}
+                                </h3>
+                                <div class="mt-2">
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">
+                                        ${message}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+        return modalId;
+    }
+
+    /**
+     * Mostra modale di successo con auto-close
+     */
+    function showSuccessModal(title, message, onClose) {
+        const modalId = 'success-modal-' + Date.now();
+
+        const modalHtml = `
+            <div id="${modalId}" class="fixed inset-0 z-[99999] overflow-y-auto modal-backdrop" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+                <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-4 text-center">
+                    <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity backdrop-blur-sm" onclick="CoregreModals.close('${modalId}')"></div>
+
+                    <!-- Modal panel -->
+                    <div class="modal-content relative inline-block align-middle bg-white dark:bg-gray-800 rounded-2xl px-6 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all max-w-lg w-full mx-4 border border-gray-200 dark:border-gray-700">
+                        <div class="sm:flex sm:items-start">
+                            <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-xl bg-green-100 dark:bg-green-900/30 sm:mx-0 sm:h-10 sm:w-10">
+                                <i class="fas fa-check-circle text-green-600 dark:text-green-400 text-lg"></i>
+                            </div>
+                            <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left flex-1">
+                                <h3 class="text-lg leading-6 font-bold text-gray-900 dark:text-white" id="modal-title">
+                                    ${title}
+                                </h3>
+                                <div class="mt-2">
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">
+                                        ${message}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+        // Auto-close dopo 1.5 secondi e naviga
+        setTimeout(() => {
+            CoregreModals.close(modalId);
+            if (typeof onClose === 'function') {
+                setTimeout(onClose, 200); // Aspetta che l'animazione finisca
+            }
+        }, 1500);
+
+        return modalId;
+    }
+
+    /**
+     * Mostra modale di errore con pulsante OK
+     */
+    function showErrorModal(title, message, onClose) {
+        const modalId = 'error-modal-' + Date.now();
+
+        const modalHtml = `
+            <div id="${modalId}" class="fixed inset-0 z-[99999] overflow-y-auto modal-backdrop" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+                <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-4 text-center">
+                    <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity backdrop-blur-sm" onclick="CoregreModals.close('${modalId}')"></div>
+
+                    <!-- Modal panel -->
+                    <div class="modal-content relative inline-block align-middle bg-white dark:bg-gray-800 rounded-2xl px-6 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all max-w-lg w-full mx-4 border border-gray-200 dark:border-gray-700">
+                        <div class="sm:flex sm:items-start">
+                            <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-xl bg-red-100 dark:bg-red-900/30 sm:mx-0 sm:h-10 sm:w-10">
+                                <i class="fas fa-exclamation-circle text-red-600 dark:text-red-400 text-lg"></i>
+                            </div>
+                            <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left flex-1">
+                                <h3 class="text-lg leading-6 font-bold text-gray-900 dark:text-white" id="modal-title">
+                                    ${title}
+                                </h3>
+                                <div class="mt-2">
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">
+                                        ${message}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
+                            <button type="button" onclick="CoregreModals.close('${modalId}')"
+                                    class="w-full inline-flex justify-center rounded-lg border border-transparent shadow-sm px-4 py-2 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-base font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:w-auto sm:text-sm transition-all duration-200 hover:shadow-lg">
+                                <i class="fas fa-times mr-2"></i>
+                                OK
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+        // Salva callback per quando viene chiuso
+        if (typeof onClose === 'function') {
+            const modal = document.getElementById(modalId);
+            modal.addEventListener('click', (e) => {
+                if (e.target.id === modalId || e.target.closest('button')) {
+                    setTimeout(onClose, 200);
+                }
+            }, { once: true });
+        }
+
+        return modalId;
     }
 
     // Cleanup function per PJAX navigation
