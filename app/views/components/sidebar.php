@@ -118,16 +118,11 @@
                                         dark:hover:text-gray-200 shadow-sm hover:shadow-md hover:-translate-y-0.5"> <i
                                             class="fas fa-h text-green-500 dark:text-green-400"></i> <span>Hermes</span>
                                     </a>
-                                    <a href="<?= $this->url('/quality/operators') ?>" class="flex items-center gap-3 rounded-lg
-                                        px-3 py-2.5 text-sm font-medium text-gray-600 transition-all duration-200
-                                        hover:bg-white hover:text-gray-800 dark:text-gray-400 dark:hover:bg-gray-700
-                                        dark:hover:text-gray-200 shadow-sm hover:shadow-md hover:-translate-y-0.5"> <i
-                                            class="fas fa-users text-green-500 dark:text-green-400"></i>
-                                        <span>Operatori</span>
-                                    </a>
                                 </div>
                             </div>
-                        </li> <?php endif; ?> <!-- Produzione --> <?php if ($this->hasPermission('produzione')): ?>
+                        </li> <?php endif; ?>
+
+                    <!-- Produzione --> <?php if ($this->hasPermission('produzione')): ?>
                         <li> <button @click="activeMenu=activeMenu==='production' ? null : 'production' " class="sidebar-item flex
                                 w-full items-center justify-between rounded-xl px-4 py-3 font-medium text-gray-700
                                 transition-all duration-200 hover:bg-gradient-to-r hover:from-yellow-50 hover:to-orange-100
@@ -385,6 +380,23 @@
                     </div>
                     <ul class="space-y-2">
 
+                        <!-- InWork Admin -->
+                        <?php if ($this->hasPermission('admin')): ?>
+                            <li>
+                                <a href="<?= $this->url('/inwork-admin') ?>" class="sidebar-item flex items-center gap-3 rounded-xl px-4
+                                py-3 font-medium text-gray-700 transition-all duration-200 hover:bg-gradient-to-r
+                                hover:from-purple-50 hover:to-indigo-100 hover:text-purple-600 dark:text-gray-300
+                                dark:hover:from-purple-900/20 dark:hover:to-indigo-800/20 dark:hover:text-purple-400 shadow-sm
+                                hover:shadow-lg hover:-translate-y-0.5 group">
+                                    <div
+                                        class="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-r
+                                    from-purple-500 to-indigo-600 shadow-md group-hover:shadow-lg transition-all duration-200">
+                                        <i class="fas fa-mobile-alt text-sm text-white"></i>
+                                    </div>
+                                    <span class="sidebar-text">InWork Mobile</span>
+                                </a>
+                            </li>
+                        <?php endif; ?>
 
                         <!-- Database -->
                         <?php if ($this->hasPermission('dbsql')): ?>

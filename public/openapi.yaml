@@ -6,6 +6,8 @@ info:
 
     ## Autenticazione
     Le API mobile utilizzano autenticazione tramite username/password (PIN).
+    Gli operatori sono gestiti nella tabella `inwork_operators` e devono avere status `active = 1` per autenticarsi.
+    Ogni operatore ha permessi granulari per accedere ai moduli (quality, repairs) tramite la tabella `inwork_module_permissions`.
 
     ## Versioning
     Versione corrente: 1.0.0
@@ -209,6 +211,13 @@ paths:
                             type: string
                           app_type:
                             type: string
+                          enabled_modules:
+                            type: array
+                            description: Lista moduli abilitati per l'operatore
+                            items:
+                              type: string
+                              enum: [quality, repairs]
+                            example: ["quality", "repairs"]
                           permissions:
                             type: array
                             items:
@@ -423,6 +432,84 @@ paths:
                   data:
                     type: object
                     description: Dettagli cartellino/commessa se trovato
+
+  /api/mobile/enabled-modules:
+    get:
+      tags:
+        - Mobile API
+      summary: Moduli abilitati per operatore
+      description: |
+        Recupera i moduli abilitati per un operatore specifico.
+        Ritorna sia la lista dei moduli abilitati che tutti i moduli con il loro stato.
+      parameters:
+        - name: operator_id
+          in: query
+          required: true
+          schema:
+            type: integer
+          description: ID dell'operatore
+      responses:
+        '200':
+          description: Moduli recuperati
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: Moduli recuperati con successo
+                  data:
+                    type: object
+                    properties:
+                      operator_id:
+                        type: integer
+                        example: 1
+                      enabled_modules:
+                        type: array
+                        description: Lista moduli abilitati
+                        items:
+                          type: string
+                          enum: [quality, repairs]
+                        example: ["quality", "repairs"]
+                      all_modules:
+                        type: object
+                        description: Tutti i moduli con stato enabled
+                        properties:
+                          quality:
+                            type: object
+                            properties:
+                              name:
+                                type: string
+                                example: "Controllo Qualità"
+                              enabled:
+                                type: boolean
+                                example: true
+                          repairs:
+                            type: object
+                            properties:
+                              name:
+                                type: string
+                                example: "Riparazioni Interne"
+                              enabled:
+                                type: boolean
+                                example: true
+        '404':
+          description: Operatore non trovato o non attivo
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: error
+                  message:
+                    type: string
+                    example: Operatore non trovato o non attivo
 
   # ==================== QUALITY API ====================
   /api/quality/login:
@@ -1106,6 +1193,7 @@ components:
   schemas:
     Operator:
       type: object
+      description: Operatore mobile (tabella inwork_operators)
       properties:
         id:
           type: integer
@@ -1113,12 +1201,40 @@ components:
         user:
           type: string
           example: "OP001"
+          description: Username univoco per login
         full_name:
           type: string
           example: "Mario Rossi"
+          description: Nome completo operatore
         reparto:
           type: string
           example: "PROD"
+          description: Reparto di appartenenza
+        active:
+          type: boolean
+          example: true
+          description: Status attivo (solo operatori attivi possono autenticarsi)
+        email:
+          type: string
+          format: email
+          example: "mario.rossi@example.com"
+          nullable: true
+        phone:
+          type: string
+          example: "+39 123 456 7890"
+          nullable: true
+        notes:
+          type: string
+          example: "Note aggiuntive sull'operatore"
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          nullable: true
+        updated_at:
+          type: string
+          format: date-time
+          nullable: true
 
     CartellinoInfo:
       type: object

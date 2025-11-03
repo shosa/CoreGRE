@@ -407,10 +407,16 @@ class CronManager
         $logDir = dirname($logFile);
 
         if (!is_dir($logDir)) {
-            mkdir($logDir, 0755, true);
+            @mkdir($logDir, 0777, true);
         }
 
-        file_put_contents($logFile, $logMessage, FILE_APPEND);
+        // Tenta di scrivere il log, ma non bloccare l'esecuzione se fallisce
+        if (is_writable($logDir) || !file_exists($logFile)) {
+            @file_put_contents($logFile, $logMessage, FILE_APPEND);
+        } else {
+            // Fallback: scrivi su error_log se non riesci a scrivere su file
+            error_log('[CRON] ' . trim($logMessage));
+        }
 
         // Log anche su stdout in modalità CLI
         if (php_sapi_name() === 'cli') {

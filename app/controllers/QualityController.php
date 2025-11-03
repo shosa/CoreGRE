@@ -8,7 +8,6 @@ use App\Models\QualityRecord;
 use App\Models\QualityException;
 use App\Models\QualityDepartment;
 use App\Models\QualityDefectType;
-use App\Models\QualityOperator;
 use App\Models\ActivityLog;
 
 /**
@@ -66,21 +65,6 @@ class QualityController extends BaseController
     }
 
     /**
-     * Gestione Operatori CQ
-     */
-    public function operators()
-    {
-        $this->logActivity('QUALITY', 'VIEW_OPERATORS', 'Visualizzazione operatori CQ');
-
-        $data = [
-            'pageTitle' => 'Operatori CQ - Gestione Team',
-            'operators' => $this->getAllOperators()
-        ];
-
-        $this->render('quality.operators', $data);
-    }
-
-    /**
      * Gestione Reparti CQ
      */
     public function departments()
@@ -123,72 +107,6 @@ class QualityController extends BaseController
 
         $this->render('quality.reports', $data);
     }
-
-    /**
-     * API: Gestione Operatori (CRUD completo)
-     */
-    public function manageOperator()
-    {
-        if (!$this->isPost() || !$this->isAjax()) {
-            $this->json(['error' => 'Richiesta non valida'], 400);
-            return;
-        }
-
-        try {
-            $action = $this->input('action');
-
-            if ($action === 'create') {
-                $data = [
-                    'user' => $this->input('user'),
-                    'full_name' => $this->input('full_name'),
-                    'pin' => (int) $this->input('pin'),
-                    'reparto' => $this->input('reparto')
-                ];
-
-                $this->createOperator($data);
-                $this->logActivity(
-                    'QUALITY',
-                    'CREATE_OPERATOR',
-                    'Creato operatore CQ',
-                    "User: {$data['user']}, Nome: {$data['full_name']}"
-                );
-
-            } elseif ($action === 'update') {
-                $id = (int) $this->input('id');
-                $data = [
-                    'user' => $this->input('user'),
-                    'full_name' => $this->input('full_name'),
-                    'pin' => (int) $this->input('pin'),
-                    'reparto' => $this->input('reparto')
-                ];
-
-                $this->updateOperator($id, $data);
-                $this->logActivity(
-                    'QUALITY',
-                    'UPDATE_OPERATOR',
-                    'Modificato operatore CQ',
-                    "ID: {$id}, User: {$data['user']}"
-                );
-
-            } elseif ($action === 'delete') {
-                $id = (int) $this->input('id');
-                $this->deleteOperator($id);
-                $this->logActivity(
-                    'QUALITY',
-                    'DELETE_OPERATOR',
-                    'Eliminato operatore CQ',
-                    "ID: {$id}"
-                );
-            }
-
-            $this->json(['success' => true]);
-
-        } catch (Exception $e) {
-            error_log("Errore gestione operatore: " . $e->getMessage());
-            $this->json(['error' => 'Errore durante la gestione dell\'operatore'], 500);
-        }
-    }
-
 
     /**
      * API: Gestione Reparti (CRUD completo come legacy)
@@ -343,11 +261,6 @@ class QualityController extends BaseController
             // Eccezioni questo mese
             $stats['month_exceptions'] = QualityException::thisMonth()->count();
 
-            // Operatori attivi (conta operatori distinti negli ultimi 30 giorni)
-            $stats['active_operators'] = QualityRecord::recent(30)
-                ->distinct()
-                ->count('operatore');
-
             // Reparti attivi
             $stats['active_departments'] = QualityDepartment::active()->count();
 
@@ -358,7 +271,6 @@ class QualityController extends BaseController
                 'today_records' => 0,
                 'week_records' => 0,
                 'month_exceptions' => 0,
-                'active_operators' => 0,
                 'active_departments' => 0
             ];
         }
@@ -398,14 +310,6 @@ class QualityController extends BaseController
     }
 
     /**
-     * Tutti gli operatori
-     */
-    private function getAllOperators()
-    {
-        return QualityOperator::orderBy('full_name')->get();
-    }
-
-    /**
      * Tutti i reparti
      */
     private function getAllDepartments()
@@ -424,41 +328,6 @@ class QualityController extends BaseController
             ->orderBy('ordine')
             ->orderBy('descrizione')
             ->get();
-    }
-
-
-    /**
-     * CRUD Operatori
-     */
-    private function createOperator($data)
-    {
-        return QualityOperator::create([
-            'user' => $data['user'],
-            'full_name' => $data['full_name'],
-            'pin' => $data['pin'],
-            'reparto' => $data['reparto']
-        ]);
-    }
-
-    private function updateOperator($id, $data)
-    {
-        $operator = QualityOperator::find($id);
-        if (!$operator) return false;
-
-        return $operator->update([
-            'user' => $data['user'],
-            'full_name' => $data['full_name'],
-            'pin' => $data['pin'],
-            'reparto' => $data['reparto']
-        ]);
-    }
-
-    private function deleteOperator($id)
-    {
-        $operator = QualityOperator::find($id);
-        if (!$operator) return false;
-
-        return $operator->delete();
     }
 
 

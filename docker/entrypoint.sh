@@ -87,11 +87,15 @@ mkdir -p /var/log/supervisor
 chown -R www-data:www-data /var/www/html/storage
 chown -R www-data:www-data /var/www/html/public/uploads
 
-# Set permissions
-chmod -R 755 /var/www/html/storage
-chmod -R 755 /var/www/html/public/uploads
+# Set permissions (775 = rwxrwxr-x, allows www-data group to write)
+chmod -R 775 /var/www/html/storage
+chmod -R 775 /var/www/html/public/uploads
 
-echo "✓ Permissions set"
+# Set SGID bit to preserve group ownership on new files
+chmod -R g+s /var/www/html/storage
+chmod -R g+s /var/www/html/public/uploads
+
+echo "✓ Permissions set (775 with SGID)"
 
 # ============================================================================
 # 4. Copy .env if not exists

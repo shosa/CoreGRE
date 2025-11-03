@@ -6,7 +6,8 @@
 
 use App\Models\QualityRecord;
 use App\Models\QualityException;
-use App\Models\QualityOperator;
+use App\Models\InWorkOperator;
+use App\Models\InWorkModulePermission;
 use App\Models\InternalRepair;
 use App\Models\Reparti;
 use App\Models\Laboratory;
@@ -50,8 +51,9 @@ class MobileApiController extends BaseController
             $appType = $data['app_type'] ?? $this->getHeader('X-App-Type') ?? 'quality'; // default quality per compatibilità
 
             if ($action === 'get_users') {
-                // Lista tutti gli operatori - ELOQUENT
-                $users = QualityOperator::select('id', 'user', 'full_name', 'reparto')
+                // Lista tutti gli operatori attivi - ELOQUENT
+                $users = InWorkOperator::select('id', 'user', 'full_name', 'reparto')
+                    ->where('active', 1)
                     ->orderBy('user', 'ASC')
                     ->get()
                     ->toArray();
@@ -67,9 +69,10 @@ class MobileApiController extends BaseController
 
             } elseif ($action === 'login' && !empty($data['username']) && !empty($data['password'])) {
                 // Verifica credenziali login - ELOQUENT
-                $user = QualityOperator::select('id', 'user', 'full_name', 'reparto')
+                $user = InWorkOperator::select('id', 'user', 'full_name', 'reparto')
                     ->where('user', $data['username'])
                     ->where('pin', $data['password'])
+                    ->where('active', 1)
                     ->first();
 
                 if ($user) {
@@ -77,6 +80,7 @@ class MobileApiController extends BaseController
 
                     // Aggiungi informazioni specifiche per app
                     $userData['app_type'] = $appType;
+                    $userData['enabled_modules'] = $this->getOperatorEnabledModules($userData['id']);
                     $userData['permissions'] = $this->getUserPermissions($userData['id'], $appType);
                     $userData['features'] = $this->getAppFeatures($appType);
 
@@ -135,8 +139,9 @@ class MobileApiController extends BaseController
             }
 
             // ELOQUENT
-            $operator = QualityOperator::select('id', 'user', 'full_name', 'reparto')
+            $operator = InWorkOperator::select('id', 'user', 'full_name', 'reparto')
                 ->where('id', $id)
+                ->where('active', 1)
                 ->first();
 
             if (!$operator) {
@@ -195,8 +200,9 @@ class MobileApiController extends BaseController
             }
 
             // Recupera dati operatore - ELOQUENT
-            $operator = QualityOperator::select('user', 'full_name')
+            $operator = InWorkOperator::select('user', 'full_name')
                 ->where('id', $id)
+                ->where('active', 1)
                 ->first();
 
             if (!$operator) {
@@ -454,18 +460,108 @@ class MobileApiController extends BaseController
     }
 
     /**
+     * API per ottenere i moduli abilitati per un operatore
+     * GET /api/mobile/enabled-modules?operator_id=1
+     */
+    public function getEnabledModules()
+    {
+        if (!$this->isGet()) {
+            $this->json(['status' => 'error', 'message' => 'Metodo non consentito'], 405);
+            return;
+        }
+
+        try {
+            $operatorId = $this->input('operator_id');
+
+            if (empty($operatorId)) {
+                $this->json([
+                    'status' => 'error',
+                    'message' => 'ID operatore mancante'
+                ]);
+                return;
+            }
+
+            // Verifica che l'operatore esista ed è attivo
+            $operator = InWorkOperator::where('id', $operatorId)
+                ->where('active', 1)
+                ->first();
+
+            if (!$operator) {
+                $this->json([
+                    'status' => 'error',
+                    'message' => 'Operatore non trovato o non attivo'
+                ]);
+                return;
+            }
+
+            // Recupera moduli abilitati
+            $enabledModules = $this->getOperatorEnabledModules($operatorId);
+
+            // Recupera tutti i moduli disponibili con descrizioni
+            $allModules = InWorkModulePermission::MODULES;
+            $modulesData = [];
+
+            foreach ($allModules as $moduleKey => $moduleName) {
+                $modulesData[] = [
+                    'key' => $moduleKey,
+                    'name' => $moduleName,
+                    'enabled' => in_array($moduleKey, $enabledModules)
+                ];
+            }
+
+            $this->json([
+                'status' => 'success',
+                'message' => 'Moduli recuperati con successo',
+                'data' => [
+                    'operator_id' => $operatorId,
+                    'operator_name' => $operator->full_name,
+                    'enabled_modules' => $enabledModules,
+                    'all_modules' => $modulesData
+                ]
+            ]);
+
+        } catch (Exception $e) {
+            error_log("Errore API mobile enabled-modules: " . $e->getMessage());
+            $this->json([
+                'status' => 'error',
+                'message' => 'Si è verificato un errore'
+            ]);
+        }
+    }
+
+    /**
+     * Ottiene i moduli abilitati per l'operatore
+     */
+    private function getOperatorEnabledModules($operatorId)
+    {
+        $enabledModules = InWorkModulePermission::where('operator_id', $operatorId)
+            ->where('enabled', 1)
+            ->pluck('module')
+            ->toArray();
+
+        return $enabledModules;
+    }
+
+    /**
      * Ottiene permessi utente per app specifica
      */
     private function getUserPermissions($operatorId, $appType)
     {
         $permissions = [];
 
+        // Verifica se l'operatore ha il modulo abilitato
+        $enabledModules = $this->getOperatorEnabledModules($operatorId);
+
         switch ($appType) {
             case 'quality':
-                $permissions = ['cq_view', 'cq_create', 'cq_edit'];
+                if (in_array('quality', $enabledModules)) {
+                    $permissions = ['cq_view', 'cq_create', 'cq_edit'];
+                }
                 break;
             case 'repairs':
-                $permissions = ['repairs_view', 'repairs_create', 'repairs_edit', 'repairs_complete'];
+                if (in_array('repairs', $enabledModules)) {
+                    $permissions = ['repairs_view', 'repairs_create', 'repairs_edit', 'repairs_complete'];
+                }
                 break;
         }
 

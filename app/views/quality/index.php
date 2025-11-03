@@ -40,7 +40,7 @@
 </nav>
 
 <!-- Stats Cards -->
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
     <div
         class="rounded-2xl border border-gray-200 bg-white p-6 shadow-lg dark:border-gray-800 dark:bg-gray-800/40 backdrop-blur-sm">
         <div class="flex items-center">
@@ -84,22 +84,6 @@
                 <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Eccezioni Mese</p>
                 <p class="text-2xl font-bold text-gray-900 dark:text-white">
                     <?= number_format($stats['month_exceptions']) ?>
-                </p>
-            </div>
-        </div>
-    </div>
-
-    <div
-        class="rounded-2xl border border-gray-200 bg-white p-6 shadow-lg dark:border-gray-800 dark:bg-gray-800/40 backdrop-blur-sm">
-        <div class="flex items-center">
-            <div
-                class="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-r from-purple-500 to-purple-600 shadow-lg">
-                <i class="fas fa-users text-white"></i>
-            </div>
-            <div class="ml-4">
-                <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Operatori Attivi</p>
-                <p class="text-2xl font-bold text-gray-900 dark:text-white">
-                    <?= number_format($stats['active_operators']) ?>
                 </p>
             </div>
         </div>
@@ -182,29 +166,7 @@
         Gestione e Configurazione
     </h2>
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <!-- Operatori CQ -->
-        <div
-            class="group relative overflow-hidden rounded-xl border border-gray-200 bg-white shadow-md hover:shadow-lg dark:border-gray-800 dark:bg-gray-800/40 backdrop-blur-sm transition-all duration-200 hover:-translate-y-1">
-            <div class="relative p-6">
-                <div
-                    class="flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-r from-purple-500 to-indigo-600 shadow-lg mb-4 group-hover:scale-110 transition-transform duration-300">
-                    <i class="fas fa-user-tie text-white"></i>
-                </div>
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                    Operatori CQ
-                </h3>
-                <p class="text-gray-600 dark:text-gray-400 text-sm mb-4">
-                    Gestisci il team degli operatori controllo qualità
-                </p>
-                <a href="<?= $this->url('/quality/operators') ?>"
-                    class="inline-flex items-center text-purple-600 hover:text-purple-700 font-medium text-sm group-hover:translate-x-1 transition-transform">
-                    Gestisci Team
-                    <i class="fas fa-arrow-right ml-2 text-xs"></i>
-                </a>
-            </div>
-        </div>
-
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <!-- Reparti CQ -->
         <div
             class="group relative overflow-hidden rounded-xl border border-gray-200 bg-white shadow-md hover:shadow-lg dark:border-gray-800 dark:bg-gray-800/40 backdrop-blur-sm transition-all duration-200 hover:-translate-y-1">

@@ -68,19 +68,26 @@ $router->post('/api/riparazioni/delete', 'Riparazioni@delete');
 // Routes per il controllo qualità - Sistema Hermes CQ (come legacy)
 $router->get('/quality', 'Quality@index');
 $router->get('/quality/hermes', 'Quality@hermes');
-$router->get('/quality/operators', 'Quality@operators');
 $router->get('/quality/departments', 'Quality@departments');
 $router->get('/quality/defects', 'Quality@defects');
 $router->get('/quality/reports', 'Quality@reports');
 
 // API Routes per Quality Hermes Management (CRUD completo come legacy)
-$router->post('/quality/manage-operator', 'Quality@manageOperator');
 $router->post('/quality/manage-department', 'Quality@manageDepartment');
 $router->post('/quality/manage-defect', 'Quality@manageDefect');
 $router->get('/quality/generate-report', 'Quality@generateReport');
 $router->post('/quality/save-defect-type', 'Quality@saveDefectType');
 $router->post('/quality/delete-defect-type', 'Quality@deleteDefectType');
 $router->get('/quality/hermes-data', 'Quality@getHermesData');
+
+// Routes per InWork Admin - Gestione Operatori Mobile
+$router->get('/inwork-admin', 'InWorkAdmin@index');
+$router->get('/inwork-admin/create', 'InWorkAdmin@create');
+$router->post('/inwork-admin/store', 'InWorkAdmin@store');
+$router->get('/inwork-admin/{id}/edit', 'InWorkAdmin@edit');
+$router->post('/inwork-admin/{id}/update', 'InWorkAdmin@update');
+$router->post('/inwork-admin/delete', 'InWorkAdmin@delete');
+$router->post('/inwork-admin/toggle', 'InWorkAdmin@toggle');
 
 // Routes per la produzione
 $router->get('/produzione', 'Produzione@index');
@@ -331,6 +338,7 @@ $router->get('/api/mobile/profile', 'MobileApi@getProfile');
 $router->get('/api/mobile/daily-summary', 'MobileApi@getDailySummary');
 $router->get('/api/mobile/system-data', 'MobileApi@getSystemData');
 $router->post('/api/mobile/check-data', 'MobileApi@checkData');
+$router->get('/api/mobile/enabled-modules', 'MobileApi@getEnabledModules');
 
 // Quality Control API Routes (per app Android) - MANTENIAMO PER RETROCOMPATIBILITÀ
 $router->post('/api/quality/login', 'QualityApi@login');

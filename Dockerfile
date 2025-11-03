@@ -121,7 +121,7 @@ WORKDIR /var/www/html
 # Copy application from composer stage
 COPY --from=composer-build --chown=www-data:www-data /app /var/www/html
 
-# Create required directories
+# Create required directories with proper permissions
 RUN mkdir -p \
     /var/www/html/storage/cache \
     /var/www/html/storage/logs \
@@ -129,7 +129,8 @@ RUN mkdir -p \
     /var/www/html/storage/uploads \
     /var/www/html/storage/cache/mpdf \
     && chown -R www-data:www-data /var/www/html/storage \
-    && chmod -R 755 /var/www/html/storage
+    && chmod -R 775 /var/www/html/storage \
+    && chmod -R g+s /var/www/html/storage
 
 # Copy PHP configuration
 COPY --chmod=644 docker/php/php.ini /usr/local/etc/php/conf.d/99-coregre.ini
