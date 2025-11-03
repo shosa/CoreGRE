@@ -579,198 +579,44 @@ class QualityController extends BaseController
     }
 
     /**
-     * Genera PDF del report
+     * Genera PDF del report - Stile SAP/Console ASCII
      */
     private function generatePdfReport($data, $reportType)
     {
-
-
-        // Configura TCPDF - Orientamento orizzontale
+        // Configura TCPDF - Orientamento orizzontale con font monospace
         $pdf = new TCPDF("L", "mm", "A4", true, "UTF-8", false);
-        $pdf->SetMargins(10, 10, 10);
-        $pdf->SetAutoPageBreak(true, 10);
+        $pdf->SetMargins(8, 8, 8);
+        $pdf->SetAutoPageBreak(true, 8);
         $pdf->setPrintHeader(false);
         $pdf->setPrintFooter(false);
         $pdf->SetTitle($data['title']);
         $pdf->AddPage();
 
-        // CSS per il report - Layout migliorato e pi leggibile
+        // Stile SAP/Console - Font Monospace
         $css = '
         <style>
             body {
-                font-family: "DejaVu Sans", helvetica, arial, sans-serif;
-                font-size: 11pt;
-                line-height: 1.4;
-                color: #333;
+                font-family: "Courier New", "Courier", monospace;
+                font-size: 8pt;
+                line-height: 1.2;
+                color: #000;
+                background-color: #fff;
             }
-            h1 {
-                font-size: 20pt;
-                color: #2563eb;
-                text-align: center;
-                margin-bottom: 25px;
-                font-weight: bold;
-                border-bottom: 2px solid #2563eb;
-                padding-bottom: 10px;
-            }
-            h2 {
-                font-size: 16pt;
-                color: #1e40af;
-                margin: 20px 0 15px 0;
-                border-bottom: 1px solid #cbd5e1;
-                padding-bottom: 5px;
-                font-weight: bold;
-            }
-            h3 {
-                font-size: 14pt;
-                color: #475569;
-                margin: 15px 0 10px 0;
-                font-weight: bold;
-            }
-            table {
-                border-collapse: collapse;
-                width: 100%;
-                margin: 15px 0;
-                border: 1px solid #e2e8f0;
-                table-layout: auto;
-            }
-            th {
-                background-color: #3b82f6;
-                color: white;
-                font-weight: bold;
-                padding: 12px 8px;
-                text-align: left;
-                font-size: 10pt;
-                border: 1px solid #2563eb;
-                white-space: nowrap;
-            }
-            td {
-                padding: 10px 8px;
-                border: 1px solid #e2e8f0;
-                font-size: 10pt;
-                background-color: #ffffff;
-                white-space: nowrap;
-            }
-            .stats-grid {
-                background-color: #f0f9ff;
-                padding: 20px;
-                margin: 20px 0;
-                border: 1px solid #bae6fd;
-                border-radius: 8px;
-                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            }
-            .stat-item {
-                display: inline-block;
-                margin: 5px 15px 5px 0;
-                padding: 10px 15px;
-                background: white;
-                border-radius: 6px;
-                border-left: 4px solid #3b82f6;
-                font-size: 11pt;
-                box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            }
-            .exception-row {
-                background-color: #ffffff !important;
-            }
-            .ok-row {
-                background-color: #ffffff !important;
-            }
-            .header-info {
-                text-align: center;
-                background-color: #f1f5f9;
-                padding: 15px;
-                margin-bottom: 20px;
-                border-radius: 8px;
-                border: 1px solid #cbd5e1;
-            }
-            .footer {
-                margin-top: 40px;
-                text-align: center;
-                font-size: 9pt;
-                color: #64748b;
-                border-top: 1px solid #e2e8f0;
-                padding-top: 15px;
+            pre {
+                font-family: "Courier New", "Courier", monospace;
+                font-size: 8pt;
+                line-height: 1.2;
+                margin: 0;
+                padding: 0;
+                white-space: pre;
             }
         </style>';
 
-        // Header informativo
-        $html = $css;
-        $html .= '<div class="header-info">';
-        $html .= '<h1>' . htmlspecialchars($data['title']) . '</h1>';
-        $html .= '<p><strong>Generato il:</strong> ' . date('d/m/Y \a\l\l\e H:i:s') . '</p>';
-        if ($reportType === 'daily') {
-            $html .= '<p><strong>Data:</strong> ' . date('d/m/Y', strtotime($data['date'])) . '</p>';
-        } else {
-            $html .= '<p><strong>Periodo:</strong> Dal ' . date('d/m/Y', strtotime($data['start_date'])) . ' al ' . date('d/m/Y', strtotime($data['end_date'])) . '</p>';
-        }
-        $html .= '</div>';
+        // Genera contenuto in stile SAP ASCII
+        $content = $this->generateSapStyleContent($data, $reportType);
 
-        // Statistiche in grid
-        if (!empty($data['stats'])) {
-            $html .= '<div class="stats-grid">';
-            $html .= '<h2> Riepilogo Statistiche</h2>';
-            $html .= '<div class="stat-item"> <strong>Totale Controlli:</strong> ' . ($data['stats']['total_controls'] ?? $data['records']->count()) . '</div>';
-
-            $totalExceptions = 0;
-            foreach ($data['records'] as $record) {
-                if ($record->ha_eccezioni) $totalExceptions++;
-            }
-            $html .= '<div class="stat-item"> <strong>Controlli con Eccezioni:</strong> ' . $totalExceptions . '</div>';
-            $html .= '<div class="stat-item"> <strong>Controlli OK:</strong> ' . ($data['records']->count() - $totalExceptions) . '</div>';
-
-            if ($totalExceptions > 0) {
-                $percentageExceptions = round(($totalExceptions / $data['records']->count()) * 100, 1);
-                $html .= '<div class="stat-item"> <strong>% Eccezioni:</strong> ' . $percentageExceptions . '%</div>';
-            }
-
-            // Statistiche per reparto
-            if (!empty($data['stats']['by_department'])) {
-                $html .= '<h3> Controlli per Reparto</h3>';
-                foreach ($data['stats']['by_department'] as $dept) {
-                    $html .= '<div class="stat-item"> ' . htmlspecialchars($dept['reparto']) . ': <strong>' . $dept['count'] . '</strong> controlli</div>';
-                }
-            }
-            $html .= '</div>';
-        }
-
-        // Tabella record
-        if (!empty($data['records'])) {
-            $html .= '<h2>Record Controlli Qualit</h2>';
-            $html .= '<table>';
-            $html .= '<thead><tr>';
-            $html .= '<th>ID</th>';
-            $html .= '<th>Cartellino</th>';
-            $html .= '<th>Reparto</th>';
-            $html .= '<th>Operatore</th>';
-            $html .= '<th>Articolo</th>';
-            $html .= '<th>Paia</th>';
-            $html .= '<th>Eccezioni</th>';
-            $html .= '<th>Data</th>';
-            $html .= '</tr></thead><tbody>';
-
-            foreach ($data['records'] as $record) {
-                $rowClass = $record->ha_eccezioni ? 'exception-row' : 'ok-row';
-                $html .= '<tr class="' . $rowClass . '">';
-                $html .= '<td>' . htmlspecialchars($record->id) . '</td>';
-                $html .= '<td>' . htmlspecialchars($record->numero_cartellino) . '</td>';
-                $html .= '<td>' . htmlspecialchars($record->reparto) . '</td>';
-                $html .= '<td>' . htmlspecialchars($record->operatore) . '</td>';
-                $html .= '<td>' . htmlspecialchars($record->articolo) . '</td>';
-                $html .= '<td>' . htmlspecialchars($record->paia_totali) . '</td>';
-                $html .= '<td style="font-weight: bold; color: ' . ($record->ha_eccezioni ? '#dc2626' : '#16a34a') . ';">' . ($record->ha_eccezioni ? ' S' : ' No') . '</td>';
-                $html .= '<td>' . date('d/m/Y H:i', strtotime($record->data_controllo)) . '</td>';
-                $html .= '</tr>';
-            }
-
-            $html .= '</tbody></table>';
-        } else {
-            $html .= '<p>Nessun record trovato per il periodo selezionato.</p>';
-        }
-
-        // Footer professionale
-        $html .= '<div class="footer">';
-        $html .= '<p><strong>Report CQ Hermes</strong> - Sistema Controllo Qualit</p>';
-        $html .= '<p>Report generato il ' . date('d/m/Y \a\l\l\e H:i:s') . ' | COREGRE Sistema Gestionale</p>';
-        $html .= '</div>';
+        // Output come pre-formattato
+        $html = $css . '<pre>' . $content . '</pre>';
 
         // Scrivi HTML nel PDF
         $pdf->writeHTML($html, true, false, true, false, '');
@@ -782,7 +628,130 @@ class QualityController extends BaseController
     }
 
     /**
-     * Genera Excel del report
+     * Genera contenuto in stile SAP/Console ASCII
+     */
+    private function generateSapStyleContent($data, $reportType)
+    {
+        $output = '';
+        $width = 130; // Larghezza totale
+
+        // Box header con ASCII art
+        $output .= str_repeat('=', $width) . "\n";
+        $output .= $this->centerText('COREGRE SISTEMA GESTIONALE', $width) . "\n";
+        $output .= $this->centerText('REPORT CONTROLLO QUALITA\' HERMES', $width) . "\n";
+        $output .= str_repeat('=', $width) . "\n";
+        $output .= "\n";
+
+        // Informazioni header
+        $output .= "Data Generazione: " . date('d/m/Y H:i:s') . "\n";
+        if ($reportType === 'daily') {
+            $output .= "Data Report    : " . date('d/m/Y', strtotime($data['date'])) . "\n";
+        } else {
+            $output .= "Periodo        : " . date('d/m/Y', strtotime($data['start_date'])) . " - " . date('d/m/Y', strtotime($data['end_date'])) . "\n";
+        }
+        $output .= "\n";
+        $output .= str_repeat('-', $width) . "\n";
+
+        // Statistiche riepilogative
+        $totalRecords = $data['records']->count();
+        $totalExceptions = 0;
+        foreach ($data['records'] as $record) {
+            if ($record->ha_eccezioni) $totalExceptions++;
+        }
+        $totalOk = $totalRecords - $totalExceptions;
+        $percentExceptions = $totalRecords > 0 ? round(($totalExceptions / $totalRecords) * 100, 1) : 0;
+
+        $output .= "RIEPILOGO STATISTICHE\n";
+        $output .= str_repeat('-', $width) . "\n";
+        $output .= "\n";
+        $output .= sprintf("  ┌─────────────────────────────────────────┐\n");
+        $output .= sprintf("  │ Totale Controlli       : %6d       │\n", $totalRecords);
+        $output .= sprintf("  │ Controlli OK           : %6d       │\n", $totalOk);
+        $output .= sprintf("  │ Controlli con Eccezioni: %6d       │\n", $totalExceptions);
+        $output .= sprintf("  │ Percentuale Eccezioni  : %6.1f%%     │\n", $percentExceptions);
+        $output .= sprintf("  └─────────────────────────────────────────┘\n");
+        $output .= "\n";
+
+        // Statistiche per reparto se disponibili
+        if (!empty($data['stats']['by_department'])) {
+            $output .= "DISTRIBUZIONE PER REPARTO\n";
+            $output .= str_repeat('-', $width) . "\n";
+            $output .= "\n";
+            foreach ($data['stats']['by_department'] as $dept) {
+                $deptName = str_pad($dept['reparto'], 30);
+                $count = sprintf('%5d', $dept['count']);
+                $bar = str_repeat('█', min(50, $dept['count']));
+                $output .= sprintf("  %s : %s %s\n", $deptName, $count, $bar);
+            }
+            $output .= "\n";
+        }
+
+        $output .= str_repeat('=', $width) . "\n";
+        $output .= "DETTAGLIO RECORD CONTROLLI\n";
+        $output .= str_repeat('=', $width) . "\n";
+        $output .= "\n";
+
+        // Header tabella
+        $output .= sprintf("%-6s | %-12s | %-20s | %-15s | %-15s | %-6s | %-10s | %-16s\n",
+            'ID', 'CARTELLINO', 'REPARTO', 'OPERATORE', 'ARTICOLO', 'PAIA', 'STATO', 'DATA/ORA'
+        );
+        $output .= str_repeat('-', $width) . "\n";
+
+        // Dati tabella
+        if (!empty($data['records'])) {
+            foreach ($data['records'] as $record) {
+                $stato = $record->ha_eccezioni ? '[X] ECCEZ.' : '[√] OK';
+                $output .= sprintf("%-6s | %-12s | %-20s | %-15s | %-15s | %-6s | %-10s | %s\n",
+                    substr($record->id, 0, 6),
+                    substr($record->numero_cartellino, 0, 12),
+                    substr($record->reparto, 0, 20),
+                    substr($record->operatore, 0, 15),
+                    substr($record->articolo, 0, 15),
+                    substr($record->paia_totali, 0, 6),
+                    $stato,
+                    date('d/m/Y H:i', strtotime($record->data_controllo))
+                );
+
+                // Se ci sono eccezioni, mostrale indentate
+                if ($record->ha_eccezioni && $record->qualityExceptions) {
+                    foreach ($record->qualityExceptions as $exc) {
+                        $output .= sprintf("       └─> DIFETTO: %s", substr($exc->tipo_difetto, 0, 40));
+                        if ($exc->paia_difettose) {
+                            $output .= sprintf(" (Paia: %d)", $exc->paia_difettose);
+                        }
+                        $output .= "\n";
+                    }
+                }
+            }
+        } else {
+            $output .= $this->centerText('Nessun record trovato per il periodo selezionato', $width) . "\n";
+        }
+
+        $output .= str_repeat('-', $width) . "\n";
+        $output .= "\n";
+
+        // Footer
+        $output .= str_repeat('=', $width) . "\n";
+        $output .= $this->centerText('Fine Report', $width) . "\n";
+        $output .= $this->centerText('COREGRE Sistema Gestionale - Report CQ Hermes', $width) . "\n";
+        $output .= str_repeat('=', $width) . "\n";
+
+        return $output;
+    }
+
+    /**
+     * Helper per centrare testo
+     */
+    private function centerText($text, $width)
+    {
+        $textLen = strlen($text);
+        if ($textLen >= $width) return $text;
+        $padding = floor(($width - $textLen) / 2);
+        return str_repeat(' ', $padding) . $text;
+    }
+
+    /**
+     * Genera Excel del report - Stile Minimalista
      */
     private function generateExcelReport($data, $reportType)
     {
@@ -794,99 +763,133 @@ class QualityController extends BaseController
         // Imposta orientamento orizzontale
         $sheet->getPageSetup()->setOrientation(\PhpOffice\PhpSpreadsheet\Worksheet\PageSetup::ORIENTATION_LANDSCAPE);
 
+        // Font monospace per tutta la sheet
+        $sheet->getParent()->getDefaultStyle()->getFont()->setName('Courier New')->setSize(9);
+
         // Imposta titolo del documento
         $spreadsheet->getProperties()
             ->setTitle($data['title'])
             ->setCreator('COREGRE CQ System')
-            ->setDescription('Report CQ Hermes generato automaticamente');
+            ->setDescription('Report CQ Hermes - Stile Console');
 
-        // Titolo principale
-        $sheet->setCellValue('A1', $data['title']);
-        $sheet->mergeCells('A1:H1');
-        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(16)->setColor(new Color('FF6B35'));
-        $sheet->getStyle('A1')->getAlignment()->setHorizontal('center');
+        $currentRow = 1;
 
-        $currentRow = 3;
+        // Header stile console
+        $sheet->setCellValue("A{$currentRow}", str_repeat('=', 130));
+        $currentRow++;
+        $sheet->setCellValue("A{$currentRow}", '                       COREGRE SISTEMA GESTIONALE');
+        $sheet->getStyle("A{$currentRow}")->getFont()->setBold(true);
+        $currentRow++;
+        $sheet->setCellValue("A{$currentRow}", '                   REPORT CONTROLLO QUALITA\' HERMES');
+        $sheet->getStyle("A{$currentRow}")->getFont()->setBold(true);
+        $currentRow++;
+        $sheet->setCellValue("A{$currentRow}", str_repeat('=', 130));
+        $currentRow += 2;
 
-        if ($reportType === 'daily' && isset($data['stats'])) {
-            // Sezione statistiche
-            $sheet->setCellValue("A{$currentRow}", 'STATISTICHE GIORNALIERE');
-            $sheet->getStyle("A{$currentRow}")->getFont()->setBold(true)->setSize(12);
-            $currentRow++;
+        // Info header
+        if ($reportType === 'daily') {
+            $sheet->setCellValue("A{$currentRow}", 'Data Report    : ' . date('d/m/Y', strtotime($data['date'])));
+        } else {
+            $sheet->setCellValue("A{$currentRow}", 'Periodo        : ' . date('d/m/Y', strtotime($data['start_date'])) . ' - ' . date('d/m/Y', strtotime($data['end_date'])));
+        }
+        $currentRow++;
+        $sheet->setCellValue("A{$currentRow}", 'Data Generazione: ' . date('d/m/Y H:i:s'));
+        $currentRow += 2;
 
-            $sheet->setCellValue("A{$currentRow}", 'Totale Controlli:');
-            $sheet->setCellValue("B{$currentRow}", $data['stats']['total_controls']);
-            $sheet->getStyle("A{$currentRow}")->getFont()->setBold(true);
-            $currentRow++;
-
-            if (!empty($data['stats']['by_department'])) {
-                $sheet->setCellValue("A{$currentRow}", 'Per Reparto:');
-                $sheet->getStyle("A{$currentRow}")->getFont()->setBold(true);
-                $currentRow++;
-
-                foreach ($data['stats']['by_department'] as $dept) {
-                    $sheet->setCellValue("B{$currentRow}", $dept['reparto']);
-                    $sheet->setCellValue("C{$currentRow}", $dept['count'] . ' controlli');
-                    $currentRow++;
-                }
-            }
-
-            $currentRow += 2; // Spazio
+        // Statistiche
+        $totalRecords = $data['records']->count();
+        $totalExceptions = 0;
+        foreach ($data['records'] as $record) {
+            if ($record->ha_eccezioni) $totalExceptions++;
         }
 
-        // Sezione dati
+        $sheet->setCellValue("A{$currentRow}", str_repeat('-', 50));
+        $currentRow++;
+        $sheet->setCellValue("A{$currentRow}", 'RIEPILOGO STATISTICHE');
+        $sheet->getStyle("A{$currentRow}")->getFont()->setBold(true);
+        $currentRow++;
+        $sheet->setCellValue("A{$currentRow}", str_repeat('-', 50));
+        $currentRow++;
+        $sheet->setCellValue("A{$currentRow}", sprintf('Totale Controlli       : %6d', $totalRecords));
+        $currentRow++;
+        $sheet->setCellValue("A{$currentRow}", sprintf('Controlli OK           : %6d', $totalRecords - $totalExceptions));
+        $currentRow++;
+        $sheet->setCellValue("A{$currentRow}", sprintf('Controlli con Eccezioni: %6d', $totalExceptions));
+        $currentRow++;
+        $percentExceptions = $totalRecords > 0 ? round(($totalExceptions / $totalRecords) * 100, 1) : 0;
+        $sheet->setCellValue("A{$currentRow}", sprintf('Percentuale Eccezioni  : %6.1f%%', $percentExceptions));
+        $currentRow += 2;
+
+        // Tabella record
+        $sheet->setCellValue("A{$currentRow}", str_repeat('=', 110));
+        $currentRow++;
+        $sheet->setCellValue("A{$currentRow}", 'DETTAGLIO RECORD CONTROLLI');
+        $sheet->getStyle("A{$currentRow}")->getFont()->setBold(true);
+        $currentRow++;
+        $sheet->setCellValue("A{$currentRow}", str_repeat('=', 110));
+        $currentRow += 2;
+
+        // Headers
+        $headers = ['ID', 'CARTELLINO', 'REPARTO', 'OPERATORE', 'ARTICOLO', 'PAIA', 'STATO', 'DATA/ORA'];
+        $cols = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+        foreach ($headers as $idx => $header) {
+            $sheet->setCellValue("{$cols[$idx]}{$currentRow}", $header);
+            $sheet->getStyle("{$cols[$idx]}{$currentRow}")->getFont()->setBold(true);
+        }
+        $currentRow++;
+        $sheet->setCellValue("A{$currentRow}", str_repeat('-', 110));
+        $currentRow++;
+
+        // Dati
         if (!empty($data['records'])) {
-            $sheet->setCellValue("A{$currentRow}", 'RECORD CONTROLLI QUALIT');
-            $sheet->getStyle("A{$currentRow}")->getFont()->setBold(true)->setSize(12);
-            $currentRow += 2;
-
-            // Headers tabella
-            $headers = ['ID', 'Cartellino', 'Reparto', 'Operatore', 'Articolo', 'Paia', 'Eccezioni', 'Data'];
-            $headerRow = $currentRow;
-
-            foreach ($headers as $col => $header) {
-                $cellAddress = chr(65 + $col) . $headerRow;
-                $sheet->setCellValue($cellAddress, $header);
-            }
-
-            // Stile headers
-            $sheet->getStyle("A{$headerRow}:H{$headerRow}")->getFill()
-                ->setFillType(Fill::FILL_SOLID)
-                ->getStartColor()->setRGB('FF6B35');
-            $sheet->getStyle("A{$headerRow}:H{$headerRow}")->getFont()
-                ->setBold(true)
-                ->setColor(new Color('FFFFFF'));
-
-            $currentRow++;
-
-            // Dati
             foreach ($data['records'] as $record) {
+                $stato = $record->ha_eccezioni ? '[X] ECCEZ.' : '[√] OK';
                 $sheet->setCellValue("A{$currentRow}", $record->id);
                 $sheet->setCellValue("B{$currentRow}", $record->numero_cartellino);
                 $sheet->setCellValue("C{$currentRow}", $record->reparto);
                 $sheet->setCellValue("D{$currentRow}", $record->operatore);
                 $sheet->setCellValue("E{$currentRow}", $record->articolo);
                 $sheet->setCellValue("F{$currentRow}", $record->paia_totali);
-                $sheet->setCellValue("G{$currentRow}", $record->ha_eccezioni ? 'S' : 'No');
+                $sheet->setCellValue("G{$currentRow}", $stato);
                 $sheet->setCellValue("H{$currentRow}", date('d/m/Y H:i', strtotime($record->data_controllo)));
 
-                // Rimuovo colori alternati - sfondo bianco uniforme
+                // Evidenzia eccezioni
+                if ($record->ha_eccezioni) {
+                    $sheet->getStyle("G{$currentRow}")->getFont()->setBold(true);
+                }
 
                 $currentRow++;
+
+                // Eccezioni indentate
+                if ($record->ha_eccezioni && $record->qualityExceptions) {
+                    foreach ($record->qualityExceptions as $exc) {
+                        $defectText = '       └─> DIFETTO: ' . $exc->tipo_difetto;
+                        if ($exc->paia_difettose) {
+                            $defectText .= ' (Paia: ' . $exc->paia_difettose . ')';
+                        }
+                        $sheet->setCellValue("A{$currentRow}", $defectText);
+                        $sheet->mergeCells("A{$currentRow}:H{$currentRow}");
+                        $currentRow++;
+                    }
+                }
             }
         } else {
-            $sheet->setCellValue("A{$currentRow}", 'Nessun record trovato per il periodo selezionato.');
-            $sheet->getStyle("A{$currentRow}")->getFont()->setItalic(true);
+            $sheet->setCellValue("A{$currentRow}", 'Nessun record trovato per il periodo selezionato');
             $currentRow++;
         }
 
-        // Timestamp generazione
+        $sheet->setCellValue("A{$currentRow}", str_repeat('-', 110));
         $currentRow += 2;
-        $sheet->setCellValue("A{$currentRow}", 'Report generato il ' . date('d/m/Y \a\l\l\e H:i:s'));
-        $sheet->getStyle("A{$currentRow}")->getFont()->setSize(9)->setColor(new Color('666666'));
+
+        // Footer
+        $sheet->setCellValue("A{$currentRow}", str_repeat('=', 50));
+        $currentRow++;
+        $sheet->setCellValue("A{$currentRow}", 'Fine Report - COREGRE Sistema Gestionale');
+        $currentRow++;
+        $sheet->setCellValue("A{$currentRow}", str_repeat('=', 50));
 
         // Auto-size colonne
-        foreach (range('A', 'H') as $col) {
+        foreach ($cols as $col) {
             $sheet->getColumnDimension($col)->setAutoSize(true);
         }
 

@@ -107,23 +107,21 @@
     <!-- Calendario -->
     <div class="lg:col-span-1">
         <div class="rounded-2xl border border-gray-200 bg-white p-6 shadow-lg dark:border-gray-800 dark:bg-gray-800/40 backdrop-blur-sm">
+            <!-- Calendar Header -->
             <div class="flex items-center justify-between mb-6">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Calendario</h3>
-                <div class="flex space-x-2">
-                    <button id="prevMonth" class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
-                        <i class="fas fa-chevron-left"></i>
-                    </button>
-                    <button id="nextMonth" class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
-                        <i class="fas fa-chevron-right"></i>
-                    </button>
-                </div>
+                <button id="prevMonth" class="inline-flex items-center px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 transition-colors">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+
+                <h3 id="calendarMonthYear" class="text-lg font-semibold text-gray-900 dark:text-white"></h3>
+
+                <button id="nextMonth" class="inline-flex items-center px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 transition-colors">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
             </div>
-            <div id="calendarContainer">
-                <div id="calendarMonthYear" class="text-center mb-4">
-                    <h4 class="text-lg font-semibold text-gray-900 dark:text-white"></h4>
-                </div>
-                <div id="calendarGrid" class="calendar-grid"></div>
-            </div>
+
+            <!-- Calendar Grid -->
+            <div id="calendarGrid" class="calendar-grid"></div>
         </div>
     </div>
 
@@ -295,71 +293,105 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 
 <style>
-.calendar-grid {
-    font-family: inherit;
-}
-
 .calendar-grid table {
     width: 100%;
-    border-collapse: collapse;
-}
-
-.calendar-grid th,
-.calendar-grid td {
-    padding: 8px;
-    text-align: center;
-    border: 1px solid;
+    border-collapse: separate;
+    border-spacing: 0;
 }
 
 .calendar-grid th {
+    padding: 0.75rem;
+    text-align: center;
+    font-size: 0.875rem;
     font-weight: 600;
-    background-color: rgb(243 244 246);
-    color: rgb(55 65 81);
-    border-color: rgb(229 231 235);
-}
-
-.calendar-grid td {
-    cursor: pointer;
-    transition: background-color 0.2s;
-    color: rgb(17 24 39);
-    border-color: rgb(229 231 235);
-}
-
-.calendar-grid td:hover {
-    background-color: rgb(219 234 254);
-}
-
-.calendar-grid td.selected {
-    background-color: rgb(59 130 246);
-    color: white;
-}
-
-.calendar-grid td.other-month {
-    color: rgb(156 163 175);
-}
-
-.calendar-grid td.today {
-    background-color: rgb(254 243 199);
-    font-weight: 600;
+    color: #374151;
+    border-bottom: 1px solid #e5e7eb;
 }
 
 .dark .calendar-grid th {
-    background-color: rgb(55 65 81);
-    color: rgb(243 244 246);
-    border-color: rgb(75 85 99);
+    color: #d1d5db;
+    border-bottom-color: #4b5563;
+}
+
+.calendar-grid td {
+    height: 5rem;
+    border: 1px solid #f3f4f6;
+    position: relative;
+    transition: all 0.2s;
+    cursor: pointer;
 }
 
 .dark .calendar-grid td {
-    border-color: rgb(75 85 99);
-    color: rgb(243 244 246);
+    border-color: #4b5563;
 }
 
-.dark .calendar-grid td:hover {
-    background-color: rgb(30 64 175);
+.calendar-grid td.empty {
+    background-color: #f9fafb;
+    cursor: not-allowed;
+}
+
+.dark .calendar-grid td.empty {
+    background-color: #1f2937;
+}
+
+.calendar-grid td.today {
+    background-color: #dbeafe;
 }
 
 .dark .calendar-grid td.today {
-    background-color: rgb(146 64 14);
+    background-color: rgba(30, 58, 138, 0.3);
+}
+
+.calendar-grid td.selected {
+    background-color: #dcfce7;
+}
+
+.dark .calendar-grid td.selected {
+    background-color: rgba(21, 128, 61, 0.2);
+}
+
+.calendar-grid td:not(.empty):hover {
+    background-color: #eff6ff;
+}
+
+.dark .calendar-grid td:not(.empty):hover {
+    background-color: rgba(59, 130, 246, 0.2);
+}
+
+.calendar-grid td .day-number {
+    position: absolute;
+    top: 0.5rem;
+    left: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #111827;
+}
+
+.dark .calendar-grid td .day-number {
+    color: #f3f4f6;
+}
+
+.calendar-grid td .day-indicator {
+    position: absolute;
+    top: 0.25rem;
+    right: 0.25rem;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 9999px;
+    background-color: #22c55e;
+}
+
+.calendar-grid td .today-label {
+    position: absolute;
+    bottom: 0.25rem;
+    left: 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #2563eb;
+}
+
+.dark .calendar-grid td .today-label {
+    color: #60a5fa;
 }
 </style>
 
@@ -468,11 +500,12 @@
 
         if (!monthYearEl || !gridEl) return;
 
-        monthYearEl.innerHTML = `<h4 class="text-lg font-semibold text-gray-900 dark:text-white">${monthNames[currentMonth]} ${currentYear}</h4>`;
+        monthYearEl.textContent = `${monthNames[currentMonth]} ${currentYear}`;
 
         const firstDay = new Date(currentYear, currentMonth, 1);
         const lastDay = new Date(currentYear, currentMonth + 1, 0);
         const firstDayWeek = firstDay.getDay() === 0 ? 7 : firstDay.getDay();
+        const today = new Date();
 
         let html = `
             <table class="w-full">
@@ -489,19 +522,30 @@
             html += '<tr>';
             for (let day = 1; day <= 7; day++) {
                 if (week === 0 && day < firstDayWeek) {
-                    html += '<td class="other-month"></td>';
+                    html += '<td class="empty"></td>';
                 } else if (date > lastDay.getDate()) {
-                    html += '<td class="other-month"></td>';
+                    html += '<td class="empty"></td>';
                 } else {
                     const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(date).padStart(2, '0')}`;
-                    const isToday = dateStr === new Date().toISOString().split('T')[0];
+                    const isToday = dateStr === today.toISOString().split('T')[0];
                     const isSelected = dateStr === selectedDate;
 
                     let classes = [];
                     if (isToday) classes.push('today');
                     if (isSelected) classes.push('selected');
 
-                    html += `<td class="${classes.join(' ')}" onclick="window.selectQualityDate('${dateStr}')">${date}</td>`;
+                    html += `<td class="${classes.join(' ')}" onclick="window.selectQualityDate('${dateStr}')">`;
+                    html += `<div class="day-number">${date}</div>`;
+
+                    if (isSelected) {
+                        html += '<div class="day-indicator"></div>';
+                    }
+
+                    if (isToday) {
+                        html += '<div class="today-label">Oggi</div>';
+                    }
+
+                    html += '</td>';
                     date++;
                 }
             }
