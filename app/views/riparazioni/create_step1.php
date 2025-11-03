@@ -298,6 +298,10 @@
             // Mostra modale di loading
             const loadingModalId = showLoadingModal('Verifica Cartellino', `Ricerca del cartellino <strong>${cartellino}</strong> in corso...`);
 
+            // Timestamp per garantire tempo minimo di visualizzazione
+            const startTime = Date.now();
+            const minDisplayTime = 500; // millisecondi
+
             try {
                 console.log('Starting checkCartellino for:', cartellino); // Debug
 
@@ -315,6 +319,13 @@
 
                 const data = await response.json();
                 console.log('Data received:', data); // Debug
+
+                // Calcola tempo rimanente per raggiungere il minimo
+                const elapsed = Date.now() - startTime;
+                const remainingTime = Math.max(0, minDisplayTime - elapsed);
+
+                // Attendi il tempo rimanente prima di chiudere
+                await new Promise(resolve => setTimeout(resolve, remainingTime));
 
                 // Chiudi modale loading
                 CoregreModals.close(loadingModalId);
@@ -351,6 +362,13 @@
             } catch (error) {
                 console.error('Error checking cartellino:', error);
 
+                // Calcola tempo rimanente per raggiungere il minimo
+                const elapsed = Date.now() - startTime;
+                const remainingTime = Math.max(0, minDisplayTime - elapsed);
+
+                // Attendi il tempo rimanente prima di chiudere
+                await new Promise(resolve => setTimeout(resolve, remainingTime));
+
                 // Chiudi modale loading
                 CoregreModals.close(loadingModalId);
 
@@ -370,6 +388,10 @@
             // Mostra modale di loading
             const loadingModalId = showLoadingModal('Verifica Commessa', `Ricerca della commessa <strong>${commessa}</strong> in corso...`);
 
+            // Timestamp per garantire tempo minimo di visualizzazione
+            const startTime = Date.now();
+            const minDisplayTime = 500; // millisecondi
+
             try {
                 console.log('Starting checkCommessa for:', commessa); // Debug
 
@@ -387,6 +409,13 @@
 
                 const data = await response.json();
                 console.log('Data received:', data); // Debug
+
+                // Calcola tempo rimanente per raggiungere il minimo
+                const elapsed = Date.now() - startTime;
+                const remainingTime = Math.max(0, minDisplayTime - elapsed);
+
+                // Attendi il tempo rimanente prima di chiudere
+                await new Promise(resolve => setTimeout(resolve, remainingTime));
 
                 // Chiudi modale loading
                 CoregreModals.close(loadingModalId);
@@ -422,6 +451,13 @@
                 }
             } catch (error) {
                 console.error('Error checking commessa:', error);
+
+                // Calcola tempo rimanente per raggiungere il minimo
+                const elapsed = Date.now() - startTime;
+                const remainingTime = Math.max(0, minDisplayTime - elapsed);
+
+                // Attendi il tempo rimanente prima di chiudere
+                await new Promise(resolve => setTimeout(resolve, remainingTime));
 
                 // Chiudi modale loading
                 CoregreModals.close(loadingModalId);
