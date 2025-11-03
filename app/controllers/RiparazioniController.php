@@ -20,7 +20,7 @@ class RiparazioniController extends BaseController
     /**
      * Dashboard Riparazioni
      */
-    public function dashboard()
+    public function index()
     {
         $this->requireAuth();
         $this->requirePermission('riparazioni');
@@ -57,7 +57,7 @@ class RiparazioniController extends BaseController
                 'repairsByDepartment' => $repairsByDepartment
             ];
 
-            $this->render('riparazioni.dashboard', $data);
+            $this->render('riparazioni.index', $data);
 
         } catch (Exception $e) {
             error_log("Errore dashboard riparazioni: " . $e->getMessage());
@@ -69,7 +69,7 @@ class RiparazioniController extends BaseController
     /**
      * Lista riparazioni
      */
-    public function index()
+    public function list()
     {
         $this->requireAuth();
         $this->requirePermission('riparazioni');
@@ -120,7 +120,7 @@ class RiparazioniController extends BaseController
                 'currentUrgency' => $urgency
             ];
             
-            $this->render('riparazioni.index', $data);
+            $this->render('riparazioni.list', $data);
             
         } catch (Exception $e) {
             error_log("Errore riparazioni index: " . $e->getMessage());

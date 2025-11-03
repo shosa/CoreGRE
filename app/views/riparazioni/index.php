@@ -1,26 +1,24 @@
-<!-- Dashboard Header -->
+<?php
+/**
+ * Riparazioni - Dashboard Principale
+ * Gestione Riparazioni di Produzione
+ */
+?>
+
+<!-- Header -->
 <div class="mb-8">
     <div class="sm:flex sm:items-center sm:justify-between">
         <div>
             <div class="flex items-center">
-                <!-- Icon Box -->
-                
                 <div>
                     <h1 class="text-title-md2 font-bold text-gray-900 dark:text-white">
-                        Riparazioni
+                        Gestione Riparazioni
                     </h1>
                     <p class="mt-2 text-gray-600 dark:text-gray-400">
-                        Gestisci tutte le riparazioni in lavorazione
+                        Dashboard per la gestione delle riparazioni di produzione
                     </p>
                 </div>
             </div>
-        </div>
-        <div class="mt-4 sm:mt-0 flex items-center space-x-3">
-            <a href="<?= $this->url('/riparazioni/create') ?>" 
-               class="inline-flex items-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700">
-                <i class="fas fa-plus mr-2"></i>
-                Nuova Riparazione
-            </a>
         </div>
     </div>
 </div>
@@ -37,423 +35,246 @@
         <li>
             <div class="flex items-center">
                 <i class="fas fa-chevron-right text-gray-400 mx-2"></i>
-                <a href="<?= $this->url('/riparazioni') ?>" class="hover:text-gray-700 dark:hover:text-gray-300">
-                    Riparazioni
-                </a>
-            </div>
-        </li>
-        <li>
-            <div class="flex items-center">
-                <i class="fas fa-chevron-right text-gray-400 mx-2"></i>
-                <span class="text-gray-700 dark:text-gray-300">Lista</span>
+                <span class="text-gray-700 dark:text-gray-300">Riparazioni</span>
             </div>
         </li>
     </ol>
 </nav>
 
-
-<!-- Filtri -->
-<div class="mb-8">
-    <div class="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-800/40 md:p-6 shadow-lg backdrop-blur-sm">
-        <form method="GET" class="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Ricerca
-                </label>
-                <input type="text" name="search" value="<?= htmlspecialchars($currentSearch ?? '') ?>"
-                       placeholder="ID, Codice, Articolo, Cartellino..."
-                       class="w-full rounded-lg border-gray-300 px-4 py-2.5 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:border-primary">
+<!-- Stats Cards -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <!-- Riparazioni Totali -->
+    <div class="rounded-2xl border border-gray-200 bg-white p-6 shadow-lg dark:border-gray-800 dark:bg-gray-800/40 backdrop-blur-sm">
+        <div class="flex items-center">
+            <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 shadow-lg">
+                <i class="fas fa-tools text-white"></i>
             </div>
-            
-            <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Stato
-                </label>
-                <select name="status" 
-                        class="w-full rounded-lg border-gray-300 px-4 py-2.5 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:border-primary">
-                    <option value="">Tutti gli stati</option>
-                    <option value="open" <?= ($currentStatus ?? '') === 'open' ? 'selected' : '' ?>>Aperte</option>
-                    <option value="complete" <?= ($currentStatus ?? '') === 'complete' ? 'selected' : '' ?>>Complete</option>
-                </select>
-            </div>
-            
-            <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Urgenza
-                </label>
-                <select name="urgency" 
-                        class="w-full rounded-lg border-gray-300 px-4 py-2.5 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:border-primary">
-                    <option value="">Tutte le urgenze</option>
-                    <option value="BASSA" <?= ($currentUrgency ?? '') === 'BASSA' ? 'selected' : '' ?>>Bassa</option>
-                    <option value="MEDIA" <?= ($currentUrgency ?? '') === 'MEDIA' ? 'selected' : '' ?>>Media</option>
-                    <option value="ALTA" <?= ($currentUrgency ?? '') === 'ALTA' ? 'selected' : '' ?>>Alta</option>
-                </select>
-            </div>
-            
-            <div class="flex items-end">
-                <button type="submit" 
-                        class="w-full rounded-lg border border-gray-300 bg-gradient-to-r from-gray-500 to-gray-600 px-4 py-2.5 text-sm font-medium text-white hover:from-gray-600 hover:to-gray-700 shadow-md hover:shadow-lg transition-all duration-200">
-                    <i class="fas fa-search mr-2"></i>
-                    Filtra
-                </button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<!-- Tabella Riparazioni -->
-<div class="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-800/40 shadow-lg backdrop-blur-sm">
-    <div class="p-6 border-b border-gray-200 dark:border-gray-700">
-        <div class="flex items-center justify-between">
-            <h3 class="text-title-md font-bold text-gray-900 dark:text-white">
-                Elenco Riparazioni
-            </h3>
-            <div class="flex items-center space-x-3">
-                <button id="select-all" type="button" 
-                        class="rounded-lg px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                    <i class="fas fa-check-square mr-1"></i>
-                    Seleziona tutto
-                </button>
-                <button type="button" id="delete-selected" disabled 
-                    class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed">
-                <i class="fas fa-trash-alt mr-1"></i>
-                Elimina Selezionati
-            </button>
+            <div class="ml-4">
+                <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Riparazioni Totali</p>
+                <p class="text-2xl font-bold text-gray-900 dark:text-white">
+                    <?= number_format($stats['totalRepairs']) ?>
+                </p>
             </div>
         </div>
     </div>
-    
-    <div class="overflow-hidden">
-        <div class="overflow-x-auto">
-            <table class="w-full">
-                <thead>
-                    <tr class="border-b border-gray-200 dark:border-gray-700">
-                        <th class="w-8 px-6 py-4 text-left">
-                            <input type="checkbox" id="master-checkbox" class="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary dark:border-gray-600 dark:bg-gray-700">
-                        </th>
-                        <th class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">ID</th>
-                        <th class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Codice</th>
-                        <th class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Articolo</th>
-                        <th class="px-6 py-4 text-center text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Qtà</th>
-                        <th class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Cartellino</th>
-                        <th class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Data</th>
-                        <th class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Reparto</th>
-                        <th class="px-6 py-4 text-center text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Stato</th>
-                        <th class="px-6 py-4 text-center text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Azioni</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                <?php if (empty($riparazioni)): ?>
-                    <tr>
-                        <td colspan="10" class="px-4 py-8 text-center text-gray-500 dark:text-gray-400">
-                            <i class="fas fa-search text-4xl mb-4 text-gray-300"></i>
-                            <p class="text-lg font-medium">Nessuna riparazione trovata</p>
-                            <p class="text-sm">Prova a modificare i filtri o crea una nuova riparazione</p>
-                        </td>
-                    </tr>
-                <?php else: ?>
-                    <?php foreach ($riparazioni as $rip): ?>
-                        <?php
-                        // Determina colore urgenza
-                        $urgencyColor = 'gray';
-                        $urgencyBg = 'bg-gray-100 text-gray-800';
-                        switch ($rip->URGENZA) {
-                            case 'ALTA':
-                                $urgencyColor = 'red';
-                                $urgencyBg = 'bg-red-100 text-red-800';
-                                break;
-                            case 'MEDIA':
-                                $urgencyColor = 'yellow';
-                                $urgencyBg = 'bg-yellow-100 text-yellow-800';
-                                break;
-                            case 'BASSA':
-                                $urgencyColor = 'green';
-                                $urgencyBg = 'bg-green-100 text-green-800';
-                                break;
-                        }
-                        
-                        $isComplete = $rip->COMPLETA == 1;
-                        $statusColor = $isComplete ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800';
-                        $statusText = $isComplete ? 'Completa' : 'Aperta';
-                        ?>
-                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                            <td class="px-4 py-3">
-                                <input type="checkbox" class="row-checkbox w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
-                                       value="<?= htmlspecialchars($rip->IDRIP) ?>">
-                            </td>
-                            <td class="px-4 py-3">
-                                <div class="flex items-center">
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium <?= $urgencyBg ?>">
-                                        <?= htmlspecialchars($rip->IDRIP) ?>
-                                    </span>
-                                </div>
-                            </td>
-                            <td class="px-4 py-3 font-medium text-gray-900 dark:text-white">
-                                <?= htmlspecialchars($rip->CODICE ?? '') ?>
-                            </td>
-                            <td class="px-4 py-3 max-w-xs truncate dark:text-white">
-                                <span title="<?= htmlspecialchars($rip->ARTICOLO ?? '') ?>">
-                                    <?= htmlspecialchars($rip->ARTICOLO ?? '') ?>
-                                </span>
-                            </td>
-                            <td class="px-4 py-3 text-center dark:text-white">
-                                <span class="font-semibold"><?= htmlspecialchars($rip->QTA ?? '0') ?></span>
-                            </td>
-                            <td class="px-4 py-3 dark:text-white">
-                                <?= htmlspecialchars($rip->CARTELLINO ?? '') ?>
-                            </td>
-                            <td class="px-4 py-3 dark:text-white">
-                                <?= htmlspecialchars($rip->DATA ?? '') ?>
-                            </td>
-                            <td class="px-4 py-3 dark:text-white">
-                                <?= htmlspecialchars($rip->REPARTO ?? '') ?>
-                            </td>
-                            <td class="px-4 py-3">
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium <?= $statusColor ?>">
-                                    <?= $statusText ?>
-                                </span>
-                            </td>
-                            <td class="px-4 py-3">
-                                <div class="flex items-center space-x-3">
-                                    <a href="<?= $this->url('/riparazioni/' . $rip->IDRIP) ?>" 
-                                       class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-blue-100 text-blue-600 hover:bg-blue-200 hover:text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-800/40 transition-colors"
-                                       title="Visualizza dettagli">
-                                        <i class="fas fa-eye text-sm"></i>
-                                    </a>
-                                    <?php if (!$isComplete): ?>
-                                        <a href="<?= $this->url('/riparazioni/' . $rip->IDRIP . '/edit') ?>"
-                                           class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-green-100 text-green-600 hover:bg-green-200 hover:text-green-700 dark:bg-green-900/30 dark:text-green-400 dark:hover:bg-green-800/40 transition-colors"
-                                           title="Modifica riparazione">
-                                            <i class="fas fa-edit text-sm"></i>
-                                        </a>
-                                        <button onclick="deleteRiparazione(<?= $rip->IDRIP ?>)"
-                                                class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-red-100 text-red-600 hover:bg-red-200 hover:text-red-700 dark:bg-red-900/30 dark:text-red-400 dark:hover:bg-red-800/40 transition-colors"
-                                                title="Elimina riparazione">
-                                            <i class="fas fa-trash text-sm"></i>
-                                        </button>
-                                    <?php endif; ?>
-                                </div>
-                            </td>
-                        </tr>
-                    <?php endforeach; ?>
-                <?php endif; ?>
-            </tbody>
-        </table>
+
+    <!-- Riparazioni Aperte -->
+    <div class="rounded-2xl border border-gray-200 bg-white p-6 shadow-lg dark:border-gray-800 dark:bg-gray-800/40 backdrop-blur-sm">
+        <div class="flex items-center">
+            <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-r from-yellow-500 to-orange-500 shadow-lg">
+                <i class="fas fa-folder-open text-white"></i>
+            </div>
+            <div class="ml-4">
+                <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Riparazioni Aperte</p>
+                <p class="text-2xl font-bold text-gray-900 dark:text-white">
+                    <?= number_format($stats['openRepairs']) ?>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Riparazioni Complete -->
+    <div class="rounded-2xl border border-gray-200 bg-white p-6 shadow-lg dark:border-gray-800 dark:bg-gray-800/40 backdrop-blur-sm">
+        <div class="flex items-center">
+            <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-r from-green-500 to-green-600 shadow-lg">
+                <i class="fas fa-check-circle text-white"></i>
+            </div>
+            <div class="ml-4">
+                <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Riparazioni Complete</p>
+                <p class="text-2xl font-bold text-gray-900 dark:text-white">
+                    <?= number_format($stats['completedRepairs']) ?>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Urgenza Alta -->
+    <div class="rounded-2xl border border-gray-200 bg-white p-6 shadow-lg dark:border-gray-800 dark:bg-gray-800/40 backdrop-blur-sm">
+        <div class="flex items-center">
+            <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-r from-red-500 to-red-600 shadow-lg">
+                <i class="fas fa-exclamation-triangle text-white"></i>
+            </div>
+            <div class="ml-4">
+                <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Urgenza Alta</p>
+                <p class="text-2xl font-bold text-gray-900 dark:text-white">
+                    <?= number_format($stats['highUrgency']) ?>
+                </p>
+            </div>
+        </div>
     </div>
 </div>
 
-<script>
-// Riparazioni Index - JavaScript compatibile con PJAX
-(function() {
-    // Variabili globali per cleanup
-    let eventListeners = [];
-    
-    // Funzione di inizializzazione
-    function initRiparazioniIndex() {
-        // Cleanup precedenti event listeners
-        cleanupEventListeners();
-        
-        const masterCheckbox = document.getElementById('master-checkbox');
-        const rowCheckboxes = document.querySelectorAll('.row-checkbox');
-        const selectAllBtn = document.getElementById('select-all');
-        const deleteBtn = document.getElementById('delete-selected');
-        
-        if (!masterCheckbox || !deleteBtn) return; // Exit se elementi non trovati
-        
-        // Seleziona/deseleziona tutto
-        function masterCheckboxHandler() {
-            rowCheckboxes.forEach(checkbox => {
-                checkbox.checked = masterCheckbox.checked;
-            });
-            updateDeleteButton();
-            updateRowHighlights();
-        }
-        masterCheckbox.addEventListener('change', masterCheckboxHandler);
-        eventListeners.push({ element: masterCheckbox, event: 'change', handler: masterCheckboxHandler });
-        
-        // Seleziona tutto button
-        if (selectAllBtn) {
-            function selectAllHandler() {
-                masterCheckbox.checked = !masterCheckbox.checked;
-                masterCheckbox.dispatchEvent(new Event('change'));
-            }
-            selectAllBtn.addEventListener('click', selectAllHandler);
-            eventListeners.push({ element: selectAllBtn, event: 'click', handler: selectAllHandler });
-        }
-        
-        // Gestione selezione singola riga
-        rowCheckboxes.forEach(checkbox => {
-            function checkboxHandler() {
-                updateMasterCheckbox();
-                updateDeleteButton();
-                updateRowHighlight(this);
-            }
-            checkbox.addEventListener('change', checkboxHandler);
-            eventListeners.push({ element: checkbox, event: 'change', handler: checkboxHandler });
-        });
-        
-        function updateMasterCheckbox() {
-            const checkedCount = document.querySelectorAll('.row-checkbox:checked').length;
-            masterCheckbox.checked = checkedCount === rowCheckboxes.length;
-            masterCheckbox.indeterminate = checkedCount > 0 && checkedCount < rowCheckboxes.length;
-        }
-        
-        function updateDeleteButton() {
-            const checkedCount = document.querySelectorAll('.row-checkbox:checked').length;
-            deleteBtn.disabled = checkedCount === 0;
-        }
-        
-        function updateRowHighlight(checkbox) {
-            const row = checkbox.closest('tr');
-            if (checkbox.checked) {
-                row.classList.add('bg-blue-50', 'dark:bg-blue-900/20');
-            } else {
-                row.classList.remove('bg-blue-50', 'dark:bg-blue-900/20');
-            }
-        }
-        
-        function updateRowHighlights() {
-            rowCheckboxes.forEach(updateRowHighlight);
-        }
-        
-        // Gestione eliminazione multipla
-        function deleteSelectedHandler() {
-            const selectedIds = Array.from(document.querySelectorAll('.row-checkbox:checked'))
-                .map(cb => cb.value);
-            
-            if (selectedIds.length === 0) return;
-            
-            const count = selectedIds.length;
-            if (window.CoregreModals && window.CoregreModals.confirmDelete) {
-                window.CoregreModals.confirmDelete(
-                    count === 1 
-                        ? 'Sei sicuro di voler eliminare questa riparazione?' 
-                        : `Sei sicuro di voler eliminare ${count} riparazioni?`,
-                    () => confirmDelete(selectedIds),
-                    count
-                );
-            } else {
-                // Fallback semplice se CoregreModals non disponibile
-                if (confirm(count === 1 
-                    ? 'Sei sicuro di voler eliminare questa riparazione?' 
-                    : `Sei sicuro di voler eliminare ${count} riparazioni?`)) {
-                    confirmDelete(selectedIds);
-                }
-            }
-        }
-        deleteBtn.addEventListener('click', deleteSelectedHandler);
-        eventListeners.push({ element: deleteBtn, event: 'click', handler: deleteSelectedHandler });
-    }
-    
-    function cleanupEventListeners() {
-        eventListeners.forEach(({ element, event, handler }) => {
-            element.removeEventListener(event, handler);
-        });
-        eventListeners = [];
-    }
+<!-- Navigation Cards -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+    <!-- Nuova Riparazione -->
+    <div class="group relative overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-lg hover:shadow-xl transition-all duration-300 dark:border-gray-800 dark:bg-gray-800/40 backdrop-blur-sm hover:-translate-y-1">
+        <div class="absolute inset-0 bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/10 dark:to-green-800/10"></div>
+        <div class="relative p-8">
+            <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-r from-green-500 to-green-600 shadow-lg mb-6 group-hover:scale-110 transition-transform duration-300">
+                <i class="fas fa-plus text-white text-2xl"></i>
+            </div>
+            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">
+                Nuova Riparazione
+            </h3>
+            <p class="text-gray-600 dark:text-gray-400 mb-6">
+                Crea una nuova riparazione inserendo cartellino o commessa
+            </p>
+            <div class="flex items-center justify-between">
+                <a href="<?= $this->url('/riparazioni/create') ?>"
+                   class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:from-green-600 hover:to-green-700 font-medium transition-all duration-200">
+                    <i class="fas fa-arrow-right mr-2"></i>
+                    Inizia
+                </a>
+            </div>
+        </div>
+    </div>
 
-    // Gestione eliminazione singola - funzione globale
-    window.deleteRiparazione = function(id) {
-        if (window.CoregreModals && window.CoregreModals.confirmDelete) {
-            window.CoregreModals.confirmDelete(
-                'Sei sicuro di voler eliminare questa riparazione?',
-                () => confirmDelete([id]),
-                1
-            );
-        } else {
-            // Fallback semplice se CoregreModals non disponibile
-            if (confirm('Sei sicuro di voler eliminare questa riparazione?')) {
-                confirmDelete([id]);
-            }
-        }
-    };
+    <!-- Lista Riparazioni -->
+    <div class="group relative overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-lg hover:shadow-xl transition-all duration-300 dark:border-gray-800 dark:bg-gray-800/40 backdrop-blur-sm hover:-translate-y-1">
+        <div class="absolute inset-0 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/10 dark:to-blue-800/10"></div>
+        <div class="relative p-8">
+            <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-r from-blue-500 to-blue-600 shadow-lg mb-6 group-hover:scale-110 transition-transform duration-300">
+                <i class="fas fa-list text-white text-2xl"></i>
+            </div>
+            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">
+                Lista Riparazioni
+            </h3>
+            <p class="text-gray-600 dark:text-gray-400 mb-6">
+                Visualizza e gestisci tutte le riparazioni esistenti
+            </p>
+            <div class="flex items-center justify-between">
+                <a href="<?= $this->url('/riparazioni/list') ?>"
+                   class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:from-blue-600 hover:to-blue-700 font-medium transition-all duration-200">
+                    <i class="fas fa-arrow-right mr-2"></i>
+                    Visualizza
+                </a>
+            </div>
+        </div>
+    </div>
 
-    // Funzione di eliminazione
-    async function confirmDelete(ids) {
-        try {
-            // Mostra notifica di caricamento
-            let loadingId = null;
-            if (window.CoregreNotifications && window.CoregreNotifications.loading) {
-                loadingId = window.CoregreNotifications.loading('Eliminazione in corso...');
-            }
-            
-            const response = await fetch(`<?= $this->url('/api/riparazioni/delete') ?>`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRF-TOKEN': window.COREGRE ? window.COREGRE.csrfToken : ''
-                },
-                body: JSON.stringify({ ids: ids })
-            });
-            
-            // Rimuovi notifica di caricamento
-            if (loadingId && window.CoregreNotifications && window.CoregreNotifications.remove) {
-                window.CoregreNotifications.remove(loadingId);
-            }
-            
-            if (!response.ok) {
-                throw new Error(`Errore server: ${response.status}`);
-            }
-            
-            const data = await response.json();
-            
-            if (data.error) {
-                throw new Error(data.error);
-            }
-            
-            if (data.success) {
-                const count = ids.length;
-                const message = count === 1 
-                    ? 'Riparazione eliminata con successo'
-                    : `${count} riparazioni eliminate con successo`;
-                    
-                // Usa sistema di notifiche globale se disponibile
-                if (window.showAlert) {
-                    window.showAlert(message, 'success');
-                } else if (window.CoregreNotifications && window.CoregreNotifications.success) {
-                    window.CoregreNotifications.success(message, 3000);
-                }
-                
-                // Ricarica la pagina con PJAX se possibile, altrimenti normale reload
-                setTimeout(() => {
-                    if (window.pjax) {
-                        window.pjax.navigateTo(window.location.href);
-                    } else {
-                        window.location.reload();
-                    }
-                }, 1500);
-            } else {
-                throw new Error('Errore durante l\'eliminazione');
-            }
-            
-        } catch (error) {
-            console.error('Error deleting riparazioni:', error);
-            
-            // Rimuovi eventuali notifiche di caricamento
-            if (window.CoregreNotifications && window.CoregreNotifications.removeByText) {
-                window.CoregreNotifications.removeByText('Eliminazione in corso');
-            }
-            
-            const errorMsg = `Errore durante l'eliminazione: ${error.message}`;
-            if (window.showAlert) {
-                window.showAlert(errorMsg, 'error');
-            } else if (window.CoregreNotifications && window.CoregreNotifications.error) {
-                window.CoregreNotifications.error(errorMsg);
-            }
-        }
-    }
+    <!-- Statistiche -->
+    <div class="group relative overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-lg hover:shadow-xl transition-all duration-300 dark:border-gray-800 dark:bg-gray-800/40 backdrop-blur-sm hover:-translate-y-1">
+        <div class="absolute inset-0 bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/10 dark:to-purple-800/10"></div>
+        <div class="relative p-8">
+            <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-r from-purple-500 to-purple-600 shadow-lg mb-6 group-hover:scale-110 transition-transform duration-300">
+                <i class="fas fa-chart-bar text-white text-2xl"></i>
+            </div>
+            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">
+                Riepilogo Urgenze
+            </h3>
+            <p class="text-gray-600 dark:text-gray-400 mb-6">
+                <span class="block"><span class="font-semibold text-red-600">Alta:</span> <?= $stats['highUrgency'] ?></span>
+                <span class="block"><span class="font-semibold text-yellow-600">Media:</span> <?= $stats['mediumUrgency'] ?></span>
+                <span class="block"><span class="font-semibold text-green-600">Bassa:</span> <?= $stats['lowUrgency'] ?></span>
+            </p>
+        </div>
+    </div>
+</div>
 
-    // Registra l'inizializzatore per PJAX
-    if (window.COREGRE && window.COREGRE.onPageLoad) {
-        window.COREGRE.onPageLoad(initRiparazioniIndex);
-    }
+<!-- Ultime Riparazioni & Riparazioni per Reparto -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <!-- Ultime Riparazioni -->
+    <div class="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-800/40 shadow-lg backdrop-blur-sm">
+        <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+            <h3 class="text-title-md font-bold text-gray-900 dark:text-white flex items-center">
+                <i class="fas fa-clock mr-3 text-blue-600"></i>
+                Ultime Riparazioni
+            </h3>
+        </div>
+        <div class="p-6">
+            <?php if (empty($recentRepairs)): ?>
+                <p class="text-center text-gray-500 dark:text-gray-400 py-8">
+                    <i class="fas fa-info-circle text-4xl mb-4 block"></i>
+                    Nessuna riparazione trovata
+                </p>
+            <?php else: ?>
+                <div class="space-y-4">
+                    <?php foreach ($recentRepairs as $repair): ?>
+                        <?php
+                        $urgencyColor = 'gray';
+                        switch ($repair->URGENZA) {
+                            case 'ALTA':
+                                $urgencyColor = 'red';
+                                break;
+                            case 'MEDIA':
+                                $urgencyColor = 'yellow';
+                                break;
+                            case 'BASSA':
+                                $urgencyColor = 'green';
+                                break;
+                        }
+                        $isComplete = $repair->COMPLETA == 1;
+                        ?>
+                        <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/30 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors">
+                            <div class="flex-1">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <span class="font-semibold text-gray-900 dark:text-white">ID: <?= htmlspecialchars($repair->IDRIP) ?></span>
+                                    <span class="text-xs px-2 py-0.5 rounded-full bg-<?= $urgencyColor ?>-100 text-<?= $urgencyColor ?>-800 dark:bg-<?= $urgencyColor ?>-900/30 dark:text-<?= $urgencyColor ?>-400">
+                                        <?= htmlspecialchars($repair->URGENZA) ?>
+                                    </span>
+                                    <?php if ($isComplete): ?>
+                                        <span class="text-xs px-2 py-0.5 rounded-full bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
+                                            Completa
+                                        </span>
+                                    <?php endif; ?>
+                                </div>
+                                <p class="text-sm text-gray-600 dark:text-gray-400 truncate">
+                                    <?= htmlspecialchars($repair->ARTICOLO) ?>
+                                </p>
+                                <p class="text-xs text-gray-500 dark:text-gray-500">
+                                    Cartellino: <?= htmlspecialchars($repair->CARTELLINO) ?> • <?= htmlspecialchars($repair->DATA) ?>
+                                </p>
+                            </div>
+                            <a href="<?= $this->url('/riparazioni/' . $repair->IDRIP) ?>"
+                               class="ml-4 text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300">
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+                <div class="mt-4 text-center">
+                    <a href="<?= $this->url('/riparazioni/list') ?>"
+                       class="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium">
+                        Vedi tutte le riparazioni <i class="fas fa-arrow-right ml-1"></i>
+                    </a>
+                </div>
+            <?php endif; ?>
+        </div>
+    </div>
 
-    // Inizializza anche al primo caricamento
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initRiparazioniIndex);
-    } else {
-        initRiparazioniIndex();
-    }
-})();
-</script>
+    <!-- Riparazioni per Reparto -->
+    <div class="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-800/40 shadow-lg backdrop-blur-sm">
+        <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+            <h3 class="text-title-md font-bold text-gray-900 dark:text-white flex items-center">
+                <i class="fas fa-industry mr-3 text-purple-600"></i>
+                Riparazioni Aperte per Reparto
+            </h3>
+        </div>
+        <div class="p-6">
+            <?php if (empty($repairsByDepartment)): ?>
+                <p class="text-center text-gray-500 dark:text-gray-400 py-8">
+                    <i class="fas fa-info-circle text-4xl mb-4 block"></i>
+                    Nessuna riparazione aperta
+                </p>
+            <?php else: ?>
+                <div class="space-y-3">
+                    <?php foreach ($repairsByDepartment as $dept): ?>
+                        <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/30 rounded-lg">
+                            <div class="flex items-center gap-3">
+                                <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-100 dark:bg-purple-900/30">
+                                    <i class="fas fa-building text-purple-600 dark:text-purple-400"></i>
+                                </div>
+                                <span class="font-medium text-gray-900 dark:text-white">
+                                    <?= htmlspecialchars($dept->REPARTO ?: 'Non Specificato') ?>
+                                </span>
+                            </div>
+                            <span class="text-2xl font-bold text-gray-900 dark:text-white">
+                                <?= number_format($dept->total) ?>
+                            </span>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
+        </div>
+    </div>
+</div>
