@@ -112,16 +112,31 @@
                             <div x-show="activeMenu==='quality' " x-collapse class="dropdown-menu mt-3 space-y-1 pl-6 pr-2"
                                 data-title="Controllo Qualità">
                                 <div class="rounded-lg bg-gray-50/80 dark:bg-gray-800/40 p-2 shadow-inner backdrop-blur-sm">
-                                        <a href="<?= $this->url('/quality/') ?>"
-                                            class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-gray-600 transition-all duration-200 hover:bg-white hover:text-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-200 shadow-sm hover:shadow-md hover:-translate-y-0.5">
-                                            <i class="fas fa-home text-green-500 dark:text-green-400"></i>
-                                            <span>Dashboard</span>
-                                        </a>
-                                        <a href="<?= $this->url('/quality/hermes') ?>"
-                                            class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-gray-600 transition-all duration-200 hover:bg-white hover:text-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-200 shadow-sm hover:shadow-md hover:-translate-y-0.5">
-                                            <i class="fas fa-h text-green-500 dark:text-green-400"></i>
-                                            <span>Hermes</span>
-                                        </a>
+                                    <a href="<?= $this->url('/quality/') ?>"
+                                        class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-gray-600 transition-all duration-200 hover:bg-white hover:text-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-200 shadow-sm hover:shadow-md hover:-translate-y-0.5">
+                                        <i class="fas fa-home text-green-500 dark:text-green-400"></i>
+                                        <span>Dashboard</span>
+                                    </a>
+                                    <a href="<?= $this->url('/quality/records') ?>"
+                                        class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-gray-600 transition-all duration-200 hover:bg-white hover:text-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-200 shadow-sm hover:shadow-md hover:-translate-y-0.5">
+                                        <i class="fas fa-list text-blue-500 dark:text-blue-400"></i>
+                                        <span>Consulto Record</span>
+                                    </a>
+                                    <a href="<?= $this->url('/quality/reports') ?>"
+                                        class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-gray-600 transition-all duration-200 hover:bg-white hover:text-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-200 shadow-sm hover:shadow-md hover:-translate-y-0.5">
+                                        <i class="fas fa-file-alt text-purple-500 dark:text-purple-400"></i>
+                                        <span>Report</span>
+                                    </a>
+                                    <a href="<?= $this->url('/quality/departments') ?>"
+                                        class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-gray-600 transition-all duration-200 hover:bg-white hover:text-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-200 shadow-sm hover:shadow-md hover:-translate-y-0.5">
+                                        <i class="fas fa-building text-orange-500 dark:text-orange-400"></i>
+                                        <span>Reparti</span>
+                                    </a>
+                                    <a href="<?= $this->url('/quality/defects') ?>"
+                                        class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-gray-600 transition-all duration-200 hover:bg-white hover:text-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-200 shadow-sm hover:shadow-md hover:-translate-y-0.5">
+                                        <i class="fas fa-bug text-red-500 dark:text-red-400"></i>
+                                        <span>Tipi Difetti</span>
+                                    </a>
                                 </div>
                             </div>
                         </li> <?php endif; ?>

@@ -25,35 +25,22 @@ class QualityController extends BaseController
     }
 
     /**
-     * Dashboard principale Quality Hermes - con tabs come legacy
+     * Dashboard principale Quality - Unificata con Hermes
      */
     public function index()
     {
-
-        $data = [
-            'pageTitle' => 'CQ Hermes - Sistema Controllo Qualit Luxury',
-            'stats' => $this->getHermesStats()
-        ];
-
-        $this->render('quality.index', $data);
-    }
-
-    /**
-     * Vista Hermes CQ - Tab Records del legacy
-     */
-    public function hermes()
-    {
-        $this->logActivity('QUALITY', 'VIEW_HERMES', 'Visualizzazione dashboard Hermes CQ');
+        $this->logActivity('QUALITY', 'VIEW_DASHBOARD', 'Visualizzazione dashboard Quality');
 
         $selectedDate = $this->input('date') ?: date('Y-m-d');
         $weekStart = date('Y-m-d', strtotime('monday this week', strtotime($selectedDate)));
         $weekEnd = date('Y-m-d', strtotime('sunday this week', strtotime($selectedDate)));
 
         $data = [
-            'pageTitle' => 'Dashboard Hermes CQ',
+            'pageTitle' => 'Dashboard Controllo Qualità',
             'selectedDate' => $selectedDate,
             'weekStart' => $weekStart,
             'weekEnd' => $weekEnd,
+            'stats' => $this->getHermesStats(),
             'weeklyControls' => $this->getWeeklyControls($weekStart, $weekEnd),
             'departmentExceptions' => $this->getDepartmentExceptions(),
             'dailyRecords' => $this->getDailyRecords($selectedDate),
@@ -61,7 +48,47 @@ class QualityController extends BaseController
             'tipiDifetti' => $this->getHermesDefectTypes()
         ];
 
-        $this->render('quality.hermes', $data);
+        $this->render('quality.index', $data);
+    }
+
+    /**
+     * Vista Consulto Record CQ - Tabella completa record con filtri
+     */
+    public function records()
+    {
+        $this->logActivity('QUALITY', 'VIEW_RECORDS', 'Visualizzazione consulto record CQ');
+
+        $startDate = $this->input('start_date') ?: date('Y-m-d', strtotime('-7 days'));
+        $endDate = $this->input('end_date') ?: date('Y-m-d');
+        $reparto = $this->input('reparto');
+        $operatore = $this->input('operatore');
+
+        $query = QualityRecord::whereBetween('data_controllo', [$startDate, $endDate])
+            ->byType('GRIFFE')
+            ->with('qualityExceptions');
+
+        if ($reparto) {
+            $query->where('reparto', $reparto);
+        }
+
+        if ($operatore) {
+            $query->where('operatore', $operatore);
+        }
+
+        $records = $query->orderByDesc('data_controllo')->get();
+
+        $data = [
+            'pageTitle' => 'Consulto Record CQ',
+            'records' => $records,
+            'startDate' => $startDate,
+            'endDate' => $endDate,
+            'selectedReparto' => $reparto,
+            'selectedOperatore' => $operatore,
+            'reparti' => $this->getHermesDepartments(),
+            'operatori' => $this->getUniqueOperators()
+        ];
+
+        $this->render('quality.records', $data);
     }
 
     /**
@@ -873,6 +900,19 @@ class QualityController extends BaseController
         $writer = new Xlsx($spreadsheet);
         $writer->save('php://output');
         exit;
+    }
+
+    /**
+     * Operatori unici per filtro consulto
+     */
+    private function getUniqueOperators()
+    {
+        return QualityRecord::selectRaw('DISTINCT operatore')
+            ->whereNotNull('operatore')
+            ->where('operatore', '!=', '')
+            ->orderBy('operatore')
+            ->get()
+            ->pluck('operatore');
     }
 
     /**

@@ -66,9 +66,9 @@ $router->get('/api/riparazioni/check-cartellino', 'Riparazioni@checkCartellino')
 $router->get('/api/riparazioni/check-commessa', 'Riparazioni@checkCommessa');
 $router->post('/api/riparazioni/delete', 'Riparazioni@delete');
 
-// Routes per il controllo qualità - Sistema Hermes CQ (come legacy)
+// Routes per il controllo qualità - Sistema Hermes CQ Unificato
 $router->get('/quality', 'Quality@index');
-$router->get('/quality/hermes', 'Quality@hermes');
+$router->get('/quality/records', 'Quality@records');
 $router->get('/quality/departments', 'Quality@departments');
 $router->get('/quality/defects', 'Quality@defects');
 $router->get('/quality/reports', 'Quality@reports');
