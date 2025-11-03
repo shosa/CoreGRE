@@ -72,18 +72,24 @@
                             <div x-show="activeMenu==='riparazioni' " x-collapse
                                 class="dropdown-menu mt-3 space-y-1 pl-6 pr-2" data-title="Riparazioni">
                                 <div class="rounded-lg bg-gray-50/80 dark:bg-gray-800/40 p-2 shadow-inner
-                                    backdrop-blur-sm"> <a href="<?= $this->url('/riparazioni/create') ?>" class="flex
+                                    backdrop-blur-sm"> <a href="<?= $this->url('/riparazioni') ?>" class="flex items-center gap-3 rounded-lg
+                                        px-3 py-2.5 text-sm font-medium text-gray-600 transition-all duration-200
+                                        hover:bg-white hover:text-gray-800 dark:text-gray-400 dark:hover:bg-gray-700
+                                        dark:hover:text-gray-200 shadow-sm hover:shadow-md hover:-translate-y-0.5"> <i
+                                            class="fas fa-home text-blue-500 dark:text-blue-400"></i> <span>Home</span>
+                                        <a href="<?= $this->url('/riparazioni/create') ?>" class="flex
                                         items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-gray-600
                                         transition-all duration-200 hover:bg-white hover:text-gray-800 dark:text-gray-400
                                         dark:hover:bg-gray-700 dark:hover:text-gray-200 shadow-sm hover:shadow-md
                                         hover:-translate-y-0.5"> <i class="fas fa-plus text-blue-500
                                             dark:text-blue-400"></i> <span>Nuova</span> </a> <a
-                                        href="<?= $this->url('/riparazioni') ?>" class="flex items-center gap-3 rounded-lg
+                                            href="<?= $this->url('/riparazioni/list') ?>" class="flex items-center gap-3 rounded-lg
                                         px-3 py-2.5 text-sm font-medium text-gray-600 transition-all duration-200
                                         hover:bg-white hover:text-gray-800 dark:text-gray-400 dark:hover:bg-gray-700
                                         dark:hover:text-gray-200 shadow-sm hover:shadow-md hover:-translate-y-0.5"> <i
-                                            class="fas fa-list text-blue-500 dark:text-blue-400"></i> <span>Elenco</span>
-                                    </a></div>
+                                                class="fas fa-list text-blue-500 dark:text-blue-400"></i>
+                                            <span>Elenco</span>
+                                        </a></div>
                             </div>
                         </li> <?php endif; ?> <!-- Controllo Qualità --> <?php if ($this->hasPermission('quality')): ?>
 
@@ -105,19 +111,17 @@
                             </button> <!-- Submenu -->
                             <div x-show="activeMenu==='quality' " x-collapse class="dropdown-menu mt-3 space-y-1 pl-6 pr-2"
                                 data-title="Controllo Qualità">
-                                <div class="rounded-lg bg-gray-50/80 dark:bg-gray-800/40 p-2 shadow-inner
-                                    backdrop-blur-sm"> <a href="<?= $this->url('/quality/') ?>" class="flex
-                                        items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-gray-600
-                                        transition-all duration-200 hover:bg-white hover:text-gray-800 dark:text-gray-400
-                                        dark:hover:bg-gray-700 dark:hover:text-gray-200 shadow-sm hover:shadow-md
-                                        hover:-translate-y-0.5"> <i class="fas fa-home text-green-500
-                                            dark:text-green-400"></i> <span>Dashboard</span> </a> <a
-                                        href="<?= $this->url('/quality/hermes') ?>" class="flex items-center gap-3 rounded-lg
-                                        px-3 py-2.5 text-sm font-medium text-gray-600 transition-all duration-200
-                                        hover:bg-white hover:text-gray-800 dark:text-gray-400 dark:hover:bg-gray-700
-                                        dark:hover:text-gray-200 shadow-sm hover:shadow-md hover:-translate-y-0.5"> <i
-                                            class="fas fa-h text-green-500 dark:text-green-400"></i> <span>Hermes</span>
-                                    </a>
+                                <div class="rounded-lg bg-gray-50/80 dark:bg-gray-800/40 p-2 shadow-inner backdrop-blur-sm">
+                                        <a href="<?= $this->url('/quality/') ?>"
+                                            class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-gray-600 transition-all duration-200 hover:bg-white hover:text-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-200 shadow-sm hover:shadow-md hover:-translate-y-0.5">
+                                            <i class="fas fa-home text-green-500 dark:text-green-400"></i>
+                                            <span>Dashboard</span>
+                                        </a>
+                                        <a href="<?= $this->url('/quality/hermes') ?>"
+                                            class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-gray-600 transition-all duration-200 hover:bg-white hover:text-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-200 shadow-sm hover:shadow-md hover:-translate-y-0.5">
+                                            <i class="fas fa-h text-green-500 dark:text-green-400"></i>
+                                            <span>Hermes</span>
+                                        </a>
                                 </div>
                             </div>
                         </li> <?php endif; ?>
