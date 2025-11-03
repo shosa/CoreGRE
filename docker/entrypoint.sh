@@ -95,6 +95,11 @@ chmod -R 775 /var/www/html/public/uploads
 chmod -R g+s /var/www/html/storage
 chmod -R g+s /var/www/html/public/uploads
 
+# Fix nginx temp directory permissions (worker runs as www-data)
+mkdir -p /var/lib/nginx/tmp/client_body
+chown -R www-data:www-data /var/lib/nginx/tmp
+chmod -R 755 /var/lib/nginx/tmp
+
 echo "✓ Permissions set (775 with SGID)"
 
 # ============================================================================

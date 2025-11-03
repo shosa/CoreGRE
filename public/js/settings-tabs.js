@@ -736,10 +736,11 @@
 
     // Register cleanup and re-initialization for PJAX navigation
     if (window.COREGRE && window.COREGRE.onPageLoad) {
-        // Cleanup before loading new content
-        window.COREGRE.onBeforeLoad(cleanupSettingsPage);
         // Re-initialize after new content loaded
         window.COREGRE.onPageLoad(initSettingsPage);
     }
+
+    // Cleanup when navigating away (AbortController will handle event listeners)
+    document.addEventListener('pjax:beforeNavigate', cleanupSettingsPage);
 
 })();
