@@ -230,6 +230,7 @@
 
     // AbortController per gestire cleanup event listeners
     let formController = null;
+    let isInitialized = false;
 
     function initSearchForm() {
         const form = document.getElementById('searchForm');
@@ -237,6 +238,15 @@
         const commessaInput = document.getElementById('commessa');
 
         if (!form || !cartellinoInput || !commessaInput) return;
+
+        // Previeni inizializzazione multipla
+        if (isInitialized) {
+            console.log('[Riparazioni Step1] Already initialized, skipping');
+            return;
+        }
+
+        console.log('[Riparazioni Step1] Initializing');
+        isInitialized = true;
 
         // Abort vecchi listener se esistono
         if (formController) {
@@ -414,6 +424,20 @@
             }
         }
     }
+
+    // Cleanup function per PJAX navigation
+    function cleanupSearchForm() {
+        console.log('[Riparazioni Step1] Cleanup');
+        isInitialized = false;
+
+        if (formController) {
+            formController.abort();
+            formController = null;
+        }
+    }
+
+    // Registra cleanup per PJAX
+    document.addEventListener('pjax:beforeNavigate', cleanupSearchForm);
 
     // Registra l'inizializzatore per PJAX
     if (window.COREGRE && window.COREGRE.onPageLoad) {
