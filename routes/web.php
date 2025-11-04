@@ -276,7 +276,7 @@ $router->post('/database/table-operation', 'Database@tableOperation');
 $router->post('/database/table-preview', 'Database@tablePreview');
 
 // Migration System - rimosso sistema custom, ora si usa Artisan per le migrazioni
-// Le routes per Artisan migrations sono in /artisan-web/
+// System Dashboard - Monitoring, Logs, Performance, Quick Actions
 
 // Etichette DYMO System
 $router->get('/etichette', 'Etichette@index');
@@ -435,12 +435,11 @@ if (APP_ENV === 'development') {
     });
 }
 
-// Artisan Web Console (solo admin)
-$router->get('/artisan-web', 'Artisan@index');
-$router->post('/artisan-web/execute', 'Artisan@execute');
-$router->get('/artisan-web/migration-status', 'Artisan@migrationStatus');
-$router->post('/artisan-web/run-migrations', 'Artisan@runMigrations');
-$router->post('/artisan-web/rollback', 'Artisan@rollbackMigration');
+// System Console - Artisan + Shell/SSH (solo admin)
+$router->get('/system', 'System@index');
+$router->post('/system/execute', 'System@execute');
+$router->post('/system/execute-shell', 'System@executeShell');
+$router->get('/system/metrics', 'System@metrics');
 
 // Cron Management Routes (solo admin)
 $router->get('/cron', 'Cron@index');

@@ -119,22 +119,22 @@
                                     </a>
                                     <a href="<?= $this->url('/quality/records') ?>"
                                         class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-gray-600 transition-all duration-200 hover:bg-white hover:text-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-200 shadow-sm hover:shadow-md hover:-translate-y-0.5">
-                                        <i class="fas fa-list text-blue-500 dark:text-blue-400"></i>
+                                        <i class="fas fa-list text-green-500 dark:text-green-400"></i>
                                         <span>Consulto Record</span>
                                     </a>
                                     <a href="<?= $this->url('/quality/reports') ?>"
                                         class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-gray-600 transition-all duration-200 hover:bg-white hover:text-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-200 shadow-sm hover:shadow-md hover:-translate-y-0.5">
-                                        <i class="fas fa-file-alt text-purple-500 dark:text-purple-400"></i>
+                                        <i class="fas fa-file-alt text-green-500 dark:text-green-400"></i>
                                         <span>Report</span>
                                     </a>
                                     <a href="<?= $this->url('/quality/departments') ?>"
                                         class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-gray-600 transition-all duration-200 hover:bg-white hover:text-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-200 shadow-sm hover:shadow-md hover:-translate-y-0.5">
-                                        <i class="fas fa-building text-orange-500 dark:text-orange-400"></i>
+                                        <i class="fas fa-building text-green-500 dark:text-green-400"></i>
                                         <span>Reparti</span>
                                     </a>
                                     <a href="<?= $this->url('/quality/defects') ?>"
                                         class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-gray-600 transition-all duration-200 hover:bg-white hover:text-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-200 shadow-sm hover:shadow-md hover:-translate-y-0.5">
-                                        <i class="fas fa-bug text-red-500 dark:text-red-400"></i>
+                                        <i class="fas fa-bug text-green-500 dark:text-green-400"></i>
                                         <span>Tipi Difetti</span>
                                     </a>
                                 </div>
@@ -432,20 +432,20 @@
 
                                 </a> </li> <?php endif; ?>
 
-                        <!-- Artisan Console -->
+                        <!-- System Dashboard -->
                         <?php if ($this->hasPermission('artisan')): ?>
                             <li>
-                                <a href="<?= $this->url('/artisan-web') ?>" class="sidebar-item flex items-center gap-3 rounded-xl px-4
+                                <a href="<?= $this->url('/system') ?>" class="sidebar-item flex items-center gap-3 rounded-xl px-4
                                 py-3 font-medium text-gray-700 transition-all duration-200 hover:bg-gradient-to-r
-                                hover:from-cyan-50 hover:to-cyan-100 hover:text-gray-800 dark:text-gray-300
+                                hover:from-purple-50 hover:to-purple-100 hover:text-gray-800 dark:text-gray-300
                                 dark:hover:from-gray-800/50 dark:hover:to-gray-700/50 dark:hover:text-gray-200 shadow-sm
                                 hover:shadow-lg hover:-translate-y-0.5 group">
                                     <div
                                         class="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-r
-                                    from-cyan-500 to-cyan-600 shadow-md group-hover:shadow-lg transition-all duration-200">
-                                        <i class="fas fa-terminal text-sm text-white"></i>
+                                    from-purple-500 to-purple-600 shadow-md group-hover:shadow-lg transition-all duration-200">
+                                        <i class="fas fa-server text-sm text-white"></i>
                                     </div>
-                                    <span class="sidebar-text">Artisan Console</span>
+                                    <span class="sidebar-text">System Dashboard</span>
                                 </a>
                             </li>
                         <?php endif; ?>

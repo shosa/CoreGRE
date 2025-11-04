@@ -149,11 +149,6 @@
     <!-- Risultati della ricerca verranno inseriti qui -->
 </div>
 
-<!-- Selection Info (Fixed Bottom Right) -->
-<div id="selection-info" class="fixed bottom-6 right-6 bg-blue-600 text-white p-4 rounded-xl shadow-lg z-50 hidden">
-    <div class="text-lg font-bold text-center" id="selection-count">0 Cartellini</div>
-</div>
-
 <!-- Form nascosto per processare i dati selezionati -->
 <form id="selected-form" action="<?= $this->url('/tracking/process-links') ?>" method="POST" style="display: none;">
     <input type="hidden" name="selectedCartels" id="selectedCartels">
@@ -163,6 +158,24 @@
 <script>
     var selectedCartels = [];
     var selectedTot = 0;
+
+    // Crea il badge floating e lo appende al body per evitare problemi di overflow
+    (function() {
+        var badge = document.createElement('div');
+        badge.id = 'selection-info';
+        badge.className = 'fixed bottom-8 right-8 bg-gradient-to-r from-blue-600 to-blue-700 text-white p-6 rounded-2xl shadow-2xl hidden border-2 border-blue-400';
+        badge.style.zIndex = '99999';
+        badge.innerHTML = `
+            <div class="flex items-center space-x-3">
+                <i class="fas fa-shopping-cart text-2xl"></i>
+                <div>
+                    <div class="text-2xl font-bold" id="selection-count">0 Cartellini</div>
+                    <div class="text-xs text-blue-200 mt-1" id="selection-pairs">0 Paia totali</div>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(badge);
+    })();
 
     function searchCommesse() {
         // Reset delle selezioni precedenti
@@ -342,10 +355,12 @@
     function updateSelectionInfo() {
         var selectionInfo = document.getElementById('selection-info');
         var selectionCount = document.getElementById('selection-count');
+        var selectionPairs = document.getElementById('selection-pairs');
         var proceedBtn = document.getElementById('proceed-btn');
 
-        // Mostra sia il numero di cartellini che il totale paia
-        selectionCount.innerHTML = selectedCartels.length + ' Cartellini<br><span class="text-sm text-blue-200">' + selectedTot + ' Paia totali</span>';
+        // Aggiorna i contatori separati
+        selectionCount.textContent = selectedCartels.length + ' Cartellini';
+        selectionPairs.textContent = selectedTot + ' Paia totali';
 
         if (selectedCartels.length > 0) {
             selectionInfo.style.display = 'block';
@@ -355,6 +370,13 @@
 
         proceedBtn.disabled = selectedCartels.length === 0;
     }
+
+    // Reset completo quando la pagina viene caricata
+    window.addEventListener('DOMContentLoaded', function() {
+        selectedCartels = [];
+        selectedTot = 0;
+        updateSelectionInfo();
+    });
 
     function processSelected() {
         var selectedCartelsInput = document.getElementById('selectedCartels');
