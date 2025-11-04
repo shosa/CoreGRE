@@ -401,24 +401,81 @@ class SystemController extends BaseController
     private function getDiskUsage()
     {
         $isWindows = strtoupper(substr(PHP_OS, 0, 3)) === 'WIN';
-        // Su Windows usa C:\ non C:
-        $path = $isWindows ? 'C:\\' : '/';
 
-        $total = @disk_total_space($path);
-        $free = @disk_free_space($path);
+        if ($isWindows) {
+            // Su Windows usa disk_total_space/disk_free_space
+            $path = 'C:\\';
+            $total = @disk_total_space($path);
+            $free = @disk_free_space($path);
 
-        if ($total === false || $free === false || $total == 0) {
+            if ($total === false || $free === false || $total == 0) {
+                return ['total' => 0, 'used' => 0, 'free' => 0, 'percent' => 0];
+            }
+
+            $used = $total - $free;
+
+            return [
+                'total' => round($total / (1024 * 1024 * 1024), 2), // GB
+                'used' => round($used / (1024 * 1024 * 1024), 2),
+                'free' => round($free / (1024 * 1024 * 1024), 2),
+                'percent' => round(($used / $total) * 100, 1)
+            ];
+        } else {
+            // Su Linux usa df per evitare problemi con open_basedir
+            @exec("df -h / | tail -1 | awk '{print $2,$3,$4,$5}'", $output);
+            if (isset($output[0])) {
+                $parts = explode(' ', trim($output[0]));
+                if (count($parts) >= 4) {
+                    // $parts[0] = total, $parts[1] = used, $parts[2] = free, $parts[3] = percent
+                    return [
+                        'total' => $this->parseSize($parts[0]),
+                        'used' => $this->parseSize($parts[1]),
+                        'free' => $this->parseSize($parts[2]),
+                        'percent' => (int)str_replace('%', '', $parts[3])
+                    ];
+                }
+            }
+
+            // Fallback: prova con disk_total_space se df non funziona
+            $total = @disk_total_space('/');
+            $free = @disk_free_space('/');
+
+            if ($total !== false && $free !== false && $total > 0) {
+                $used = $total - $free;
+                return [
+                    'total' => round($total / (1024 * 1024 * 1024), 2),
+                    'used' => round($used / (1024 * 1024 * 1024), 2),
+                    'free' => round($free / (1024 * 1024 * 1024), 2),
+                    'percent' => round(($used / $total) * 100, 1)
+                ];
+            }
+
             return ['total' => 0, 'used' => 0, 'free' => 0, 'percent' => 0];
         }
+    }
 
-        $used = $total - $free;
+    /**
+     * Converte formato df (es. 50G, 1.5T, 200M) in GB
+     */
+    private function parseSize($size)
+    {
+        $size = trim($size);
+        $unit = strtoupper(substr($size, -1));
+        $value = (float)substr($size, 0, -1);
 
-        return [
-            'total' => round($total / (1024 * 1024 * 1024), 2), // GB
-            'used' => round($used / (1024 * 1024 * 1024), 2),
-            'free' => round($free / (1024 * 1024 * 1024), 2),
-            'percent' => round(($used / $total) * 100, 1)
-        ];
+        switch ($unit) {
+            case 'T':
+                return round($value * 1024, 2);
+            case 'G':
+                return round($value, 2);
+            case 'M':
+                return round($value / 1024, 2);
+            case 'K':
+                return round($value / (1024 * 1024), 2);
+            default:
+                // Se non ha unità, assume sia in KB (come restituito da df)
+                return round($value / (1024 * 1024), 2);
+        }
     }
 
     private function getUptime($isWindows)
