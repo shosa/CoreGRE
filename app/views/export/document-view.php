@@ -145,7 +145,7 @@ function separateArticlesByVoceDoganale($articoli)
                 <table class="table table-bordered terzista-table">
                     <tbody>
                         <tr>
-                            <td class="logo-cell">
+                            <td class="logo-cell" style="border: none !important;">
                                 <div class="logo-container">
                                     <img src="<?= $this->url('/assets/top_logo.jpg') ?>" alt="Logo" style="max-width: 400px;">
                                 </div>
@@ -435,7 +435,7 @@ function separateArticlesByVoceDoganale($articoli)
                             </td>
                         </tr>
                         <tr>
-                            <td colspan="6" class="text-center"><?php echo htmlspecialchars($documento->autorizzazione ?? ''); ?></td>
+                            <td colspan="6" class="text-left"><?php echo htmlspecialchars($documento->autorizzazione ?? ''); ?></td>
                         </tr>
                     </tbody>
                     <tfoot>
