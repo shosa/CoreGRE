@@ -98,6 +98,21 @@ function separateArticlesByVoceDoganale($articoli)
             width: 50%;
         }
 
+        /* Stile per la cella del logo: rimuovi bordi e centra il contenuto */
+        .terzista-table .logo-cell {
+            border: none !important;
+            vertical-align: middle;
+            text-align: center;
+        }
+
+        /* Container per centrare il logo */
+        .logo-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+        }
+
         /* Riduci l'altezza delle righe */
         .table-bordered tbody tr {
             line-height: 1;
@@ -126,8 +141,8 @@ function separateArticlesByVoceDoganale($articoli)
                 <table class="table table-bordered terzista-table">
                     <tbody>
                         <tr>
-                            <td>
-                                <div class="text-left">
+                            <td class="logo-cell">
+                                <div class="logo-container">
                                     <img src="<?= $this->url('/assets/top_logo.jpg') ?>" alt="Logo" style="max-width: 400px;">
                                 </div>
                             </td>
@@ -172,7 +187,17 @@ function separateArticlesByVoceDoganale($articoli)
                             <td><strong>N° DOCUMENTO:</strong></td>
                             <td><?php echo $progressivo; ?></td>
                             <td><strong>DATA DOCUMENTO:</strong></td>
-                            <td><?php echo htmlspecialchars($documento->data ?? ''); ?></td>
+                            <td><?php
+                                // Formatta la data in formato italiano (dd-mm-yyyy)
+                                $dataFormattata = '';
+                                if (!empty($documento->data)) {
+                                    $timestamp = strtotime($documento->data);
+                                    if ($timestamp !== false) {
+                                        $dataFormattata = date('d-m-Y', $timestamp);
+                                    }
+                                }
+                                echo htmlspecialchars($dataFormattata);
+                            ?></td>
                         </tr>
                         <tr>
                             <td><strong>TRASPORTATORE:</strong></td>
