@@ -240,29 +240,31 @@ function separateArticlesByVoceDoganale($articoli)
                         }
                         ?>
 
-                        <!-- Visualizza i mancanti raggruppati per DDT di origine -->
-                        <?php foreach ($mancantiByDDT as $rif => $mancanti): ?>
-                            <tr>
-                                <td colspan="1"></td>
-                                <td class="no-border-right" colspan="5"><strong>MANCANTI SU <?php echo htmlspecialchars($rif ?? ''); ?></strong>
-                                </td>
-                            </tr>
-                            <?php foreach ($mancanti as $articolo):
-                                $subtotal = round(($articolo->qta_reale ?? 0) * ($articolo->prezzo_unitario ?? 0), 2);
-                                ?>
+                        <!-- Visualizza i mancanti raggruppati per DDT di origine (solo se ci sono) -->
+                        <?php if (!empty($mancantiByDDT)): ?>
+                            <?php foreach ($mancantiByDDT as $rif => $mancanti): ?>
                                 <tr>
-                                    <td><?php echo htmlspecialchars($articolo->codice_articolo ?? ''); ?></td>
-                                    <td class="no-border-right"><?php echo htmlspecialchars($articolo->descrizione ?? ''); ?></td>
-                                    <td class="no-border-left"><?php echo htmlspecialchars($articolo->voce_doganale ?? ''); ?></td>
-                                    <td><?php echo htmlspecialchars($articolo->um ?? ''); ?></td>
-                                    <td><?php echo htmlspecialchars($articolo->qta_reale ?? '0'); ?></td>
-                                    <td><?php echo number_format($subtotal, 2, ',', '.'); ?></td>
+                                    <td colspan="1"></td>
+                                    <td class="no-border-right" colspan="5"><strong>MANCANTI SU <?php echo htmlspecialchars($rif ?? ''); ?></strong>
+                                    </td>
                                 </tr>
+                                <?php foreach ($mancanti as $articolo):
+                                    $subtotal = round(($articolo->qta_reale ?? 0) * ($articolo->prezzo_unitario ?? 0), 2);
+                                    ?>
+                                    <tr>
+                                        <td><?php echo htmlspecialchars($articolo->codice_articolo ?? ''); ?></td>
+                                        <td class="no-border-right"><?php echo htmlspecialchars($articolo->descrizione ?? ''); ?></td>
+                                        <td class="no-border-left"><?php echo htmlspecialchars($articolo->voce_doganale ?? ''); ?></td>
+                                        <td><?php echo htmlspecialchars($articolo->um ?? ''); ?></td>
+                                        <td><?php echo htmlspecialchars($articolo->qta_reale ?? '0'); ?></td>
+                                        <td><?php echo number_format($subtotal, 2, ',', '.'); ?></td>
+                                    </tr>
+                                <?php endforeach; ?>
                             <?php endforeach; ?>
-                        <?php endforeach; ?>
+                        <?php endif; ?>
 
                         <!-- Righe vuote e Materiali Mancanti (sezione esistente per i mancanti) -->
-                        <?php if (!empty($datiMancanti)): ?>
+                        <?php if (isset($datiMancanti) && count($datiMancanti) > 0): ?>
                             <tr>
                                 <td colspan="6"></td>
                             </tr>

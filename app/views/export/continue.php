@@ -213,7 +213,7 @@ $files = $files ?? [];
                     <button onclick="openModal()"
                         class="inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 transition-colors">
                         <i class="fas fa-weight mr-2"></i>
-                        Pesi e Aspetto Merce
+                        Piede
                     </button>
                     <button onclick="openAutorizzazioneModal()"
                         class="inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium text-blue-700 bg-blue-100 hover:bg-blue-200 dark:bg-blue-800/20 dark:text-blue-300 dark:hover:bg-blue-800/40 transition-colors">
@@ -232,7 +232,7 @@ $files = $files ?? [];
                     <button onclick="openRigaLiberaModal()"
                         class="inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium text-purple-700 bg-purple-100 hover:bg-purple-200 dark:bg-purple-800/20 dark:text-purple-300 dark:hover:bg-purple-800/40 transition-colors">
                         <i class="fas fa-plus mr-2"></i>
-                        Aggiungi Riga Libera
+                       Riga
                     </button>
                     <?php if ($documento['first_boot'] == 1): ?>
                         <button onclick="cercaNcECosti()"
@@ -249,7 +249,7 @@ $files = $files ?? [];
                     <div
                         class="inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium text-gray-500 bg-gray-100 dark:bg-gray-700 dark:text-gray-400">
                         <i class="fas fa-exclamation-triangle mr-2"></i>
-                        Mancanze
+                        
                         <?php if ($mancanzeCount > 0): ?>
                             <span
                                 class="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-800/20 dark:text-red-300">
