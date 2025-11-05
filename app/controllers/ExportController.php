@@ -1569,6 +1569,56 @@ class ExportController extends BaseController
     }
 
     /**
+     * API: Aggiungi riga libera al DDT
+     */
+    public function aggiungiRigaLibera()
+    {
+        if (!$this->isPost()) {
+            $this->json(['success' => false, 'message' => 'Metodo non consentito'], 405);
+            return;
+        }
+
+        $rawInput = file_get_contents('php://input');
+        $data = json_decode($rawInput, true);
+
+        if (!$data || !isset($data['progressivo']) || !isset($data['codice_articolo']) || !isset($data['descrizione'])) {
+            $this->json(['success' => false, 'message' => 'Dati non validi'], 400);
+            return;
+        }
+
+        try {
+            $this->db->beginTransaction();
+
+            // Crea nuova riga libera
+            ExportArticle::create([
+                'id_documento' => $data['progressivo'],
+                'codice_articolo' => $data['codice_articolo'],
+                'descrizione' => $data['descrizione'],
+                'voce_doganale' => $data['voce_doganale'] ?? null,
+                'um' => $data['um'] ?? 'PZ',
+                'qta_originale' => $data['quantita'] ?? 1,
+                'qta_reale' => $data['quantita'] ?? 1,
+                'prezzo_unitario' => $data['prezzo_unitario'] ?? 0,
+                'is_mancante' => 0,
+                'tipo_riga' => 'libera'
+            ]);
+
+            $this->db->commit();
+            $this->logActivity('DDT', 'AGGIUNGI_RIGA_LIBERA', 'Riga libera aggiunta al DDT', $data['progressivo'], $data['codice_articolo']);
+
+            $this->json([
+                'success' => true,
+                'message' => 'Riga libera aggiunta con successo'
+            ]);
+
+        } catch (Exception $e) {
+            $this->db->rollback();
+            error_log("Errore nell'aggiunta riga libera: " . $e->getMessage());
+            $this->json(['success' => false, 'message' => 'Errore durante l\'aggiunta della riga'], 500);
+        }
+    }
+
+    /**
      * API: Recupera dati voci doganali
      */
     public function getDoganaleData()

@@ -229,6 +229,11 @@ $files = $files ?? [];
 
                 <!-- Gruppo Gestione Articoli -->
                 <div class="flex flex-wrap gap-2">
+                    <button onclick="openRigaLiberaModal()"
+                        class="inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium text-purple-700 bg-purple-100 hover:bg-purple-200 dark:bg-purple-800/20 dark:text-purple-300 dark:hover:bg-purple-800/40 transition-colors">
+                        <i class="fas fa-plus mr-2"></i>
+                        Aggiungi Riga Libera
+                    </button>
                     <?php if ($documento['first_boot'] == 1): ?>
                         <button onclick="cercaNcECosti()"
                             class="inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium text-green-700 bg-green-100 hover:bg-green-200 dark:bg-green-800/20 dark:text-green-300 dark:hover:bg-green-800/40 transition-colors">
@@ -351,11 +356,17 @@ $files = $files ?? [];
                     $subtotal = round(($articolo->qta_reale ?? 0) * ($articolo->prezzo_unitario ?? 0), 2);
                     $qta_mancante = ($articolo->qta_originale ?? 0) - ($articolo->qta_reale ?? 0);
                     $isPartial = $qta_mancante > 0;
+                    $isRigaLibera = ($articolo->tipo_riga ?? 'articolo') === 'libera';
                     ?>
                     <tr
-                        class="hover:bg-gray-50 dark:hover:bg-gray-700/30 <?= $isPartial ? 'bg-yellow-50 dark:bg-yellow-800/10' : '' ?>">
+                        class="hover:bg-gray-50 dark:hover:bg-gray-700/30 <?= $isPartial ? 'bg-yellow-50 dark:bg-yellow-800/10' : '' ?> <?= $isRigaLibera ? 'border-l-4 border-purple-500' : '' ?>">
                         <td
-                            class="px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-700/50">
+                            class="px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-700/50 relative">
+                            <?php if ($isRigaLibera): ?>
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-800/20 dark:text-purple-300 mr-2">
+                                    <i class="fas fa-edit mr-1"></i>Libera
+                                </span>
+                            <?php endif; ?>
                             <?= htmlspecialchars($articolo->codice_articolo ?? '') ?>
                         </td>
                         <td class="px-6 py-4 text-sm text-gray-900 dark:text-white">
@@ -707,6 +718,108 @@ $files = $files ?? [];
     </div>
 </div>
 
+<!-- Modal Riga Libera -->
+<div id="rigaLiberaModal" class="fixed inset-0 z-[99999] hidden overflow-y-auto">
+    <div class="flex min-h-screen items-center justify-center p-4">
+        <div class="fixed inset-0 bg-black bg-opacity-25" onclick="closeModal('rigaLiberaModal')"></div>
+        <div class="relative w-full max-w-2xl rounded-2xl bg-white p-6 shadow-xl dark:bg-gray-800">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                    <i class="fas fa-plus-circle mr-2 text-purple-500"></i>
+                    Aggiungi Riga Libera al DDT
+                </h3>
+                <button onclick="closeModal('rigaLiberaModal')"
+                    class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+
+            <form id="rigaLiberaForm" onsubmit="salvaRigaLibera(event)">
+                <div class="space-y-4">
+                    <!-- Codice Articolo -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Codice Articolo
+                        </label>
+                        <input type="text" id="rl_codice" required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-purple-500 focus:border-purple-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                            placeholder="es. ART-001">
+                    </div>
+
+                    <!-- Descrizione -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Descrizione
+                        </label>
+                        <textarea id="rl_descrizione" required rows="2"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-purple-500 focus:border-purple-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                            placeholder="Descrizione articolo"></textarea>
+                    </div>
+
+                    <!-- Riga con Voce Doganale e UM -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Voce Doganale
+                            </label>
+                            <input type="text" id="rl_voce_doganale"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-purple-500 focus:border-purple-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                placeholder="es. 12345678">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Unità di Misura
+                            </label>
+                            <input type="text" id="rl_um" required value="PZ"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-purple-500 focus:border-purple-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                placeholder="es. PZ, KG, MT">
+                        </div>
+                    </div>
+
+                    <!-- Riga con Quantità e Prezzo -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Quantità
+                            </label>
+                            <input type="number" id="rl_quantita" required step="0.001" min="0" value="1"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-purple-500 focus:border-purple-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Prezzo Unitario (€)
+                            </label>
+                            <input type="number" id="rl_prezzo" step="0.001" min="0" value="0"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-purple-500 focus:border-purple-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                        </div>
+                    </div>
+
+                    <!-- Info Box -->
+                    <div class="rounded-lg bg-purple-50 p-4 dark:bg-purple-800/20">
+                        <div class="flex">
+                            <i class="fas fa-info-circle text-purple-400 mr-2 mt-0.5"></i>
+                            <p class="text-sm text-purple-700 dark:text-purple-300">
+                                La riga libera verrà aggiunta al corpo del DDT e potrà essere modificata come le altre righe.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-end space-x-3 mt-6">
+                    <button type="button" onclick="closeModal('rigaLiberaModal')"
+                        class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300">
+                        Annulla
+                    </button>
+                    <button type="submit"
+                        class="px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-700">
+                        <i class="fas fa-save mr-2"></i>Aggiungi Riga
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.1.1/exceljs.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.2/FileSaver.min.js"></script>
 
@@ -771,6 +884,15 @@ $files = $files ?? [];
 
     function openMancantiModal() {
         document.getElementById('mancantiModal').classList.remove('hidden');
+    }
+
+    function openRigaLiberaModal() {
+        document.getElementById('rigaLiberaModal').classList.remove('hidden');
+        // Reset form
+        document.getElementById('rigaLiberaForm').reset();
+        document.getElementById('rl_um').value = 'PZ';
+        document.getElementById('rl_quantita').value = '1';
+        document.getElementById('rl_prezzo').value = '0';
     }
 
     function closeModal(modalId) {
@@ -1367,6 +1489,58 @@ $files = $files ?? [];
                 CoregreNotifications.remove(loadingId);
                 console.error('Error:', error);
                 CoregreNotifications.error('Si è verificato un errore durante l\'aggiunta dei mancanti');
+            });
+    }
+
+    function salvaRigaLibera(event) {
+        event.preventDefault();
+
+        const codice = document.getElementById('rl_codice').value.trim();
+        const descrizione = document.getElementById('rl_descrizione').value.trim();
+        const voceDoganale = document.getElementById('rl_voce_doganale').value.trim();
+        const um = document.getElementById('rl_um').value.trim();
+        const quantita = parseFloat(document.getElementById('rl_quantita').value);
+        const prezzo = parseFloat(document.getElementById('rl_prezzo').value);
+
+        if (!codice || !descrizione || !um || quantita <= 0) {
+            CoregreNotifications.warning('Compila tutti i campi obbligatori');
+            return;
+        }
+
+        const loadingId = CoregreNotifications.loading('Aggiunta riga libera in corso...');
+
+        fetch('<?= $this->url('/export/aggiungi_riga_libera') ?>', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                progressivo: <?= $progressivo ?>,
+                codice_articolo: codice,
+                descrizione: descrizione,
+                voce_doganale: voceDoganale,
+                um: um,
+                quantita: quantita,
+                prezzo_unitario: prezzo
+            })
+        })
+            .then(response => response.json())
+            .then(data => {
+                CoregreNotifications.remove(loadingId);
+                if (data.success) {
+                    CoregreNotifications.success('Riga libera aggiunta con successo!');
+                    closeModal('rigaLiberaModal');
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1500);
+                } else {
+                    CoregreNotifications.error(data.message || 'Errore durante l\'aggiunta della riga');
+                }
+            })
+            .catch(error => {
+                CoregreNotifications.remove(loadingId);
+                console.error('Error:', error);
+                CoregreNotifications.error('Si è verificato un errore durante l\'aggiunta della riga');
             });
     }
 

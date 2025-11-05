@@ -142,6 +142,7 @@ $router->post('/export/save_piede_documento', 'Export@savePiedeDocumento');
 $router->post('/export/save_commento', 'Export@saveCommento');
 $router->post('/export/save_autorizzazione', 'Export@saveAutorizzazione');
 $router->post('/export/aggiungi_mancanti', 'Export@aggiungiMancanti');
+$router->post('/export/aggiungi_riga_libera', 'Export@aggiungiRigaLibera');
 $router->post('/export/get_doganale_data', 'Export@getDoganaleData');
 $router->post('/export/update_doganale_weight', 'Export@updateDoganaleWeight');
 $router->post('/export/get_piede_documento', 'Export@getPiedeDocumento');
