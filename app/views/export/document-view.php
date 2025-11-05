@@ -40,6 +40,11 @@ function separateArticlesByVoceDoganale($articoli)
     <title>DDT n° <?php echo $progressivo; ?></title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
+        /* Nascondi righe vuote di riempimento nella visualizzazione normale */
+        .empty-filler-row {
+            display: none;
+        }
+
         @media print {
             body {
                 margin: 0;
@@ -48,6 +53,11 @@ function separateArticlesByVoceDoganale($articoli)
                 margin-bottom: 0.5cm;
                 margin-left: 1cm;
                 margin-right: 1cm;
+            }
+
+            /* Mostra righe vuote di riempimento solo in stampa */
+            .empty-filler-row {
+                display: table-row !important;
             }
 
             /* Nasconde il totale in tutte le pagine tranne l'ultima */
@@ -282,6 +292,57 @@ function separateArticlesByVoceDoganale($articoli)
                                 </tr>
                             <?php endforeach; ?>
                         <?php endif; ?>
+
+                        <!-- Righe vuote per riempire la prima pagina (solo in stampa) -->
+                        <?php
+                        // Calcola il numero totale di righe stampate
+                        $totalRows = 0;
+
+                        // Conta articoli prioritari (64061010)
+                        foreach ($articoli as $art) {
+                            if ($art->qta_reale > 0 && $art->is_mancante == 0 && $art->voce_doganale == '64061010') {
+                                $totalRows++;
+                            }
+                        }
+
+                        // Conta altri articoli
+                        foreach ($articoli as $art) {
+                            if ($art->qta_reale > 0 && $art->is_mancante == 0 && $art->voce_doganale != '64061010') {
+                                $totalRows++;
+                            }
+                        }
+
+                        // Conta mancanti raggruppati (se presenti)
+                        if (!empty($mancantiByDDT)) {
+                            foreach ($mancantiByDDT as $rif => $mancanti) {
+                                $totalRows++; // Riga header "MANCANTI SU..."
+                                $totalRows += count($mancanti); // Righe mancanti
+                            }
+                        }
+
+                        // Conta materiali mancanti (se presenti)
+                        if (isset($datiMancanti) && count($datiMancanti) > 0) {
+                            $totalRows++; // Riga vuota
+                            $totalRows++; // Riga header "MATERIALI MANCANTI"
+                            $totalRows += count($datiMancanti); // Righe mancanti
+                        }
+
+                        // Numero minimo di righe per riempire la prima pagina (puoi modificare questo valore)
+                        $minRows = 20;
+                        $emptyRowsNeeded = max(0, $minRows - $totalRows);
+
+                        // Stampa righe vuote solo in modalità stampa
+                        for ($i = 0; $i < $emptyRowsNeeded; $i++):
+                        ?>
+                            <tr class="empty-filler-row">
+                                <td>&nbsp;</td>
+                                <td class="no-border-right">&nbsp;</td>
+                                <td class="no-border-left">&nbsp;</td>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                            </tr>
+                        <?php endfor; ?>
 
                         <!-- Righe per voce e peso -->
                         <tr>
