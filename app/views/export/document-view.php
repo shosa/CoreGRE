@@ -101,8 +101,12 @@ function separateArticlesByVoceDoganale($articoli)
         /* Stile per la cella del logo: rimuovi bordi e centra il contenuto */
         .terzista-table .logo-cell {
             border: none !important;
-            vertical-align: middle;
-            text-align: center;
+            border-top: none !important;
+            border-right: none !important;
+            border-bottom: none !important;
+            border-left: none !important;
+            vertical-align: middle !important;
+            text-align: center !important;
         }
 
         /* Container per centrare il logo */
