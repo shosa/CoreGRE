@@ -60,6 +60,12 @@ function separateArticlesByVoceDoganale($articoli)
                 display: table-row !important;
             }
 
+            /* Nascondi bordi orizzontali delle righe vuote, mantieni solo verticali */
+            .empty-filler-row td {
+                border-top: none !important;
+                border-bottom: none !important;
+            }
+
             /* Nasconde il totale in tutte le pagine tranne l'ultima */
             tfoot {
                 display: table-row-group !important;
@@ -328,7 +334,7 @@ function separateArticlesByVoceDoganale($articoli)
                         }
 
                         // Numero minimo di righe per riempire la prima pagina (puoi modificare questo valore)
-                        $minRows = 20;
+                        $minRows = 16;
                         $emptyRowsNeeded = max(0, $minRows - $totalRows);
 
                         // Stampa righe vuote solo in modalità stampa
