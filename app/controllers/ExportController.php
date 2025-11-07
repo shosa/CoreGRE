@@ -1372,7 +1372,8 @@ class ExportController extends BaseController
                     ExportMissingData::create([
                         'id_documento' => $progressivo,
                         'codice_articolo' => $articolo->codice_articolo,
-                        'qta_mancante' => $qtaMancante
+                        'qta_mancante' => $qtaMancante,
+                        'descrizione' => $articolo->descrizione ?? ''
                     ]);
                     $mancantiInseriti++;
                 }
@@ -1580,16 +1581,37 @@ class ExportController extends BaseController
                 $mancante = ExportMissingData::find($mancanteId);
 
                 if ($mancante) {
-                    // Aggiungi come nuovo articolo nel DDT corrente
-                    ExportArticle::create([
+                    // Recupera i dati completi dell'articolo dal documento originale
+                    $articoloOriginale = ExportArticle::where('id_documento', $mancante->id_documento)
+                        ->where('codice_articolo', $mancante->codice_articolo)
+                        ->first();
+
+                    // Prepara i dati per il nuovo articolo
+                    $nuovoArticoloData = [
                         'id_documento' => $data['progressivo'],
                         'codice_articolo' => $mancante->codice_articolo,
-                        'descrizione' => $mancante->descrizione ?? '',
                         'qta_originale' => $mancante->qta_mancante,
                         'qta_reale' => $mancante->qta_mancante,
                         'is_mancante' => 1,
                         'rif_mancante' => 'DDT ' . $mancante->id_documento
-                    ]);
+                    ];
+
+                    // Copia i dati dall'articolo originale se esiste
+                    if ($articoloOriginale) {
+                        $nuovoArticoloData['descrizione'] = $articoloOriginale->descrizione ?? '';
+                        $nuovoArticoloData['um'] = $articoloOriginale->um ?? '';
+                        $nuovoArticoloData['voce_doganale'] = $articoloOriginale->voce_doganale ?? '';
+                        $nuovoArticoloData['prezzo_unitario'] = $articoloOriginale->prezzo_unitario ?? 0;
+                    } else {
+                        // Fallback: usa i dati dal mancante se l'articolo originale non esiste più
+                        $nuovoArticoloData['descrizione'] = $mancante->descrizione ?? '';
+                        $nuovoArticoloData['um'] = '';
+                        $nuovoArticoloData['voce_doganale'] = '';
+                        $nuovoArticoloData['prezzo_unitario'] = 0;
+                    }
+
+                    // Aggiungi come nuovo articolo nel DDT corrente
+                    ExportArticle::create($nuovoArticoloData);
 
                     // Rimuovi dalla lista mancanti
                     $mancante->delete();
