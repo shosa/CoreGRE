@@ -173,6 +173,12 @@
                                         dark:hover:text-gray-200 shadow-sm hover:shadow-md hover:-translate-y-0.5"> <i
                                             class="fas fa-calendar text-yellow-500 dark:text-yellow-400"></i>
                                         <span>Calendario</span> </a>
+                                    <a href="<?= $this->url('/produzione/statistics') ?>" class="flex items-center gap-3
+                                        rounded-lg px-3 py-2.5 text-sm font-medium text-gray-600 transition-all duration-200
+                                        hover:bg-white hover:text-gray-800 dark:text-gray-400 dark:hover:bg-gray-700
+                                        dark:hover:text-gray-200 shadow-sm hover:shadow-md hover:-translate-y-0.5"> <i
+                                            class="fas fa-chart-simple text-yellow-500 dark:text-yellow-400"></i>
+                                        <span>Statistiche</span> </a>
                                     <a href="<?= $this->url('/produzione/csv') ?>" class="flex items-center gap-3
                                         rounded-lg px-3 py-2.5 text-sm font-medium text-gray-600 transition-all duration-200
                                         hover:bg-white hover:text-gray-800 dark:text-gray-400 dark:hover:bg-gray-700

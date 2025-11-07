@@ -1543,4 +1543,432 @@ class ProduzioneController extends BaseController
             return $dateString;
         }
     }
+
+    /**
+     * Dashboard Statistiche Produzione
+     */
+    public function statistics()
+    {
+        $this->requireAuth();
+        $this->requirePermission('produzione');
+
+        $this->render('produzione.statistics', [
+            'pageTitle' => 'Statistiche Produzione - ' . APP_NAME
+        ]);
+    }
+
+    /**
+     * API: Recupera statistiche generali
+     */
+    public function getStatistics()
+    {
+        $this->requireAuth();
+        $this->requirePermission('produzione');
+
+        try {
+            $today = date('Y-m-d');
+            $currentWeekStart = date('Y-m-d', strtotime('monday this week'));
+            $currentWeekEnd = date('Y-m-d', strtotime('saturday this week'));
+            $currentMonthStart = date('Y-m-01');
+            $currentMonthEnd = date('Y-m-t');
+
+            // Produzione oggi
+            $todayProduction = ProductionRecord::where('production_date', $today)->first();
+            $todayTotal = $todayProduction ? $todayProduction->total_produzione : 0;
+
+            // Produzione questa settimana
+            $weekProduction = ProductionRecord::whereBetween('production_date', [$currentWeekStart, $currentWeekEnd])
+                ->selectRaw('
+                    SUM(total_montaggio) as total_montaggio,
+                    SUM(total_orlatura) as total_orlatura,
+                    SUM(total_taglio) as total_taglio
+                ')
+                ->first();
+
+            // Produzione questo mese
+            $monthProduction = ProductionRecord::whereBetween('production_date', [$currentMonthStart, $currentMonthEnd])
+                ->selectRaw('
+                    SUM(total_montaggio) as total_montaggio,
+                    SUM(total_orlatura) as total_orlatura,
+                    SUM(total_taglio) as total_taglio,
+                    AVG(total_montaggio + total_orlatura + total_taglio) as avg_daily
+                ')
+                ->first();
+
+            // Conta solo i giorni con dati reali (produzione > 0)
+            $daysWithData = ProductionRecord::whereBetween('production_date', [$currentMonthStart, $currentMonthEnd])
+                ->whereRaw('(total_montaggio > 0 OR total_orlatura > 0 OR total_taglio > 0)')
+                ->count();
+
+            // Giorni lavorativi nel mese (Lun-Ven)
+            $workingDaysInMonth = $this->getWorkingDaysInMonth(date('Y'), date('m'));
+
+            // Completamento dati: giorni con dati rispetto ai giorni lavorativi teorici
+            $completionRate = $workingDaysInMonth > 0
+                ? round(($daysWithData / $workingDaysInMonth) * 100, 1)
+                : 0;
+
+            // Calcola i totali produzione
+            $weekTotal = ($weekProduction->total_montaggio ?? 0) +
+                        ($weekProduction->total_orlatura ?? 0) +
+                        ($weekProduction->total_taglio ?? 0);
+
+            $monthTotal = ($monthProduction->total_montaggio ?? 0) +
+                         ($monthProduction->total_orlatura ?? 0) +
+                         ($monthProduction->total_taglio ?? 0);
+
+            $this->json([
+                'success' => true,
+                'data' => [
+                    'today' => [
+                        'total' => $todayTotal,
+                        'has_data' => $todayProduction !== null
+                    ],
+                    'week' => [
+                        'total' => $weekTotal,
+                        'montaggio' => $weekProduction->total_montaggio ?? 0,
+                        'orlatura' => $weekProduction->total_orlatura ?? 0,
+                        'taglio' => $weekProduction->total_taglio ?? 0
+                    ],
+                    'month' => [
+                        'total' => $monthTotal,
+                        'montaggio' => $monthProduction->total_montaggio ?? 0,
+                        'orlatura' => $monthProduction->total_orlatura ?? 0,
+                        'taglio' => $monthProduction->total_taglio ?? 0,
+                        'avg_daily' => round($monthProduction->avg_daily ?? 0),
+                        'days_with_data' => $daysWithData,
+                        'working_days' => $workingDaysInMonth,
+                        'completion_rate' => $completionRate
+                    ]
+                ]
+            ]);
+
+        } catch (Exception $e) {
+            error_log("Errore nel recupero statistiche: " . $e->getMessage());
+            $this->json(['success' => false, 'message' => 'Errore nel caricamento statistiche'], 500);
+        }
+    }
+
+    /**
+     * API: Trend ultimi 30 giorni
+     */
+    public function getTrendData()
+    {
+        $this->requireAuth();
+        $this->requirePermission('produzione');
+
+        try {
+            $days = isset($_GET['days']) ? (int)$_GET['days'] : 30;
+            $endDate = date('Y-m-d');
+            $startDate = date('Y-m-d', strtotime("-$days days"));
+
+            $records = ProductionRecord::whereBetween('production_date', [$startDate, $endDate])
+                ->orderBy('production_date', 'asc')
+                ->select('production_date', 'total_montaggio', 'total_orlatura', 'total_taglio')
+                ->get();
+
+            $labels = [];
+            $montaggio = [];
+            $orlatura = [];
+            $taglio = [];
+            $totals = [];
+
+            foreach ($records as $record) {
+                $labels[] = date('d/m', strtotime($record->production_date));
+                $mont = $record->total_montaggio ?? 0;
+                $orl = $record->total_orlatura ?? 0;
+                $tagl = $record->total_taglio ?? 0;
+
+                $montaggio[] = $mont;
+                $orlatura[] = $orl;
+                $taglio[] = $tagl;
+                $totals[] = $mont + $orl + $tagl;
+            }
+
+            $this->json([
+                'success' => true,
+                'data' => [
+                    'labels' => $labels,
+                    'datasets' => [
+                        'montaggio' => $montaggio,
+                        'orlatura' => $orlatura,
+                        'taglio' => $taglio,
+                        'total' => $totals
+                    ]
+                ]
+            ]);
+
+        } catch (Exception $e) {
+            error_log("Errore nel recupero trend: " . $e->getMessage());
+            $this->json(['success' => false, 'message' => 'Errore nel caricamento trend'], 500);
+        }
+    }
+
+    /**
+     * API: Performance macchine
+     */
+    public function getMachinePerformance()
+    {
+        $this->requireAuth();
+        $this->requirePermission('produzione');
+
+        try {
+            $month = isset($_GET['month']) ? (int)$_GET['month'] : date('m');
+            $year = isset($_GET['year']) ? (int)$_GET['year'] : date('Y');
+
+            $monthStart = date('Y-m-01', strtotime("$year-$month-01"));
+            $monthEnd = date('Y-m-t', strtotime("$year-$month-01"));
+
+            $performance = ProductionRecord::whereBetween('production_date', [$monthStart, $monthEnd])
+                ->selectRaw('
+                    SUM(manovia1) as manovia1_total,
+                    SUM(manovia2) as manovia2_total,
+                    SUM(orlatura1) as orlatura1_total,
+                    SUM(orlatura2) as orlatura2_total,
+                    SUM(orlatura3) as orlatura3_total,
+                    SUM(orlatura4) as orlatura4_total,
+                    SUM(orlatura5) as orlatura5_total,
+                    SUM(taglio1) as taglio1_total,
+                    SUM(taglio2) as taglio2_total
+                ')
+                ->first();
+
+            $machines = [
+                ['name' => 'Manovia 1', 'value' => $performance->manovia1_total ?? 0],
+                ['name' => 'Manovia 2', 'value' => $performance->manovia2_total ?? 0],
+                ['name' => 'Orlatura 1', 'value' => $performance->orlatura1_total ?? 0],
+                ['name' => 'Orlatura 2', 'value' => $performance->orlatura2_total ?? 0],
+                ['name' => 'Orlatura 3', 'value' => $performance->orlatura3_total ?? 0],
+                ['name' => 'Orlatura 4', 'value' => $performance->orlatura4_total ?? 0],
+                ['name' => 'Orlatura 5', 'value' => $performance->orlatura5_total ?? 0],
+                ['name' => 'Taglio 1', 'value' => $performance->taglio1_total ?? 0],
+                ['name' => 'Taglio 2', 'value' => $performance->taglio2_total ?? 0],
+            ];
+
+            $this->json([
+                'success' => true,
+                'data' => $machines
+            ]);
+
+        } catch (Exception $e) {
+            error_log("Errore nel recupero performance macchine: " . $e->getMessage());
+            $this->json(['success' => false, 'message' => 'Errore nel caricamento performance'], 500);
+        }
+    }
+
+    /**
+     * API: Confronto periodi
+     */
+    public function getComparison()
+    {
+        $this->requireAuth();
+        $this->requirePermission('produzione');
+
+        try {
+            // Questo mese
+            $currentMonthStart = date('Y-m-01');
+            $currentMonthEnd = date('Y-m-t');
+
+            // Mese scorso
+            $lastMonthStart = date('Y-m-01', strtotime('first day of last month'));
+            $lastMonthEnd = date('Y-m-t', strtotime('last day of last month'));
+
+            $currentMonth = ProductionRecord::whereBetween('production_date', [$currentMonthStart, $currentMonthEnd])
+                ->selectRaw('
+                    SUM(total_montaggio) as total_montaggio,
+                    SUM(total_orlatura) as total_orlatura,
+                    SUM(total_taglio) as total_taglio
+                ')
+                ->first();
+
+            $lastMonth = ProductionRecord::whereBetween('production_date', [$lastMonthStart, $lastMonthEnd])
+                ->selectRaw('
+                    SUM(total_montaggio) as total_montaggio,
+                    SUM(total_orlatura) as total_orlatura,
+                    SUM(total_taglio) as total_taglio
+                ')
+                ->first();
+
+            $currentTotal = ($currentMonth->total_montaggio ?? 0) +
+                           ($currentMonth->total_orlatura ?? 0) +
+                           ($currentMonth->total_taglio ?? 0);
+
+            $lastTotal = ($lastMonth->total_montaggio ?? 0) +
+                        ($lastMonth->total_orlatura ?? 0) +
+                        ($lastMonth->total_taglio ?? 0);
+
+            $percentageChange = 0;
+            if ($lastTotal > 0) {
+                $percentageChange = round((($currentTotal - $lastTotal) / $lastTotal) * 100, 1);
+            }
+
+            $this->json([
+                'success' => true,
+                'data' => [
+                    'current_month' => $currentTotal,
+                    'last_month' => $lastTotal,
+                    'change' => $percentageChange,
+                    'trend' => $percentageChange >= 0 ? 'up' : 'down'
+                ]
+            ]);
+
+        } catch (Exception $e) {
+            error_log("Errore nel confronto periodi: " . $e->getMessage());
+            $this->json(['success' => false, 'message' => 'Errore nel caricamento confronto'], 500);
+        }
+    }
+
+    /**
+     * API: Grafico personalizzato
+     */
+    public function getCustomChart()
+    {
+        $this->requireAuth();
+        $this->requirePermission('produzione');
+
+        try {
+            $dateFrom = isset($_GET['date_from']) ? $_GET['date_from'] : date('Y-01-01');
+            $dateTo = isset($_GET['date_to']) ? $_GET['date_to'] : date('Y-m-d');
+            $departments = isset($_GET['departments']) ? explode(',', $_GET['departments']) : [];
+            $groupBy = isset($_GET['group_by']) ? $_GET['group_by'] : 'month';
+
+            if (empty($departments)) {
+                $this->json(['success' => false, 'message' => 'Seleziona almeno un reparto'], 400);
+                return;
+            }
+
+            // Recupera tutti i record nel periodo
+            $records = ProductionRecord::whereBetween('production_date', [$dateFrom, $dateTo])
+                ->orderBy('production_date', 'asc')
+                ->get();
+
+            // Aggrega i dati in base al raggruppamento
+            $aggregatedData = $this->aggregateProductionData($records, $departments, $groupBy);
+
+            $this->json([
+                'success' => true,
+                'data' => $aggregatedData
+            ]);
+
+        } catch (Exception $e) {
+            error_log("Errore nel recupero grafico personalizzato: " . $e->getMessage());
+            $this->json(['success' => false, 'message' => 'Errore nel caricamento dati'], 500);
+        }
+    }
+
+    /**
+     * Helper: Aggrega dati produzione in base al gruppo
+     */
+    private function aggregateProductionData($records, $departments, $groupBy)
+    {
+        $grouped = [];
+        $datasets = [];
+
+        // Inizializza datasets per ogni reparto
+        foreach ($departments as $dept) {
+            $datasets[$dept] = [];
+        }
+
+        // Raggruppa i record
+        foreach ($records as $record) {
+            $key = $this->getGroupKey($record->production_date, $groupBy);
+
+            if (!isset($grouped[$key])) {
+                $grouped[$key] = [];
+                foreach ($departments as $dept) {
+                    $grouped[$key][$dept] = 0;
+                }
+            }
+
+            // Somma i valori per ogni reparto
+            foreach ($departments as $dept) {
+                $grouped[$key][$dept] += $record->$dept ?? 0;
+            }
+        }
+
+        // Ordina per chiave
+        ksort($grouped);
+
+        // Prepara labels e datasets
+        $labels = [];
+        foreach ($grouped as $key => $values) {
+            $labels[] = $this->formatGroupLabel($key, $groupBy);
+            foreach ($departments as $dept) {
+                $datasets[$dept][] = $values[$dept];
+            }
+        }
+
+        return [
+            'labels' => $labels,
+            'datasets' => $datasets
+        ];
+    }
+
+    /**
+     * Helper: Ottiene chiave di raggruppamento
+     */
+    private function getGroupKey($date, $groupBy)
+    {
+        $timestamp = strtotime($date);
+
+        switch ($groupBy) {
+            case 'day':
+                return date('Y-m-d', $timestamp);
+            case 'week':
+                return date('Y', $timestamp) . '-W' . date('W', $timestamp);
+            case 'month':
+                return date('Y-m', $timestamp);
+            case 'quarter':
+                $quarter = ceil(date('n', $timestamp) / 3);
+                return date('Y', $timestamp) . '-Q' . $quarter;
+            default:
+                return date('Y-m-d', $timestamp);
+        }
+    }
+
+    /**
+     * Helper: Formatta label del gruppo
+     */
+    private function formatGroupLabel($key, $groupBy)
+    {
+        switch ($groupBy) {
+            case 'day':
+                return date('d/m/Y', strtotime($key));
+            case 'week':
+                $parts = explode('-W', $key);
+                return 'Sett. ' . $parts[1] . '/' . $parts[0];
+            case 'month':
+                $months = [
+                    '01' => 'Gen', '02' => 'Feb', '03' => 'Mar', '04' => 'Apr',
+                    '05' => 'Mag', '06' => 'Giu', '07' => 'Lug', '08' => 'Ago',
+                    '09' => 'Set', '10' => 'Ott', '11' => 'Nov', '12' => 'Dic'
+                ];
+                $parts = explode('-', $key);
+                return $months[$parts[1]] . ' ' . $parts[0];
+            case 'quarter':
+                $parts = explode('-Q', $key);
+                return 'Q' . $parts[1] . ' ' . $parts[0];
+            default:
+                return $key;
+        }
+    }
+
+    /**
+     * Helper: Calcola giorni lavorativi in un mese (Lun-Ven)
+     */
+    private function getWorkingDaysInMonth($year, $month)
+    {
+        $daysInMonth = cal_days_in_month(CAL_GREGORIAN, $month, $year);
+        $workingDays = 0;
+
+        for ($day = 1; $day <= $daysInMonth; $day++) {
+            $dayOfWeek = date('N', strtotime("$year-$month-$day"));
+            // Lun-Ven (1-5), escludi Sabato (6) e Domenica (7)
+            if ($dayOfWeek <= 5) {
+                $workingDays++;
+            }
+        }
+
+        return $workingDays;
+    }
 }

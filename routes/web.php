@@ -107,6 +107,14 @@ $router->get('/produzione/csv', 'Produzione@csv');
 $router->post('/produzione/process-csv', 'Produzione@processCsv');
 $router->get('/produzione/generate-csv-report', 'Produzione@generateCsvReport');
 
+// Statistics Routes
+$router->get('/produzione/statistics', 'Produzione@statistics');
+$router->get('/produzione/api/statistics', 'Produzione@getStatistics');
+$router->get('/produzione/api/trend', 'Produzione@getTrendData');
+$router->get('/produzione/api/machine-performance', 'Produzione@getMachinePerformance');
+$router->get('/produzione/api/comparison', 'Produzione@getComparison');
+$router->get('/produzione/api/custom-chart', 'Produzione@getCustomChart');
+
 // Routes per Export/DDT
 $router->get('/export', 'Export@index');
 $router->get('/export/dashboard', 'Export@dashboard');

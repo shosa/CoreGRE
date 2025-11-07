@@ -9,7 +9,12 @@
                 Gestione calendario produzione e spedizioni
             </p>
         </div>
-        <div class="mt-4 sm:mt-0">
+        <div class="mt-4 sm:mt-0 flex space-x-3">
+            <a href="<?= $this->url('/produzione/statistics') ?>"
+                class="inline-flex items-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 shadow-sm transition-all duration-200">
+                <i class="fas fa-chart-line mr-2"></i>
+                Statistiche
+            </a>
             <a href="<?= $this->url('/produzione/create') ?>"
                 class="inline-flex items-center rounded-lg border border-primary bg-gradient-to-r from-blue-500 to-blue-600 px-4 py-2 text-sm font-medium text-white hover:from-blue-600 hover:to-blue-700 shadow-md hover:shadow-lg transition-all duration-200 hover:-translate-y-0.5">
                 <i class="fas fa-plus mr-2"></i>
