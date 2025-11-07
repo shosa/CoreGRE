@@ -266,18 +266,37 @@ function formatDate($dateString) {
                                         <!-- Documenti chiusi -->
                                         <a href="<?= $this->url('/export/view/' . $doc->id) ?>"
                                            target="_blank"
-                                           class="inline-flex items-center px-2 py-1.5 rounded-lg bg-blue-100 text-blue-600 hover:bg-blue-200 hover:text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-800/40 transition-colors text-xs font-medium"
+                                           class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-blue-100 text-blue-600 hover:bg-blue-200 hover:text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-800/40 transition-colors"
                                            title="Visualizza documento">
-                                            <i class="fas fa-eye mr-1.5"></i>
-                                            Visualizza
+                                            <i class="fas fa-eye"></i>
                                         </a>
 
-                                        <button class="inline-flex items-center px-2 py-1.5 rounded-lg bg-green-100 text-green-600 hover:bg-green-200 hover:text-green-700 dark:bg-green-900/30 dark:text-green-400 dark:hover:bg-green-800/40 transition-colors text-xs font-medium"
-                                                onclick="showDocumentDetails(<?= $doc->id ?>)"
-                                                title="Dettagli documento">
-                                            <i class="fas fa-info-circle mr-1.5"></i>
-                                            Dettagli
-                                        </button>
+                                        <!-- Menu dropdown -->
+                                        <div class="relative dropdown-container">
+                                            <button class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-700 dark:bg-gray-700/50 dark:text-gray-400 dark:hover:bg-gray-600 transition-colors dropdown-trigger"
+                                                    data-doc-id="<?= $doc->id ?>"
+                                                    title="Più azioni">
+                                                <i class="fas fa-ellipsis-v"></i>
+                                            </button>
+                                            <!-- Dropdown menu -->
+                                            <div class="dropdown-menu hidden absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50">
+                                                <button onclick="showDocumentDetails(<?= $doc->id ?>)"
+                                                        class="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center rounded-t-lg">
+                                                    <i class="fas fa-info-circle mr-2 text-green-600 dark:text-green-400"></i>
+                                                    Dettagli
+                                                </button>
+                                                <a href="<?= $this->url('/export/griglia-materiali/' . $doc->id) ?>"
+                                                   class="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center">
+                                                    <i class="fas fa-th mr-2 text-purple-600 dark:text-purple-400"></i>
+                                                    Griglia Materiali
+                                                </a>
+                                                <button onclick="confirmReactivate(<?= $doc->id ?>)"
+                                                        class="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center rounded-b-lg">
+                                                    <i class="fas fa-redo mr-2 text-orange-600 dark:text-orange-400"></i>
+                                                    Riattiva
+                                                </button>
+                                            </div>
+                                        </div>
                                     <?php endif; ?>
                                 </div>
                             </td>
@@ -418,7 +437,7 @@ if ($totalPages > 1): ?>
     
     function initExportIndex() {
         cleanupEventListeners();
-        
+
         // Funzioni globali per onclick inline
         window.showDocumentDetails = function(id) {
             const modal = document.getElementById('document-details-modal');
@@ -432,7 +451,7 @@ if ($totalPages > 1): ?>
                     <p class="mt-4 text-gray-600 dark:text-gray-400">Caricamento dettagli...</p>
                 </div>
             `;
-            
+
             // Carica dettagli via AJAX
             fetch(window.COREGRE.baseUrl + '/export/getDdtDetails', {
                 method: 'POST',
@@ -457,6 +476,21 @@ if ($totalPages > 1): ?>
                     </div>
                 `;
             });
+        };
+
+        window.confirmReactivate = function(id) {
+            if (window.CoregreModals && window.CoregreModals.confirmDelete) {
+                window.CoregreModals.confirmDelete(
+                    'Sei sicuro di voler riattivare questo DDT? Il documento tornerà in stato Aperto e potrà essere modificato.',
+                    () => reactivateDocument(id),
+                    1
+                );
+            } else {
+                // Fallback semplice se CoregreModals non disponibile
+                if (confirm('Sei sicuro di voler riattivare questo DDT? Il documento tornerà in stato Aperto e potrà essere modificato.')) {
+                    reactivateDocument(id);
+                }
+            }
         };
         
         window.confirmDelete = function(id) {
@@ -516,8 +550,79 @@ if ($totalPages > 1): ?>
             modal.addEventListener('click', clickHandler);
             eventListeners.push({ element: modal, event: 'click', handler: clickHandler });
         });
+
+        // Gestione dropdown menu
+        const dropdownTriggers = document.querySelectorAll('.dropdown-trigger');
+        dropdownTriggers.forEach(trigger => {
+            function clickHandler(e) {
+                e.stopPropagation();
+                const container = trigger.closest('.dropdown-container');
+                const menu = container.querySelector('.dropdown-menu');
+
+                // Chiudi tutti gli altri dropdown
+                document.querySelectorAll('.dropdown-menu').forEach(m => {
+                    if (m !== menu) {
+                        m.classList.add('hidden');
+                    }
+                });
+
+                // Toggle questo dropdown
+                menu.classList.toggle('hidden');
+            }
+            trigger.addEventListener('click', clickHandler);
+            eventListeners.push({ element: trigger, event: 'click', handler: clickHandler });
+        });
+
+        // Chiudi dropdown quando si clicca fuori
+        function documentClickHandler(e) {
+            if (!e.target.closest('.dropdown-container')) {
+                document.querySelectorAll('.dropdown-menu').forEach(menu => {
+                    menu.classList.add('hidden');
+                });
+            }
+        }
+        document.addEventListener('click', documentClickHandler);
+        eventListeners.push({ element: document, event: 'click', handler: documentClickHandler });
     }
-    
+
+    function reactivateDocument(id) {
+        fetch(window.COREGRE.baseUrl + '/export/riattivaDdt', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: 'id=' + encodeURIComponent(id)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                if (window.showAlert) {
+                    window.showAlert(data.message || 'DDT riattivato con successo', 'success');
+                } else if (window.CoregreNotifications) {
+                    window.CoregreNotifications.success(data.message || 'DDT riattivato con successo');
+                }
+                // Ricarica la pagina dopo un breve delay
+                setTimeout(() => {
+                    location.reload();
+                }, 1000);
+            } else {
+                if (window.showAlert) {
+                    window.showAlert(data.message || 'Errore durante la riattivazione', 'error');
+                } else if (window.CoregreNotifications) {
+                    window.CoregreNotifications.error(data.message || 'Errore durante la riattivazione');
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            if (window.showAlert) {
+                window.showAlert('Errore durante la riattivazione del DDT', 'error');
+            } else if (window.CoregreNotifications) {
+                window.CoregreNotifications.error('Errore durante la riattivazione del DDT');
+            }
+        });
+    }
+
     function deleteDocument(id) {
         fetch(window.COREGRE.baseUrl + '/export/delete', {
             method: 'POST',

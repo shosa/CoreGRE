@@ -1221,6 +1221,51 @@ class ExportController extends BaseController
     }
 
     /**
+     * API: Riattiva un DDT chiuso
+     */
+    public function riattivaDdt()
+    {
+        if (!$this->isPost()) {
+            $this->json(['success' => false, 'message' => 'Metodo non consentito'], 405);
+            return;
+        }
+
+        $id = $this->input('id');
+
+        if (!$id) {
+            $this->json(['success' => false, 'message' => 'ID documento richiesto'], 400);
+            return;
+        }
+
+        try {
+            // Verifica che il documento esista e sia chiuso
+            $documento = ExportDocument::find($id);
+
+            if (!$documento) {
+                $this->json(['success' => false, 'message' => 'Documento non trovato'], 404);
+                return;
+            }
+
+            if ($documento->stato !== 'Chiuso') {
+                $this->json(['success' => false, 'message' => 'Il documento non è chiuso'], 400);
+                return;
+            }
+
+            // Riattiva il documento
+            $documento->stato = 'Aperto';
+            $documento->save();
+
+            $this->logActivity('DDT', 'RIATTIVAZIONE', 'DDT riattivato', $id, '');
+
+            $this->json(['success' => true, 'message' => 'DDT riattivato con successo']);
+
+        } catch (Exception $e) {
+            error_log("Errore nella riattivazione DDT: " . $e->getMessage());
+            $this->json(['success' => false, 'message' => 'Errore durante la riattivazione'], 500);
+        }
+    }
+
+    /**
      * API: Cerca nomenclature e costi
      */
     public function cercaNcECosti()
@@ -1992,5 +2037,230 @@ class ExportController extends BaseController
     {
         // Reindirizza alla view del documento per la stampa
         $this->redirect($this->url('/export/view/' . $progressivo));
+    }
+
+    /**
+     * Pagina griglia materiali per selezione e stampa
+     */
+    public function grigliaMateriali($progressivo = null)
+    {
+        if (!$progressivo) {
+            $this->setFlash('error', 'ID documento non valido');
+            $this->redirect($this->url('/export'));
+            return;
+        }
+
+        try {
+            // Recupera il documento
+            $documento = ExportDocument::with('terzista')->find($progressivo);
+
+            if (!$documento) {
+                $this->setFlash('error', 'Documento non trovato');
+                $this->redirect($this->url('/export'));
+                return;
+            }
+
+            // Recupera tutti i materiali (articoli) del documento
+            $materiali = ExportArticle::where('id_documento', $progressivo)
+                ->where('qta_reale', '>', 0)
+                ->select('codice_articolo', 'descrizione')
+                ->distinct()
+                ->orderBy('codice_articolo')
+                ->get();
+
+            $this->render('export.griglia-materiali', [
+                'pageTitle' => 'Griglia Materiali - DDT ' . $progressivo,
+                'progressivo' => $progressivo,
+                'documento' => $documento,
+                'materiali' => $materiali
+            ]);
+
+        } catch (Exception $e) {
+            error_log("Errore nel caricamento griglia materiali: " . $e->getMessage());
+            $this->setFlash('error', 'Errore nel caricamento della griglia materiali');
+            $this->redirect($this->url('/export'));
+        }
+    }
+
+    /**
+     * Genera PDF griglia materiali
+     */
+    public function generateGrigliaPdf()
+    {
+        if (!$this->isPost()) {
+            $this->setFlash('error', 'Metodo non consentito');
+            $this->redirect($this->url('/export'));
+            return;
+        }
+
+        $progressivo = $this->input('progressivo');
+        $materialiSelezionati = $this->input('materiali'); // Array di codici articolo
+
+        if (!$progressivo || empty($materialiSelezionati)) {
+            $this->json(['success' => false, 'message' => 'Progressivo e materiali richiesti'], 400);
+            return;
+        }
+
+        try {
+            // Recupera il documento
+            $documento = ExportDocument::with('terzista')->find($progressivo);
+
+            if (!$documento) {
+                $this->json(['success' => false, 'message' => 'Documento non trovato'], 404);
+                return;
+            }
+
+            // Recupera i dettagli dei materiali selezionati
+            $materiali = ExportArticle::where('id_documento', $progressivo)
+                ->whereIn('codice_articolo', $materialiSelezionati)
+                ->select('codice_articolo', 'descrizione')
+                ->distinct()
+                ->orderBy('codice_articolo')
+                ->get();
+
+            // Inizializza mPDF
+            $mpdf = new \Mpdf\Mpdf([
+                'mode' => 'utf-8',
+                'format' => 'A4',
+                'orientation' => 'P',
+                'margin_left' => 15,
+                'margin_right' => 15,
+                'margin_top' => 15,
+                'margin_bottom' => 15,
+                'default_font' => 'dejavusans',
+                'tempDir' => APP_ROOT . '/storage/cache/mpdf'
+            ]);
+
+            $mpdf->SetTitle('Griglia Materiali - DDT ' . $progressivo);
+
+            // Costruisci HTML per la griglia
+            $html = $this->buildGrigliaMaterialiHtml($documento, $materiali, $progressivo);
+
+            $mpdf->WriteHTML($html);
+
+            $filename = 'Griglia_Materiali_DDT_' . $progressivo . '_' . date('Ymd') . '.pdf';
+            $mpdf->Output($filename, 'I');
+
+        } catch (Exception $e) {
+            error_log("Errore nella generazione PDF griglia materiali: " . $e->getMessage());
+            $this->json(['success' => false, 'message' => 'Errore nella generazione del PDF'], 500);
+        }
+    }
+
+    /**
+     * Helper: Costruisce HTML per griglia materiali
+     */
+    private function buildGrigliaMaterialiHtml($documento, $materiali, $progressivo)
+    {
+        $html = '
+        <html>
+        <head>
+            <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    font-size: 10pt;
+                }
+                .header {
+                    text-align: center;
+                    margin-bottom: 20px;
+                    border-bottom: 2px solid #333;
+                    padding-bottom: 10px;
+                }
+                .header h1 {
+                    margin: 0;
+                    font-size: 18pt;
+                    color: #333;
+                }
+                .header p {
+                    margin: 5px 0;
+                    font-size: 10pt;
+                }
+                .griglia-container {
+                    width: 100%;
+                    margin-top: 20px;
+                }
+                table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    margin-bottom: 20px;
+                }
+                .sample-cell {
+                    width: 20%;
+                    height: 120px;
+                    border: 2px solid #333;
+                    text-align: center;
+                    vertical-align: middle;
+                    background-color: #f9f9f9;
+                    font-size: 8pt;
+                    color: #999;
+                }
+                .material-cell {
+                    width: 30%;
+                    height: 120px;
+                    border: 1px solid #666;
+                    padding: 10px;
+                    vertical-align: top;
+                }
+                .material-code {
+                    font-weight: bold;
+                    font-size: 11pt;
+                    color: #333;
+                    margin-bottom: 5px;
+                }
+                .material-desc {
+                    font-size: 9pt;
+                    color: #666;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="header">
+                <h1>GRIGLIA MATERIALI</h1>
+                <p><strong>DDT n° ' . htmlspecialchars($progressivo) . '</strong></p>
+                <p>Destinatario: ' . htmlspecialchars($documento->terzista->ragione_sociale ?? 'N/A') . '</p>
+                <p>Data: ' . date('d/m/Y', strtotime($documento->data)) . '</p>
+            </div>
+
+            <div class="griglia-container">
+                <table>';
+
+        // Organizza materiali in righe da 2 (ogni riga ha 2 campioni + 2 descrizioni)
+        $materialiArray = $materiali->toArray();
+        $chunks = array_chunk($materialiArray, 2);
+
+        foreach ($chunks as $chunk) {
+            $html .= '<tr>';
+
+            foreach ($chunk as $materiale) {
+                // Cella campione (quadrata)
+                $html .= '<td class="sample-cell">
+                    <div style="padding: 5px;">CAMPIONE<br/>DA INCOLLARE</div>
+                </td>';
+
+                // Cella descrizione materiale (rettangolare)
+                $html .= '<td class="material-cell">
+                    <div class="material-code">' . htmlspecialchars($materiale['codice_articolo']) . '</div>
+                    <div class="material-desc">' . htmlspecialchars($materiale['descrizione'] ?? 'N/A') . '</div>
+                </td>';
+            }
+
+            // Se la riga ha solo 1 materiale, completa con celle vuote
+            if (count($chunk) == 1) {
+                $html .= '<td class="sample-cell">
+                    <div style="padding: 5px;">CAMPIONE<br/>DA INCOLLARE</div>
+                </td>';
+                $html .= '<td class="material-cell"></td>';
+            }
+
+            $html .= '</tr>';
+        }
+
+        $html .= '
+                </table>
+            </div>
+        </body>
+        </html>';
+
+        return $html;
     }
 }

@@ -1,7 +1,7 @@
 # Composer
 /vendor/
 composer.lock
-
+.env
 
 # Temporary and cache files
 /temp/

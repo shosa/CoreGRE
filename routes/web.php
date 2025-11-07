@@ -135,6 +135,7 @@ $router->get('/export/segnacolli/{progressivo}', 'Export@generateSegnacolli');
 
 // New API Routes for continue.php functionality
 $router->post('/export/completa_ddt', 'Export@completaDdt');
+$router->post('/export/riattivaDdt', 'Export@riattivaDdt');
 $router->post('/export/cerca_nc_costi', 'Export@cercaNcECosti');
 $router->post('/export/elabora_mancanti', 'Export@elaboraMancanti');
 $router->post('/export/update_data', 'Export@updateData');
@@ -151,6 +152,8 @@ $router->post('/export/reset_piede_documento', 'Export@resetPiedeDocumento');
 $router->get('/export/download/{progressivo}/{filename}', 'Export@downloadFile');
 $router->get('/export/download_all/{progressivo}', 'Export@downloadAllFiles');
 $router->get('/export/pdf/{progressivo}', 'Export@generatePdf');
+$router->get('/export/griglia-materiali/{progressivo}', 'Export@grigliaMateriali');
+$router->post('/export/griglia-materiali/genera-pdf', 'Export@generateGrigliaPdf');
 
 
 
