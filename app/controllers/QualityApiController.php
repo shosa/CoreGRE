@@ -503,17 +503,19 @@ class QualityApiController extends BaseController
                 ->count();
 
             // 2. Lista controlli con eccezioni - ELOQUENT
-            $controls_list = QualityRecord::with('qualityExceptions')
-                ->where('operatore', $operatorRecord->user)
-                ->whereDate('data_controllo', $date)
-                ->orderBy('data_controllo', 'DESC')
+            $controls_list = QualityRecord::select('cq_records.*', 'd.nome_reparto as reparto_nome')
+                ->leftJoin('cq_departments as d', 'cq_records.reparto', '=', 'd.id')
+                ->with('qualityExceptions')
+                ->where('cq_records.operatore', $operatorRecord->user)
+                ->whereDate('cq_records.data_controllo', $date)
+                ->orderBy('cq_records.data_controllo', 'DESC')
                 ->get()
                 ->map(function($record) {
                     return [
                         'id' => $record->id,
                         'numero_cartellino' => $record->numero_cartellino,
                         'articolo' => $record->articolo,
-                        'reparto' => $record->reparto,
+                        'reparto' => $record->reparto_nome ?: $record->reparto, // Use text name if available, fallback to ID/text
                         'ora_controllo' => $record->data_controllo->format('H:i:s'),
                         'tipo_cq' => $record->tipo_cq,
                         'numero_eccezioni' => $record->qualityExceptions->count()
@@ -528,26 +530,40 @@ class QualityApiController extends BaseController
             })->count();
 
             // 4. Ottieni i tipi di difetti più frequenti - ELOQUENT
-            $top_defects = QualityException::select('tipo_difetto')
+            $top_defects = QualityException::select('cq_exceptions.tipo_difetto', 't.descrizione as tipo_difetto_nome')
                 ->selectRaw('COUNT(*) AS count')
+                ->leftJoin('cq_deftypes as t', 'cq_exceptions.tipo_difetto', '=', 't.id')
                 ->whereHas('qualityRecord', function($q) use ($operatorRecord, $date) {
                     $q->where('operatore', $operatorRecord->user)
                       ->whereDate('data_controllo', $date);
                 })
-                ->groupBy('tipo_difetto')
+                ->groupBy('cq_exceptions.tipo_difetto', 't.descrizione')
                 ->orderBy('count', 'DESC')
                 ->limit(5)
                 ->get()
+                ->map(function($item) {
+                    return [
+                        'tipo_difetto' => $item->tipo_difetto_nome ?: $item->tipo_difetto, // Use text name if available, fallback to ID/text
+                        'count' => $item->count
+                    ];
+                })
                 ->toArray();
 
             // 5. Ottieni i reparti con più controlli - ELOQUENT
-            $top_departments = QualityRecord::select('reparto')
+            $top_departments = QualityRecord::select('cq_records.reparto', 'd.nome_reparto as reparto_nome')
                 ->selectRaw('COUNT(*) AS count')
-                ->where('operatore', $operatorRecord->user)
-                ->whereDate('data_controllo', $date)
-                ->groupBy('reparto')
+                ->leftJoin('cq_departments as d', 'cq_records.reparto', '=', 'd.id')
+                ->where('cq_records.operatore', $operatorRecord->user)
+                ->whereDate('cq_records.data_controllo', $date)
+                ->groupBy('cq_records.reparto', 'd.nome_reparto')
                 ->orderBy('count', 'DESC')
                 ->get()
+                ->map(function($item) {
+                    return [
+                        'reparto' => $item->reparto_nome ?: $item->reparto, // Use text name if available, fallback to ID/text
+                        'count' => $item->count
+                    ];
+                })
                 ->toArray();
 
             // Formatta data ESATTO COME LEGACY
@@ -600,8 +616,11 @@ class QualityApiController extends BaseController
                 return;
             }
 
-            // Ottieni dettagli record - ELOQUENT
-            $record = QualityRecord::find($record_id);
+            // Ottieni dettagli record - ELOQUENT with department JOIN
+            $record = QualityRecord::select('cq_records.*', 'd.nome_reparto as reparto_nome')
+                ->leftJoin('cq_departments as d', 'cq_records.reparto', '=', 'd.id')
+                ->where('cq_records.id', $record_id)
+                ->first();
 
             if (!$record) {
                 $this->json([
@@ -611,21 +630,31 @@ class QualityApiController extends BaseController
                 return;
             }
 
-            // Ottieni eccezioni associate - ELOQUENT
-            $exceptions = QualityException::select('cq_hermes_eccezioni.*', 't.descrizione as tipo_difetto_desc')
-                ->leftJoin('cq_hermes_tipi_difetti as t', 'cq_hermes_eccezioni.tipo_difetto', '=', 't.id')
-                ->where('cq_hermes_eccezioni.cartellino_id', $record_id)
-                ->orderBy('cq_hermes_eccezioni.id')
+            // Ottieni eccezioni associate - ELOQUENT with defect type JOIN
+            $exceptions = QualityException::select('cq_exceptions.*', 't.descrizione as tipo_difetto_desc')
+                ->leftJoin('cq_deftypes as t', 'cq_exceptions.tipo_difetto', '=', 't.id')
+                ->where('cq_exceptions.cartellino_id', $record_id)
+                ->orderBy('cq_exceptions.id')
                 ->get()
+                ->map(function($exception) {
+                    $data = $exception->toArray();
+                    // Replace tipo_difetto with descriptive text if available
+                    $data['tipo_difetto'] = $exception->tipo_difetto_desc ?: $exception->tipo_difetto;
+                    unset($data['tipo_difetto_desc']); // Remove the extra field
+                    return $data;
+                })
                 ->toArray();
 
-            $record = $record->toArray();
+            $recordData = $record->toArray();
+            // Replace reparto with descriptive text if available
+            $recordData['reparto'] = $record->reparto_nome ?: $record->reparto;
+            unset($recordData['reparto_nome']); // Remove the extra field
 
             $this->json([
                 'status' => 'success',
                 'message' => 'Dettagli record recuperati',
                 'data' => [
-                    'record' => $record,
+                    'record' => $recordData,
                     'exceptions' => $exceptions
                 ]
             ]);
