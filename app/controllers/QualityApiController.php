@@ -448,7 +448,7 @@ class QualityApiController extends BaseController
                         'taglia' => $eccezione['taglia'],
                         'tipo_difetto' => $eccezione['tipo_difetto'],
                         'note_operatore' => $eccezione['note_operatore'] ?? null,
-                        'fotoPATH' => $eccezione['fotoPath'] ?? null
+                        'fotoPath' => $eccezione['fotoPath'] ?? null
                     ]);
                 }
             }
@@ -744,42 +744,15 @@ class QualityApiController extends BaseController
             if (move_uploaded_file($file['tmp_name'], $file_path)) {
                 error_log("Upload photo: File salvato con successo: {$file_path}");
 
-                // Salva nel database
-                try {
-                    $this->db->execute("
-                        INSERT INTO cq_foto_eccezioni (
-                            cartellino_id, tipo_difetto, calzata, note,
-                            nome_file, percorso_file, created_at
-                        ) VALUES (?, ?, ?, ?, ?, ?, ?)
-                    ", [
-                        $cartellino_id,
-                        $tipo_difetto,
-                        $calzata,
-                        $note,
-                        $filename,
-                        $file_path,
-                        date('Y-m-d H:i:s')
-                    ]);
-
-                    $photo_id = $this->db->getLastInsertId();
-
-                    error_log("Upload photo: Record DB inserito con ID: {$photo_id}");
-
-                    $this->json([
-                        'status' => 'success',
-                        'message' => 'Foto caricata con successo',
-                        'data' => [
-                            'photo_id' => $photo_id,
-                            'filename' => $filename,
-                            'url' => BASE_URL . '/storage/quality/cq_uploads/' . $filename
-                        ]
-                    ]);
-                } catch (Exception $db_error) {
-                    error_log("Upload photo: Errore DB - " . $db_error->getMessage());
-                    // File salvato ma DB fallito - elimina file
-                    @unlink($file_path);
-                    throw $db_error;
-                }
+                // Ritorna solo il filename - l'inserimento nel DB avverrà con saveHermesCq
+                $this->json([
+                    'status' => 'success',
+                    'message' => 'Foto caricata con successo',
+                    'data' => [
+                        'filename' => $filename,
+                        'url' => BASE_URL . '/storage/quality/cq_uploads/' . $filename
+                    ]
+                ]);
             } else {
                 $last_error = error_get_last();
                 error_log("Upload photo: FALLITO move_uploaded_file - " . json_encode($last_error));
