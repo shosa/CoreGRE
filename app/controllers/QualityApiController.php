@@ -651,22 +651,48 @@ class QualityApiController extends BaseController
         }
 
         try {
-            // Verifica upload file
-            if (!isset($_FILES['photo']) || $_FILES['photo']['error'] !== UPLOAD_ERR_OK) {
+            // Verifica upload file con dettagli errore
+            if (!isset($_FILES['photo'])) {
+                error_log("Upload photo: Nessun file ricevuto in \$_FILES['photo']");
                 $this->json([
                     'status' => 'error',
-                    'message' => 'Errore durante l\'upload del file'
+                    'message' => 'Nessun file ricevuto'
                 ]);
                 return;
             }
 
-            // Parametri obbligatori ESATTI COME LEGACY
+            $file = $_FILES['photo'];
+
+            // Log dettagliato dell'errore
+            if ($file['error'] !== UPLOAD_ERR_OK) {
+                $error_messages = [
+                    UPLOAD_ERR_INI_SIZE => 'Il file supera upload_max_filesize in php.ini',
+                    UPLOAD_ERR_FORM_SIZE => 'Il file supera MAX_FILE_SIZE',
+                    UPLOAD_ERR_PARTIAL => 'Upload parziale del file',
+                    UPLOAD_ERR_NO_FILE => 'Nessun file caricato',
+                    UPLOAD_ERR_NO_TMP_DIR => 'Directory temporanea mancante',
+                    UPLOAD_ERR_CANT_WRITE => 'Impossibile scrivere su disco',
+                    UPLOAD_ERR_EXTENSION => 'Upload bloccato da estensione PHP'
+                ];
+
+                $error_msg = $error_messages[$file['error']] ?? 'Errore sconosciuto';
+                error_log("Upload photo error code {$file['error']}: {$error_msg}");
+
+                $this->json([
+                    'status' => 'error',
+                    'message' => "Errore upload: {$error_msg}"
+                ]);
+                return;
+            }
+
+            // Parametri obbligatori
             $cartellino_id = $_POST['cartellino_id'] ?? '';
             $tipo_difetto = $_POST['tipo_difetto'] ?? '';
             $calzata = $_POST['calzata'] ?? '';
             $note = $_POST['note'] ?? '';
 
             if (empty($cartellino_id) || empty($tipo_difetto)) {
+                error_log("Upload photo: Parametri mancanti - cartellino_id: '{$cartellino_id}', tipo_difetto: '{$tipo_difetto}'");
                 $this->json([
                     'status' => 'error',
                     'message' => 'Parametri cartellino_id e tipo_difetto sono obbligatori'
@@ -674,69 +700,104 @@ class QualityApiController extends BaseController
                 return;
             }
 
-            $file = $_FILES['photo'];
+            // RIMOSSA LIMITAZIONE FORMATO - Accetta tutti i formati immagine da mobile
             $file_extension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
-            $allowed_extensions = ['jpg', 'jpeg', 'png'];
 
-            if (!in_array($file_extension, $allowed_extensions)) {
+            // Se l'estensione è vuota o sconosciuta, usa 'jpg' come default
+            if (empty($file_extension)) {
+                $file_extension = 'jpg';
+            }
+
+            // Directory upload
+            $upload_dir = APP_ROOT . '/storage/quality/cq_uploads/';
+
+            // Verifica e crea directory con gestione errori
+            if (!is_dir($upload_dir)) {
+                error_log("Upload photo: Directory non esistente, creazione: {$upload_dir}");
+                if (!mkdir($upload_dir, 0755, true)) {
+                    error_log("Upload photo: ERRORE creazione directory {$upload_dir}");
+                    $this->json([
+                        'status' => 'error',
+                        'message' => 'Impossibile creare la directory di upload'
+                    ]);
+                    return;
+                }
+                error_log("Upload photo: Directory creata con successo");
+            }
+
+            // Verifica permessi scrittura
+            if (!is_writable($upload_dir)) {
+                error_log("Upload photo: Directory non scrivibile: {$upload_dir}");
                 $this->json([
                     'status' => 'error',
-                    'message' => 'Formato file non supportato. Utilizzare JPG, JPEG o PNG.'
+                    'message' => 'Directory di upload non scrivibile. Controllare i permessi.'
                 ]);
                 return;
             }
 
-            // Directory upload ESATTA COME LEGACY
-            $upload_dir = APP_ROOT . '/storage/quality/cq_uploads/';
-            if (!is_dir($upload_dir)) {
-                mkdir($upload_dir, 0755, true);
-            }
-
-            // Nome file ESATTO COME LEGACY
+            // Nome file
             $filename = 'eccezione_' . $cartellino_id . '_' . time() . '.' . $file_extension;
             $file_path = $upload_dir . $filename;
 
+            error_log("Upload photo: Tentativo salvataggio file da '{$file['tmp_name']}' a '{$file_path}'");
+
             if (move_uploaded_file($file['tmp_name'], $file_path)) {
-                // Salva nel database - ELOQUENT
-                // Nota: Servrebbe un modello QualityPhotoException, per ora uso raw
-                $this->db->execute("
-                    INSERT INTO cq_foto_eccezioni (
-                        cartellino_id, tipo_difetto, calzata, note,
-                        nome_file, percorso_file, created_at
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?)
-                ", [
-                    $cartellino_id,
-                    $tipo_difetto,
-                    $calzata,
-                    $note,
-                    $filename,
-                    $file_path,
-                    date('Y-m-d H:i:s')
-                ]);
+                error_log("Upload photo: File salvato con successo: {$file_path}");
 
-                $photo_id = $this->db->getLastInsertId();
+                // Salva nel database
+                try {
+                    $this->db->execute("
+                        INSERT INTO cq_foto_eccezioni (
+                            cartellino_id, tipo_difetto, calzata, note,
+                            nome_file, percorso_file, created_at
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?)
+                    ", [
+                        $cartellino_id,
+                        $tipo_difetto,
+                        $calzata,
+                        $note,
+                        $filename,
+                        $file_path,
+                        date('Y-m-d H:i:s')
+                    ]);
 
-                $this->json([
-                    'status' => 'success',
-                    'message' => 'Foto caricata con successo',
-                    'data' => [
-                        'photo_id' => $photo_id,
-                        'filename' => $filename,
-                        'url' => BASE_URL . '/storage/quality/cq_uploads/' . $filename
-                    ]
-                ]);
+                    $photo_id = $this->db->getLastInsertId();
+
+                    error_log("Upload photo: Record DB inserito con ID: {$photo_id}");
+
+                    $this->json([
+                        'status' => 'success',
+                        'message' => 'Foto caricata con successo',
+                        'data' => [
+                            'photo_id' => $photo_id,
+                            'filename' => $filename,
+                            'url' => BASE_URL . '/storage/quality/cq_uploads/' . $filename
+                        ]
+                    ]);
+                } catch (Exception $db_error) {
+                    error_log("Upload photo: Errore DB - " . $db_error->getMessage());
+                    // File salvato ma DB fallito - elimina file
+                    @unlink($file_path);
+                    throw $db_error;
+                }
             } else {
+                $last_error = error_get_last();
+                error_log("Upload photo: FALLITO move_uploaded_file - " . json_encode($last_error));
+                error_log("Upload photo: Source exists: " . (file_exists($file['tmp_name']) ? 'YES' : 'NO'));
+                error_log("Upload photo: Dest dir writable: " . (is_writable($upload_dir) ? 'YES' : 'NO'));
+
                 $this->json([
                     'status' => 'error',
-                    'message' => 'Errore durante il salvataggio del file'
+                    'message' => 'Errore durante il salvataggio del file. Verificare i permessi della directory.'
                 ]);
             }
 
         } catch (Exception $e) {
             error_log("Errore API upload_photo: " . $e->getMessage());
+            error_log("Stack trace: " . $e->getTraceAsString());
             $this->json([
                 'status' => 'error',
-                'message' => 'Si è verificato un errore durante l\'upload'
+                'message' => 'Si è verificato un errore durante l\'upload: ' . $e->getMessage()
             ]);
         }
     }
