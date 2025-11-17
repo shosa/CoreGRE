@@ -63,19 +63,38 @@ class QualityController extends BaseController
         $reparto = $this->input('reparto');
         $operatore = $this->input('operatore');
 
-        $query = QualityRecord::whereBetween('data_controllo', [$startDate, $endDate])
-            ->byType('GRIFFE')
-            ->with('qualityExceptions');
+        // Query with JOIN to get department names
+        $query = QualityRecord::select('cq_records.*', 'd.nome_reparto as reparto_nome')
+            ->leftJoin('cq_departments as d', 'cq_records.reparto', '=', 'd.id')
+            ->whereBetween('cq_records.data_controllo', [$startDate, $endDate])
+            ->where('cq_records.tipo_cq', 'GRIFFE')
+            ->with(['qualityExceptions' => function($q) {
+                // Load exceptions with defect type names
+                $q->select('cq_exceptions.*', 't.descrizione as tipo_difetto_nome')
+                  ->leftJoin('cq_deftypes as t', 'cq_exceptions.tipo_difetto', '=', 't.id');
+            }]);
 
         if ($reparto) {
-            $query->where('reparto', $reparto);
+            // Filter by department ID
+            $query->where('cq_records.reparto', $reparto);
         }
 
         if ($operatore) {
-            $query->where('operatore', $operatore);
+            $query->where('cq_records.operatore', $operatore);
         }
 
-        $records = $query->orderByDesc('data_controllo')->get();
+        $records = $query->orderByDesc('cq_records.data_controllo')->get();
+
+        // Map records to add display names
+        $records->each(function($record) {
+            // Use nome_reparto from JOIN or fallback to ID
+            $record->reparto_display = $record->reparto_nome ?: $record->reparto;
+
+            // Map exceptions to use tipo_difetto_nome
+            $record->qualityExceptions->each(function($exception) {
+                $exception->tipo_difetto_display = $exception->tipo_difetto_nome ?: $exception->tipo_difetto;
+            });
+        });
 
         $data = [
             'pageTitle' => 'Consulto Record CQ',
@@ -1009,13 +1028,25 @@ class QualityController extends BaseController
      */
     private function getDailyRecords($selectedDate)
     {
-        return QualityRecord::with('qualityExceptions')
-            ->whereDate('data_controllo', $selectedDate)
-            ->orderByDesc('data_controllo')
+        return QualityRecord::select('cq_records.*', 'd.nome_reparto as reparto_nome')
+            ->leftJoin('cq_departments as d', 'cq_records.reparto', '=', 'd.id')
+            ->with(['qualityExceptions' => function($q) {
+                $q->select('cq_exceptions.*', 't.descrizione as tipo_difetto_nome')
+                  ->leftJoin('cq_deftypes as t', 'cq_exceptions.tipo_difetto', '=', 't.id');
+            }])
+            ->whereDate('cq_records.data_controllo', $selectedDate)
+            ->orderByDesc('cq_records.data_controllo')
             ->get()
             ->map(function($record) {
+                $record->reparto_display = $record->reparto_nome ?: $record->reparto;
                 $record->numero_eccezioni = $record->qualityExceptions->count();
-                $record->tipi_difetti = $record->qualityExceptions->pluck('tipo_difetto')->implode(', ');
+
+                // Map tipo_difetto to display names
+                $defectNames = $record->qualityExceptions->map(function($exc) {
+                    return $exc->tipo_difetto_nome ?: $exc->tipo_difetto;
+                });
+                $record->tipi_difetti = $defectNames->implode(', ');
+
                 return $record;
             });
     }

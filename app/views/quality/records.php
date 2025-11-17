@@ -69,7 +69,7 @@
             <select name="reparto" class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-white">
                 <option value="">Tutti i reparti</option>
                 <?php foreach ($reparti as $reparto): ?>
-                    <option value="<?= htmlspecialchars($reparto->nome_reparto) ?>" <?= $selectedReparto === $reparto->nome_reparto ? 'selected' : '' ?>>
+                    <option value="<?= htmlspecialchars($reparto->id) ?>" <?= $selectedReparto == $reparto->id ? 'selected' : '' ?>>
                         <?= htmlspecialchars($reparto->nome_reparto) ?>
                     </option>
                 <?php endforeach; ?>
@@ -229,7 +229,7 @@
                                 <?= htmlspecialchars($record->articolo) ?>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300">
-                                <?= htmlspecialchars($record->reparto) ?>
+                                <?= htmlspecialchars($record->reparto_display) ?>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300">
                                 <?= htmlspecialchars($record->operatore) ?>
@@ -252,13 +252,29 @@
                             </td>
                             <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-300">
                                 <?php if ($hasExceptions): ?>
-                                    <div class="space-y-1">
+                                    <div class="space-y-2">
                                         <?php foreach ($record->qualityExceptions as $exception): ?>
-                                            <div class="flex items-center text-xs text-red-600 dark:text-red-400">
-                                                <i class="fas fa-bug mr-1"></i>
-                                                <?= htmlspecialchars($exception->tipo_difetto) ?>
-                                                <?php if ($exception->paia_difettose): ?>
-                                                    <span class="ml-1 text-gray-500">(<?= $exception->paia_difettose ?> paia)</span>
+                                            <div class="flex items-start">
+                                                <div class="flex-1">
+                                                    <div class="flex items-center text-xs text-red-600 dark:text-red-400">
+                                                        <i class="fas fa-bug mr-1"></i>
+                                                        <?= htmlspecialchars($exception->tipo_difetto_display) ?>
+                                                        <?php if (!empty($exception->taglia)): ?>
+                                                            <span class="ml-1 text-gray-500">Taglia: <?= htmlspecialchars($exception->taglia) ?></span>
+                                                        <?php endif; ?>
+                                                    </div>
+                                                    <?php if (!empty($exception->note_operatore)): ?>
+                                                        <div class="text-xs text-gray-500 mt-1">
+                                                            <?= htmlspecialchars($exception->note_operatore) ?>
+                                                        </div>
+                                                    <?php endif; ?>
+                                                </div>
+                                                <?php if (!empty($exception->fotoPath)): ?>
+                                                    <button onclick="showExceptionPhoto('<?= htmlspecialchars($exception->fotoPath) ?>', '<?= htmlspecialchars($exception->tipo_difetto_display) ?>')"
+                                                            class="ml-2 flex items-center justify-center w-8 h-8 rounded bg-blue-100 dark:bg-blue-900/30 hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors"
+                                                            title="Visualizza foto">
+                                                        <i class="fas fa-camera text-blue-600 dark:text-blue-400 text-sm"></i>
+                                                    </button>
                                                 <?php endif; ?>
                                             </div>
                                         <?php endforeach; ?>
@@ -275,7 +291,47 @@
     <?php endif; ?>
 </div>
 
+<!-- Photo Modal -->
+<div id="photoModal" class="fixed inset-0 bg-black bg-opacity-75 z-50 hidden flex items-center justify-center p-4" onclick="closePhotoModal()">
+    <div class="relative max-w-4xl max-h-full" onclick="event.stopPropagation()">
+        <button onclick="closePhotoModal()" class="absolute -top-10 right-0 text-white hover:text-gray-300 transition-colors">
+            <i class="fas fa-times text-2xl"></i>
+        </button>
+        <div class="bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-2xl">
+            <div class="p-4 border-b border-gray-200 dark:border-gray-700">
+                <h3 id="photoModalTitle" class="text-lg font-semibold text-gray-900 dark:text-white"></h3>
+            </div>
+            <div class="p-4">
+                <img id="photoModalImage" src="" alt="Foto eccezione" class="max-w-full max-h-[70vh] mx-auto">
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
+// Photo Modal Functions
+function showExceptionPhoto(photoPath, defectType) {
+    const modal = document.getElementById('photoModal');
+    const modalImage = document.getElementById('photoModalImage');
+    const modalTitle = document.getElementById('photoModalTitle');
+
+    modalTitle.textContent = 'Foto Eccezione: ' + defectType;
+    modalImage.src = '/storage/quality/cq_uploads/' + photoPath;
+    modal.classList.remove('hidden');
+}
+
+function closePhotoModal() {
+    const modal = document.getElementById('photoModal');
+    modal.classList.add('hidden');
+}
+
+// Close modal on ESC key
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closePhotoModal();
+    }
+});
+
 // Consulto Record CQ - PJAX Compatible
 (function() {
     'use strict';
