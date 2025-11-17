@@ -10,8 +10,11 @@ namespace App\Models;
  */
 class QualityOperator extends BaseModel
 {
-    protected $table = 'cq_operators';
-    const UPDATED_AT = null;
+    protected $table = 'inwork_operators';
+    protected $primaryKey = 'user';
+    public $incrementing = false;
+    protected $keyType = 'string';
+    public const UPDATED_AT = null;
 
     protected $fillable = [
             'user',
