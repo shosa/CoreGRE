@@ -105,27 +105,30 @@ export default function DashboardPage() {
     }
   };
 
+  const getToken = () => JSON.parse(localStorage.getItem('coregre-auth') || '{}').state?.token ?? '';
+
   const fetchTrendData = async (period: number) => {
+    if (!hasPermission('produzione')) return;
     try {
       const r = await fetch(`/api/widgets/produzione-trend?period=${period}`, {
-        headers: { 'Authorization': `Bearer ${JSON.parse(localStorage.getItem('coregre-auth') || '{}').state?.token ?? ''}` },
+        headers: { 'Authorization': `Bearer ${getToken()}` },
       });
       if (r.ok) setTrendData(await r.json());
     } catch {}
   };
 
   const fetchRepartiData = async (period: number) => {
+    if (!hasPermission('produzione')) return;
     try {
       const r = await fetch(`/api/widgets/produzione-chart?period=${period}`, {
-        headers: { 'Authorization': `Bearer ${JSON.parse(localStorage.getItem('coregre-auth') || '{}').state?.token ?? ''}` },
+        headers: { 'Authorization': `Bearer ${getToken()}` },
       });
       if (r.ok) setRepartiData(await r.json());
     } catch {}
   };
 
-  const getToken = () => JSON.parse(localStorage.getItem('coregre-auth') || '{}').state?.token ?? '';
-
   const fetchHealthData = async () => {
+    if (!hasPermission('system-admin')) return;
     try {
       const r = await fetch('/api/settings/health-check', {
         headers: { 'Authorization': `Bearer ${getToken()}` },
@@ -135,6 +138,7 @@ export default function DashboardPage() {
   };
 
   const fetchJobsData = async () => {
+    if (!hasPermission('system-admin')) return;
     try {
       const r = await fetch('/api/settings/jobs', {
         headers: { 'Authorization': `Bearer ${getToken()}` },
@@ -144,6 +148,7 @@ export default function DashboardPage() {
   };
 
   const fetchLogStats = async () => {
+    if (!hasPermission('log')) return;
     try {
       const r = await fetch('/api/activity-log/stats', {
         headers: { 'Authorization': `Bearer ${getToken()}` },
