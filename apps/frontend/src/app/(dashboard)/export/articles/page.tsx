@@ -40,6 +40,10 @@ export default function ExportArticlesPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
 
+  // Pagination
+  const ITEMS_PER_PAGE = 20;
+  const [currentPage, setCurrentPage] = useState(1);
+
   // Modal state
   const [showModal, setShowModal] = useState(false);
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create');
@@ -69,8 +73,15 @@ export default function ExportArticlesPage() {
 
   const handleSearch = (v: string) => {
     setSearch(v);
+    setCurrentPage(1);
     load(v || undefined);
   };
+
+  const totalPages = Math.max(1, Math.ceil(articles.length / ITEMS_PER_PAGE));
+  const paginatedArticles = articles.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE,
+  );
 
   const openCreate = () => {
     setForm(emptyForm);
@@ -164,6 +175,11 @@ export default function ExportArticlesPage() {
             {!loading && (
               <span className="text-xs text-gray-400">
                 <span className="font-semibold text-gray-600 dark:text-gray-300">{articles.length}</span> articoli
+                {articles.length > ITEMS_PER_PAGE && (
+                  <span className="ml-1">
+                    — pag. <span className="font-semibold text-gray-600 dark:text-gray-300">{currentPage}</span>/{totalPages}
+                  </span>
+                )}
               </span>
             )}
 
@@ -231,7 +247,7 @@ export default function ExportArticlesPage() {
                 </thead>
                 <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
                   <AnimatePresence>
-                    {articles.map((a, i) => (
+                    {paginatedArticles.map((a, i) => (
                       <motion.tr
                         key={a.id}
                         initial={{ opacity: 0, x: -8 }}
@@ -315,6 +331,74 @@ export default function ExportArticlesPage() {
               </div>
             )}
           </div>
+
+          {/* Pagination */}
+          {!loading && totalPages > 1 && (
+            <div className="shrink-0 border-t border-gray-200 dark:border-gray-700 px-5 py-3 flex items-center justify-between gap-3">
+              <span className="text-xs text-gray-500 dark:text-gray-400">
+                {(currentPage - 1) * ITEMS_PER_PAGE + 1}–{Math.min(currentPage * ITEMS_PER_PAGE, articles.length)} di {articles.length} articoli
+              </span>
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => setCurrentPage(1)}
+                  disabled={currentPage === 1}
+                  className="w-7 h-7 flex items-center justify-center rounded-md text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                  title="Prima pagina"
+                >
+                  <i className="fas fa-angle-double-left text-xs"></i>
+                </button>
+                <button
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                  className="w-7 h-7 flex items-center justify-center rounded-md text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                  title="Pagina precedente"
+                >
+                  <i className="fas fa-angle-left text-xs"></i>
+                </button>
+                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                  let page: number;
+                  if (totalPages <= 5) {
+                    page = i + 1;
+                  } else if (currentPage <= 3) {
+                    page = i + 1;
+                  } else if (currentPage >= totalPages - 2) {
+                    page = totalPages - 4 + i;
+                  } else {
+                    page = currentPage - 2 + i;
+                  }
+                  return (
+                    <button
+                      key={page}
+                      onClick={() => setCurrentPage(page)}
+                      className={`w-7 h-7 flex items-center justify-center rounded-md text-xs font-medium transition-colors ${
+                        page === currentPage
+                          ? 'bg-orange-500 text-white'
+                          : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  );
+                })}
+                <button
+                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={currentPage === totalPages}
+                  className="w-7 h-7 flex items-center justify-center rounded-md text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                  title="Pagina successiva"
+                >
+                  <i className="fas fa-angle-right text-xs"></i>
+                </button>
+                <button
+                  onClick={() => setCurrentPage(totalPages)}
+                  disabled={currentPage === totalPages}
+                  className="w-7 h-7 flex items-center justify-center rounded-md text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                  title="Ultima pagina"
+                >
+                  <i className="fas fa-angle-double-right text-xs"></i>
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </motion.div>
 
