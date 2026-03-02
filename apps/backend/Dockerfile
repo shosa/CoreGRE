@@ -46,7 +46,7 @@ RUN npm run build
 
 # Stage 3: Runner
 FROM node:18-alpine AS runner
-RUN apk add --no-cache openssl
+RUN apk add --no-cache openssl su-exec
 
 WORKDIR /app
 
@@ -67,13 +67,13 @@ COPY --from=builder --chown=nestjs:nodejs /app/node_modules ./node_modules
 # Copy frontend public assets (needed for PDF generation)
 COPY --from=builder --chown=nestjs:nodejs /app/apps/frontend/public ./public
 
-# Create storage directories with correct permissions
-RUN mkdir -p /app/storage/export/temp /app/storage/export/src /app/storage/jobs /app/storage/uploads /app/storage/logs && \
-    chown -R nestjs:nodejs /app/storage
+# Create storage directories (will be overridden by volumes at runtime)
+RUN mkdir -p /app/storage/export/temp /app/storage/export/src /app/storage/jobs /app/storage/uploads /app/storage/logs
 
-USER nestjs
+# Entrypoint: fix volume permissions as root, then exec as nestjs
+COPY apps/backend/docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
 
 EXPOSE 3011
 
-# Run migrations and start
-CMD sh -c "npx prisma migrate deploy || true && node dist/src/main"
+ENTRYPOINT ["/docker-entrypoint.sh"]
