@@ -7,6 +7,7 @@ import PageHeader from "@/components/layout/PageHeader";
 import Breadcrumb from "@/components/layout/Breadcrumb";
 import { produzioneApi } from "@/lib/api";
 import { showError } from "@/store/notifications";
+import { useAuthStore, PERM } from "@/store/auth";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -37,6 +38,8 @@ type RecentRecord = {
 };
 
 export default function ProduzioneDashboard() {
+  const { hasPermLevel } = useAuthStore();
+  const canCreate = hasPermLevel('produzione', PERM.CREATE);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<Stats>({
     registrazioniOggi: 0,
@@ -171,6 +174,7 @@ export default function ProduzioneDashboard() {
         {/* Colonna 1-2: Cards principali */}
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:col-span-2">
           {/* Nuova Produzione */}
+          {canCreate && (
           <motion.div variants={itemVariants}>
             <div className="group relative h-full overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-lg transition-all duration-300 hover:shadow-xl dark:border-gray-800 dark:bg-gray-800/40 backdrop-blur-sm">
               <div className="absolute inset-0 bg-gradient-to-br from-yellow-50 to-orange-50 opacity-60 dark:from-yellow-900/10 dark:to-orange-800/10" />
@@ -189,6 +193,7 @@ export default function ProduzioneDashboard() {
               </div>
             </div>
           </motion.div>
+          )}
 
           {/* Calendario */}
           <motion.div variants={itemVariants}>

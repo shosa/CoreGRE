@@ -134,12 +134,12 @@ export class UsersService {
 
     if (!permission) {
       return {
-        riparazioni: false,
-        produzione: false,
-        quality: false,
-        export: false,
+        riparazioni: 0,
+        produzione: 0,
+        quality: 0,
+        export: 0,
+        tracking: 0,
         scm_admin: false,
-        tracking: false,
         analitiche: false,
         mrp: false,
         users: false,
@@ -152,7 +152,14 @@ export class UsersService {
       };
     }
 
-    return permission.permessi as any;
+    const raw = permission.permessi as Record<string, unknown>;
+    // Migrate legacy boolean true → 15 (DELETE = full access) for operative modules
+    const operative = ['riparazioni', 'produzione', 'quality', 'export', 'tracking'] as const;
+    for (const key of operative) {
+      if (raw[key] === true) raw[key] = 15;
+      else if (raw[key] === false || raw[key] === undefined) raw[key] = 0;
+    }
+    return raw;
   }
 
   async updatePermissions(userId: number, permessi: any) {

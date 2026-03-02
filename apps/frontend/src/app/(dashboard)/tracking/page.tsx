@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { trackingApi } from '@/lib/api';
 import { showError } from '@/store/notifications';
+import { useAuthStore, PERM } from '@/store/auth';
 import PageHeader from '@/components/layout/PageHeader';
 import Breadcrumb from '@/components/layout/Breadcrumb';
 
@@ -26,6 +27,9 @@ interface TrackingStats {
 }
 
 export default function TrackingPage() {
+  const { hasPermLevel } = useAuthStore();
+  const canCreate = hasPermLevel('tracking', PERM.CREATE);
+  const canDelete = hasPermLevel('tracking', PERM.DELETE);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<TrackingStats>({
     totalLinks: 0,
@@ -122,7 +126,8 @@ export default function TrackingPage() {
 
       {/* Navigation Cards - Layout: 2 Large Side-by-Side + 3 Small Stacked */}
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {/* 1. Ricerca Multipla - LARGE CARD */}
+        {/* 1. Ricerca Multipla - LARGE CARD (richiede CREATE per associazioni) */}
+        {canCreate && (
         <motion.div variants={itemVariants}>
           <Link href="/tracking/multi-search">
             <div className="group relative h-full overflow-hidden rounded-2xl border border-gray-200 bg-white p-8 shadow-lg hover:shadow-xl transition-all hover:-translate-y-1 dark:border-gray-700 dark:bg-gray-800">
@@ -144,8 +149,10 @@ export default function TrackingPage() {
             </div>
           </Link>
         </motion.div>
+        )}
 
         {/* 2. Inserimento Manuale - LARGE CARD */}
+        {canCreate && (
         <motion.div variants={itemVariants}>
           <Link href="/tracking/order-search">
             <div className="group relative h-full overflow-hidden rounded-2xl border border-gray-200 bg-white p-8 shadow-lg hover:shadow-xl transition-all hover:-translate-y-1 dark:border-gray-700 dark:bg-gray-800">
@@ -167,6 +174,7 @@ export default function TrackingPage() {
             </div>
           </Link>
         </motion.div>
+        )}
 
         {/* Right Column: 3 Small Cards Stacked */}
         <div className="grid grid-cols-1 gap-6 md:col-span-2 lg:col-span-1">
@@ -231,6 +239,7 @@ export default function TrackingPage() {
           </motion.div>
 
           {/* 6. Archivio & Compattamento - SMALL CARD */}
+          {canDelete && (
           <motion.div variants={itemVariants}>
             <Link href="/tracking/archive">
               <div className="group relative overflow-hidden rounded-2xl border border-gray-200 bg-white p-6 shadow-sm hover:shadow-lg transition-all hover:-translate-y-1 dark:border-gray-700 dark:bg-gray-800">
@@ -249,6 +258,7 @@ export default function TrackingPage() {
               </div>
             </Link>
           </motion.div>
+          )}
         </div>
       </div>
     </motion.div>

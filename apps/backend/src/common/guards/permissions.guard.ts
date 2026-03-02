@@ -6,7 +6,12 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { PrismaClient } from '@prisma/client';
-import { PERMISSIONS_KEY } from '../decorators/permissions.decorator';
+import {
+  PERMISSIONS_KEY,
+  PERM_ACTION_KEY,
+  PERM,
+  hasPermLevel,
+} from '../decorators/permissions.decorator';
 
 @Injectable()
 export class PermissionsGuard implements CanActivate {
@@ -17,13 +22,11 @@ export class PermissionsGuard implements CanActivate {
   constructor(private reflector: Reflector) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    // Get required permissions from decorator metadata
     const requiredPermissions = this.reflector.getAllAndOverride<string[]>(
       PERMISSIONS_KEY,
       [context.getHandler(), context.getClass()],
     );
 
-    // If no permissions are required, allow access
     if (!requiredPermissions || requiredPermissions.length === 0) {
       return true;
     }
@@ -35,7 +38,6 @@ export class PermissionsGuard implements CanActivate {
       throw new ForbiddenException('User not authenticated');
     }
 
-    // Fetch user with permissions
     const userWithPermissions = await this.prisma.user.findUnique({
       where: { id: user.userId },
       include: { permissions: true },
@@ -45,14 +47,10 @@ export class PermissionsGuard implements CanActivate {
       throw new ForbiddenException('User not found');
     }
 
-    // Check if modules are enabled
+    // Check moduli abilitati
     for (const permission of requiredPermissions) {
-      // Map permission to module name (handle special cases where permission name differs from module name)
-      const moduleMap: Record<string, string> = {
-        quality: 'qualita',
-      };
+      const moduleMap: Record<string, string> = { quality: 'qualita' };
       const moduleName = moduleMap[permission] || permission;
-
       const isModuleEnabled = await this.isModuleEnabled(moduleName);
       if (!isModuleEnabled) {
         throw new ForbiddenException(
@@ -61,16 +59,23 @@ export class PermissionsGuard implements CanActivate {
       }
     }
 
-    // Check if user has required permissions
-    const userPermissions =
-      userWithPermissions.permissions?.permessi || {};
+    // Livello minimo richiesto per questo endpoint (default: READ)
+    const requiredLevel: number =
+      this.reflector.getAllAndOverride<number>(PERM_ACTION_KEY, [
+        context.getHandler(),
+        context.getClass(),
+      ]) ?? PERM.READ;
 
-    // User needs at least ONE of the required permissions (OR logic)
-    const hasPermission = requiredPermissions.some(
-      (permission) => userPermissions[permission] === true,
-    );
+    const userPermissions = userWithPermissions.permissions?.permessi || {};
 
-    if (!hasPermission) {
+    const granted = requiredPermissions.some((permission) => {
+      const val = (userPermissions as Record<string, unknown>)[permission];
+      if (typeof val === 'boolean') return val === true;
+      if (typeof val === 'number')  return hasPermLevel(val, requiredLevel);
+      return false;
+    });
+
+    if (!granted) {
       throw new ForbiddenException(
         `Accesso negato. Permessi richiesti: ${requiredPermissions.join(', ')}`,
       );
@@ -83,21 +88,16 @@ export class PermissionsGuard implements CanActivate {
     const now = Date.now();
     const cached = this.moduleCache.get(moduleName);
 
-    // Return cached value if still valid
     if (cached && now - cached.timestamp < this.CACHE_TTL) {
       return cached.value;
     }
 
-    // Fetch from database
     const setting = await this.prisma.setting.findUnique({
       where: { key: `module.${moduleName}.enabled` },
     });
 
     const isEnabled = setting?.value === 'true';
-
-    // Update cache
     this.moduleCache.set(moduleName, { value: isEnabled, timestamp: now });
-
     return isEnabled;
   }
 }

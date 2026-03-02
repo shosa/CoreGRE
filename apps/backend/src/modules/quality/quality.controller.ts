@@ -16,7 +16,7 @@ import { QualityService } from './quality.service';
 import { JobsQueueService } from '../jobs/jobs.queue';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../../common/guards/permissions.guard';
-import { RequirePermissions } from '../../common/decorators/permissions.decorator';
+import { RequirePermissions, RequirePermLevel, PERM } from '../../common/decorators/permissions.decorator';
 import { LogActivity } from '../../common/decorators/log-activity.decorator';
 import {
   CreateDepartmentDto,
@@ -112,6 +112,7 @@ export class QualityController {
    */
   @ApiOperation({ summary: 'Create new department' })
   @Post('departments')
+  @RequirePermLevel(PERM.CREATE)
   @LogActivity({
     module: 'quality',
     action: 'create',
@@ -128,6 +129,7 @@ export class QualityController {
    */
   @ApiOperation({ summary: 'Update department' })
   @Put('departments/:id')
+  @RequirePermLevel(PERM.UPDATE)
   @LogActivity({
     module: 'quality',
     action: 'update',
@@ -147,6 +149,7 @@ export class QualityController {
    */
   @ApiOperation({ summary: 'Delete department' })
   @Delete('departments/:id')
+  @RequirePermLevel(PERM.DELETE)
   @LogActivity({
     module: 'quality',
     action: 'delete',
@@ -188,6 +191,7 @@ export class QualityController {
    */
   @ApiOperation({ summary: 'Create new defect type' })
   @Post('defect-types')
+  @RequirePermLevel(PERM.CREATE)
   @LogActivity({
     module: 'quality',
     action: 'create',
@@ -204,6 +208,7 @@ export class QualityController {
    */
   @ApiOperation({ summary: 'Update defect type' })
   @Put('defect-types/:id')
+  @RequirePermLevel(PERM.UPDATE)
   @LogActivity({
     module: 'quality',
     action: 'update',
@@ -223,6 +228,7 @@ export class QualityController {
    */
   @ApiOperation({ summary: 'Delete defect type' })
   @Delete('defect-types/:id')
+  @RequirePermLevel(PERM.DELETE)
   @LogActivity({
     module: 'quality',
     action: 'delete',
@@ -295,6 +301,7 @@ export class QualityController {
    */
   @ApiOperation({ summary: 'Create new quality control record' })
   @Post('records')
+  @RequirePermLevel(PERM.CREATE)
   @LogActivity({
     module: 'quality',
     action: 'create',
@@ -402,6 +409,7 @@ export class QualityController {
    */
   @ApiOperation({ summary: 'Generate quality PDF report' })
   @Post('reports/generate-pdf')
+  @RequirePermLevel(PERM.CREATE)
   @LogActivity({
     module: 'quality',
     action: 'generate_report',

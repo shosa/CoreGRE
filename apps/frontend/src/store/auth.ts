@@ -1,12 +1,27 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 
+// Bitmask levels (must match backend PERM constants)
+export const PERM = { NONE: 0, READ: 1, CREATE: 3, UPDATE: 7, DELETE: 15 } as const;
+export type PermLevel = 0 | 1 | 3 | 7 | 15;
+
+export function hasPermLevel(userValue: number | boolean | undefined, required: PermLevel): boolean {
+  if (userValue === true) return true;   // legacy boolean → full access
+  if (!userValue) return false;
+  const val = userValue as number;
+  if (required === PERM.READ)   return (val & 1) !== 0;
+  if (required === PERM.CREATE) return (val & 2) !== 0;
+  if (required === PERM.UPDATE) return (val & 4) !== 0;
+  if (required === PERM.DELETE) return (val & 8) !== 0;
+  return false;
+}
+
 interface User {
   id: number;
   userName: string;
   nome: string;
   mail: string;
-  permissions: Record<string, boolean>;
+  permissions: Record<string, boolean | number>;
 }
 
 interface AuthState {
@@ -20,6 +35,7 @@ interface AuthState {
   updateUser: (user: Partial<User>) => void;
   toggleSidebar: () => void;
   hasPermission: (module: string) => boolean;
+  hasPermLevel: (module: string, level: PermLevel) => boolean;
   setHasHydrated: (state: boolean) => void;
 }
 
@@ -53,7 +69,16 @@ export const useAuthStore = create<AuthState>()(
       hasPermission: (module) => {
         const { user } = get();
         if (!user) return false;
-        return user.permissions?.[module] === true;
+        const val = user.permissions?.[module];
+        if (typeof val === 'boolean') return val === true;
+        if (typeof val === 'number') return val > 0;
+        return false;
+      },
+
+      hasPermLevel: (module, level) => {
+        const { user } = get();
+        if (!user) return false;
+        return hasPermLevel(user.permissions?.[module], level);
       },
 
       setHasHydrated: (state) => {

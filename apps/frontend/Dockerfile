@@ -10,8 +10,10 @@ WORKDIR /app
 COPY package.json package-lock.json* ./
 COPY apps/frontend/package.json ./apps/frontend/
 
-# Install dependencies
-RUN npm install
+# Install workspace dependencies
+RUN npm install --legacy-peer-deps && \
+    # Remove any workspace-local react/react-dom that would cause dual-React in SSR
+    rm -rf apps/frontend/node_modules/react apps/frontend/node_modules/react-dom || true
 
 # Stage 2: Builder
 FROM node:18-alpine AS builder

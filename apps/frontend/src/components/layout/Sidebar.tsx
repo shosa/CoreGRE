@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation';
 import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useAuthStore } from '@/store/auth';
+import { useAuthStore, PERM } from '@/store/auth';
 import { useModulesStore } from '@/store/modules';
 import { settingsApi } from '@/lib/api';
 
@@ -13,6 +13,7 @@ interface SubMenuItem {
   name: string;
   href: string;
   icon: string;
+  permLevel?: number; // minimo livello richiesto (PERM.CREATE, PERM.UPDATE, PERM.DELETE)
 }
 
 interface MenuItem {
@@ -42,7 +43,7 @@ const menuItems: MenuItem[] = [
     permission: 'riparazioni',
     children: [
       { name: 'Dashboard', href: '/riparazioni', icon: 'fa-home' },
-      { name: 'Nuova', href: '/riparazioni/create', icon: 'fa-plus' },
+      { name: 'Nuova', href: '/riparazioni/create', icon: 'fa-plus', permLevel: PERM.CREATE },
       { name: 'Elenco', href: '/riparazioni/list', icon: 'fa-list' },
     ]
   },
@@ -68,7 +69,7 @@ const menuItems: MenuItem[] = [
     permission: 'produzione',
     children: [
       { name: 'Dashboard', href: '/produzione', icon: 'fa-home' },
-      { name: 'Nuova', href: '/produzione/new', icon: 'fa-plus' },
+      { name: 'Nuova', href: '/produzione/new', icon: 'fa-plus', permLevel: PERM.CREATE },
       { name: 'Calendario', href: '/produzione/calendario', icon: 'fa-calendar' },
       { name: 'Statistiche', href: '/produzione/statistics', icon: 'fa-chart-simple' },
       { name: 'Report', href: '/produzione/csv', icon: 'fa-file-csv' },
@@ -83,7 +84,7 @@ const menuItems: MenuItem[] = [
     permission: 'export',
     children: [
       { name: 'Dashboard', href: '/export', icon: 'fa-home' },
-      { name: 'Nuovo DDT', href: '/export/create', icon: 'fa-plus-circle' },
+      { name: 'Nuovo DDT', href: '/export/create', icon: 'fa-plus-circle', permLevel: PERM.CREATE },
       { name: 'Elenco', href: '/export/archive', icon: 'fa-archive' },
     ]
   },
@@ -108,10 +109,10 @@ const menuItems: MenuItem[] = [
     permission: 'tracking',
     children: [
       { name: 'Dashboard', href: '/tracking', icon: 'fa-home' },
-      { name: 'Ricerca Multipla', href: '/tracking/multi-search', icon: 'fa-search-plus' },
-      { name: 'Inserimento Manuale', href: '/tracking/order-search', icon: 'fa-keyboard' },
+      { name: 'Ricerca Multipla', href: '/tracking/multi-search', icon: 'fa-search-plus', permLevel: PERM.CREATE },
+      { name: 'Inserimento Manuale', href: '/tracking/order-search', icon: 'fa-keyboard', permLevel: PERM.CREATE },
       { name: 'Albero Dettagli', href: '/tracking/tree-view', icon: 'fa-sitemap' },
-      { name: 'Archivio', href: '/tracking/archive', icon: 'fa-archive' },
+      { name: 'Archivio', href: '/tracking/archive', icon: 'fa-archive', permLevel: PERM.DELETE },
     ]
   },
   {
@@ -155,7 +156,7 @@ const getSubIconGradient = (gradient: string) => {
 
 export default function Sidebar() {
   const pathname = usePathname();
-  const { user, sidebarCollapsed, toggleSidebar, hasPermission } = useAuthStore();
+  const { user, sidebarCollapsed, toggleSidebar, hasPermission, hasPermLevel } = useAuthStore();
   const { fetchModules, isModuleActive, lastFetched } = useModulesStore();
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
   const [popupMenu, setPopupMenu] = useState<string | null>(null);
@@ -255,8 +256,14 @@ export default function Sidebar() {
     return 'bg-gradient-to-r from-blue-50/80 to-white dark:from-blue-900/30 dark:to-gray-800 shadow-sm ring-1 ring-blue-100/60 dark:ring-blue-900/30';
   };
 
+  const isChildVisible = (child: SubMenuItem, parentPermission?: string): boolean => {
+    if (!child.permLevel || !parentPermission) return true;
+    return hasPermLevel(parentPermission, child.permLevel);
+  };
+
   const renderMenuItem = (item: MenuItem, index: number, category?: 'FUNZIONI' | 'FRAMEWORK' | 'STRUMENTI') => {
-    const hasChildren = item.children && item.children.length > 0;
+    const visibleChildren = item.children?.filter(c => isChildVisible(c, item.permission)) ?? [];
+    const hasChildren = visibleChildren.length > 0;
     const isOpen = activeMenu === item.name;
     const isPopupOpen = popupMenu === item.name;
     const subIconGradient = getSubIconGradient(item.gradient);
@@ -321,7 +328,7 @@ export default function Sidebar() {
                   className="overflow-hidden mt-1.5 pl-4 pr-1"
                 >
                   <div className="rounded-xl bg-gray-50/60 dark:bg-gray-800/40 border border-gray-100/80 dark:border-gray-700/40 p-2 shadow-inset-subtle backdrop-blur-sm">
-                    {item.children?.map((child, i) => (
+                    {visibleChildren.map((child, i) => (
                       <motion.div
                         key={child.name}
                         initial={{ opacity: 0, x: -8 }}
@@ -360,7 +367,7 @@ export default function Sidebar() {
                     <div className="px-3 py-2 mb-1.5 border-b border-gray-100/80 dark:border-gray-700">
                       <span className="text-[13px] font-semibold text-gray-900 dark:text-white">{item.name}</span>
                     </div>
-                    {item.children?.map((child) => (
+                    {visibleChildren.map((child) => (
                       <motion.div key={child.name} whileHover={{ x: 2 }} transition={{ duration: 0.15 }}>
                         <Link
                           href={child.href}

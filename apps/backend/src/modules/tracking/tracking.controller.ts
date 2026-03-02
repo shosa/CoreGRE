@@ -15,7 +15,7 @@ import { ApiTags, ApiBearerAuth, ApiOperation, ApiResponse, ApiParam, ApiQuery, 
 import { Response } from 'express';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../../common/guards/permissions.guard';
-import { RequirePermissions } from '../../common/decorators/permissions.decorator';
+import { RequirePermissions, RequirePermLevel, PERM } from '../../common/decorators/permissions.decorator';
 import { LogActivity } from '../../common/decorators/log-activity.decorator';
 import { TrackingService } from './tracking.service';
 import { JobsQueueService } from '../jobs/jobs.queue';
@@ -48,6 +48,7 @@ export class TrackingController {
 
   @ApiOperation({ summary: 'Crea types' })
   @Post('types')
+  @RequirePermLevel(PERM.CREATE)
   @LogActivity({ module: 'tracking', action: 'create', entity: 'TrackingType', description: 'Creazione nuovo tipo tracciamento' })
   async createType(@Body() body: { name: string; note?: string }) {
     return this.trackingService.createType(body.name, body.note);
@@ -80,6 +81,7 @@ export class TrackingController {
   // ==================== PROCESSLINKS ====================
   @ApiOperation({ summary: 'Crea save-links' })
   @Post('save-links')
+  @RequirePermLevel(PERM.CREATE)
   @LogActivity({ module: 'tracking', action: 'save_links', entity: 'TrackingLink', description: 'Salvataggio collegamenti tracking' })
   async saveLinks(@Body() body: {
     typeId: number;
@@ -91,6 +93,7 @@ export class TrackingController {
 
   @ApiOperation({ summary: 'Crea generate-links-pdf' })
   @Post('generate-links-pdf')
+  @RequirePermLevel(PERM.CREATE)
   @LogActivity({ module: 'tracking', action: 'generate_links_pdf', entity: 'Job', description: 'Generazione PDF report collegamenti' })
   async generateLinksPdf(
     @Body() body: {
@@ -133,6 +136,7 @@ export class TrackingController {
 
   @ApiOperation({ summary: 'Aggiorna update-lot' })
   @Put('update-lot/:id')
+  @RequirePermLevel(PERM.UPDATE)
   @LogActivity({ module: 'tracking', action: 'update', entity: 'TrackingLink', description: 'Modifica lotto tracking' })
   async updateLot(
     @Param('id') id: string,
@@ -143,6 +147,7 @@ export class TrackingController {
 
   @ApiOperation({ summary: 'Elimina delete-lot' })
   @Delete('delete-lot/:id')
+  @RequirePermLevel(PERM.DELETE)
   @LogActivity({ module: 'tracking', action: 'delete', entity: 'TrackingLink', description: 'Eliminazione lotto tracking' })
   async deleteLot(@Param('id') id: string) {
     return this.trackingService.deleteLink(parseInt(id));
@@ -223,6 +228,7 @@ export class TrackingController {
 
   @ApiOperation({ summary: 'Crea update-lot-info' })
   @Post('update-lot-info')
+  @RequirePermLevel(PERM.UPDATE)
   @LogActivity({ module: 'tracking', action: 'update_lot_info', entity: 'Lot', description: 'Aggiornamento informazioni lotto' })
   async updateLotInfo(@Body() body: {
     lot: string;
@@ -239,6 +245,7 @@ export class TrackingController {
 
   @ApiOperation({ summary: 'Crea update-order-info' })
   @Post('update-order-info')
+  @RequirePermLevel(PERM.UPDATE)
   @LogActivity({ module: 'tracking', action: 'update_order_info', entity: 'Order', description: 'Aggiornamento informazioni ordine' })
   async updateOrderInfo(@Body() body: { ordine: string; date?: string }) {
     return this.trackingService.updateOrderInfo(
@@ -249,6 +256,7 @@ export class TrackingController {
 
   @ApiOperation({ summary: 'Crea update-sku' })
   @Post('update-sku')
+  @RequirePermLevel(PERM.UPDATE)
   @LogActivity({ module: 'tracking', action: 'update_sku', entity: 'Article', description: 'Aggiornamento SKU articolo' })
   async updateSku(@Body() body: { art: string; sku: string }) {
     return this.trackingService.updateSku(body.art, body.sku);
@@ -326,6 +334,7 @@ export class TrackingController {
   @ApiOperation({ summary: 'Compatta TrackLink di un periodo in archivio storico' })
   @LogActivity({ module: 'tracking', action: 'compact', entity: 'TrackLink', description: 'Compattamento dati tracking in archivio storico' })
   @Post('compact')
+  @RequirePermLevel(PERM.DELETE)
   async compact(@Body() dto: CompactDto) {
     return this.trackingService.compactLinks(new Date(dto.dataDa), new Date(dto.dataA));
   }
@@ -350,6 +359,7 @@ export class TrackingController {
   @ApiOperation({ summary: 'Genera mastrino PDF ASCII per periodo (da archivio)' })
   @LogActivity({ module: 'tracking', action: 'generate_pdf', entity: 'TrackLinkArchive', description: 'Generazione mastrino PDF tracking' })
   @Post('compact-report-pdf')
+  @RequirePermLevel(PERM.CREATE)
   async compactReportPdf(@Body() dto: CompactDto, @Req() req: any) {
     const userId = req.user?.userId;
     const job = await this.jobsQueueService.enqueue(

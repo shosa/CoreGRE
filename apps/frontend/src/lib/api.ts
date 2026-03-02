@@ -676,7 +676,7 @@ export const settingsApi = {
     return response.data;
   },
   getLogoExists: async (tipo: 'documenti' | 'icona') => {
-    const response = await api.get(`/settings/logo/${tipo}`);
+    const response = await api.get(`/settings/logo/${tipo}/exists`);
     return response.data as { exists: boolean };
   },
   /** URL pubblico del proxy logo — usabile direttamente come <img src> */

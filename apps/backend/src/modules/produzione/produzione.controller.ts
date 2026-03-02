@@ -17,7 +17,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiTags, ApiBearerAuth, ApiOperation, ApiResponse, ApiParam, ApiQuery, ApiConsumes, ApiBody } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../../common/guards/permissions.guard';
-import { RequirePermissions } from '../../common/decorators/permissions.decorator';
+import { RequirePermissions, RequirePermLevel, PERM } from '../../common/decorators/permissions.decorator';
 import { LogActivity } from '../../common/decorators/log-activity.decorator';
 import { ProduzioneService } from './produzione.service';
 import { JobsQueueService } from '../jobs/jobs.queue';
@@ -59,6 +59,7 @@ export class ProduzioneController {
   }
 
   @Post('phases')
+  @RequirePermLevel(PERM.CREATE)
   @ApiOperation({ summary: 'Crea fase produzione', description: 'Crea una nuova fase di produzione' })
   @ApiBody({
     description: 'Dati della nuova fase',
@@ -81,6 +82,7 @@ export class ProduzioneController {
   }
 
   @Put('phases/:id')
+  @RequirePermLevel(PERM.UPDATE)
   @ApiOperation({ summary: 'Aggiorna fase produzione', description: 'Aggiorna i dati di una fase esistente' })
   @ApiParam({ name: 'id', type: 'number', description: 'ID della fase', example: 1 })
   @ApiBody({
@@ -103,6 +105,7 @@ export class ProduzioneController {
   }
 
   @Delete('phases/:id')
+  @RequirePermLevel(PERM.DELETE)
   @ApiOperation({ summary: 'Elimina fase produzione', description: 'Elimina una fase di produzione' })
   @ApiParam({ name: 'id', type: 'number', description: 'ID della fase', example: 1 })
   @ApiResponse({ status: 200, description: 'Fase eliminata con successo' })
@@ -135,6 +138,7 @@ export class ProduzioneController {
   }
 
   @Post('departments')
+  @RequirePermLevel(PERM.CREATE)
   @ApiOperation({ summary: 'Crea reparto', description: 'Crea un nuovo reparto di produzione' })
   @ApiBody({
     description: 'Dati del nuovo reparto',
@@ -156,6 +160,7 @@ export class ProduzioneController {
   }
 
   @Put('departments/:id')
+  @RequirePermLevel(PERM.UPDATE)
   @ApiOperation({ summary: 'Aggiorna reparto', description: 'Aggiorna i dati di un reparto esistente' })
   @ApiParam({ name: 'id', type: 'number', description: 'ID del reparto', example: 1 })
   @ApiBody({
@@ -177,6 +182,7 @@ export class ProduzioneController {
   }
 
   @Delete('departments/:id')
+  @RequirePermLevel(PERM.DELETE)
   @ApiOperation({ summary: 'Elimina reparto', description: 'Elimina un reparto di produzione' })
   @ApiParam({ name: 'id', type: 'number', description: 'ID del reparto', example: 1 })
   @ApiResponse({ status: 200, description: 'Reparto eliminato con successo' })
@@ -312,6 +318,7 @@ export class ProduzioneController {
   }
 
   @Post('email/:date')
+  @RequirePermLevel(PERM.CREATE)
   @ApiOperation({ summary: 'Invia report PDF via email', description: 'Genera e invia report PDF produzione via email' })
   @ApiParam({ name: 'date', type: 'string', description: 'Data (YYYY-MM-DD)', example: '2025-01-15' })
   @ApiResponse({ status: 200, description: 'Email inviata con successo' })
@@ -366,6 +373,7 @@ export class ProduzioneController {
   }
 
   @Post('date/:date')
+  @RequirePermLevel(PERM.UPDATE)
   @ApiOperation({ summary: 'Salva dati produzione giornaliera', description: 'Crea o aggiorna i dati di produzione per una data specifica' })
   @ApiParam({ name: 'date', type: 'string', description: 'Data (YYYY-MM-DD)', example: '2025-01-15' })
   @ApiBody({
@@ -410,6 +418,7 @@ export class ProduzioneController {
   }
 
   @Put('date/:date')
+  @RequirePermLevel(PERM.UPDATE)
   @ApiOperation({ summary: 'Aggiorna dati produzione giornaliera', description: 'Alias per POST - aggiorna i dati di produzione' })
   @ApiParam({ name: 'date', type: 'string', description: 'Data (YYYY-MM-DD)', example: '2025-01-15' })
   @ApiResponse({ status: 200, description: 'Dati aggiornati con successo' })
@@ -426,6 +435,7 @@ export class ProduzioneController {
   // ==================== CSV REPORT ====================
 
   @Post('process-csv')
+  @RequirePermLevel(PERM.CREATE)
   @UseInterceptors(FileInterceptor('csvFile'))
   @ApiOperation({ summary: 'Upload e processa CSV produzione', description: 'Carica un file CSV con dati produzione e lo processa' })
   @ApiConsumes('multipart/form-data')
@@ -459,6 +469,7 @@ export class ProduzioneController {
   }
 
   @Post('generate-csv-report')
+  @RequirePermLevel(PERM.CREATE)
   @ApiOperation({ summary: 'Genera report PDF da CSV', description: 'Genera report PDF dai dati CSV processati' })
   @ApiBody({
     description: 'Dati CSV per report',

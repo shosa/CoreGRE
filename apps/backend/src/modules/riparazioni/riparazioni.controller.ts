@@ -15,7 +15,7 @@ import { ApiTags, ApiBearerAuth, ApiOperation, ApiResponse, ApiParam, ApiQuery, 
 import { RiparazioniService } from './riparazioni.service';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../../common/guards/permissions.guard';
-import { RequirePermissions } from '../../common/decorators/permissions.decorator';
+import { RequirePermissions, RequirePermLevel, PERM } from '../../common/decorators/permissions.decorator';
 import { LogActivity } from '../../common/decorators/log-activity.decorator';
 import { Prisma } from '@prisma/client';
 
@@ -149,6 +149,7 @@ export class RiparazioniController {
    */
   @ApiOperation({ summary: 'Create new riparazione' })
   @Post()
+  @RequirePermLevel(PERM.CREATE)
   @LogActivity({ module: 'riparazioni', action: 'create', entity: 'Riparazione', description: 'Creazione nuova riparazione esterna' })
   async create(@Body() createDto: any) {
     // Convert DTO to Prisma input
@@ -193,6 +194,7 @@ export class RiparazioniController {
    */
   @ApiOperation({ summary: 'Update riparazione' })
   @Put(':id(\\d+)')
+  @RequirePermLevel(PERM.UPDATE)
   @LogActivity({ module: 'riparazioni', action: 'update', entity: 'Riparazione', description: 'Modifica riparazione esterna' })
   async update(
     @Param('id', ParseIntPipe) id: number,
@@ -231,6 +233,7 @@ export class RiparazioniController {
    */
   @ApiOperation({ summary: 'Mark riparazione as completed' })
   @Put(':id(\\d+)/complete')
+  @RequirePermLevel(PERM.UPDATE)
   @LogActivity({ module: 'riparazioni', action: 'complete', entity: 'Riparazione', description: 'Completamento riparazione esterna' })
   async complete(@Param('id', ParseIntPipe) id: number) {
     return this.riparazioniService.complete(id);
@@ -242,6 +245,7 @@ export class RiparazioniController {
    */
   @ApiOperation({ summary: 'Delete riparazione' })
   @Delete(':id(\\d+)')
+  @RequirePermLevel(PERM.DELETE)
   @LogActivity({ module: 'riparazioni', action: 'delete', entity: 'Riparazione', description: 'Eliminazione riparazione esterna' })
   async remove(@Param('id', ParseIntPipe) id: number) {
     await this.riparazioniService.remove(id);
@@ -306,6 +310,7 @@ export class RiparazioniController {
    */
   @ApiOperation({ summary: 'Create laboratorio' })
   @Post('laboratori')
+  @RequirePermLevel(PERM.CREATE)
   @LogActivity({ module: 'riparazioni', action: 'create', entity: 'Laboratorio', description: 'Creazione nuovo laboratorio' })
   async createLaboratorio(@Body() createDto: any) {
     const data: Prisma.LaboratorioCreateInput = {
@@ -321,6 +326,7 @@ export class RiparazioniController {
    */
   @ApiOperation({ summary: 'Update laboratorio' })
   @Put('laboratori/:id(\\d+)')
+  @RequirePermLevel(PERM.UPDATE)
   @LogActivity({ module: 'riparazioni', action: 'update', entity: 'Laboratorio', description: 'Modifica laboratorio' })
   async updateLaboratorio(
     @Param('id', ParseIntPipe) id: number,
@@ -338,6 +344,7 @@ export class RiparazioniController {
    */
   @ApiOperation({ summary: 'Delete laboratorio' })
   @Delete('laboratori/:id(\\d+)')
+  @RequirePermLevel(PERM.DELETE)
   @LogActivity({ module: 'riparazioni', action: 'delete', entity: 'Laboratorio', description: 'Eliminazione laboratorio' })
   async deleteLaboratorio(@Param('id', ParseIntPipe) id: number) {
     await this.riparazioniService.deleteLaboratorio(id);
@@ -350,6 +357,7 @@ export class RiparazioniController {
    */
   @ApiOperation({ summary: 'Create reparto' })
   @Post('reparti')
+  @RequirePermLevel(PERM.CREATE)
   async createReparto(@Body() createDto: any) {
     const data: Prisma.RepartoCreateInput = {
       nome: createDto.nome,
@@ -365,6 +373,7 @@ export class RiparazioniController {
    */
   @ApiOperation({ summary: 'Update reparto' })
   @Put('reparti/:id(\\d+)')
+  @RequirePermLevel(PERM.UPDATE)
   async updateReparto(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateDto: any,
@@ -382,6 +391,7 @@ export class RiparazioniController {
    */
   @ApiOperation({ summary: 'Delete reparto' })
   @Delete('reparti/:id(\\d+)')
+  @RequirePermLevel(PERM.DELETE)
   async deleteReparto(@Param('id', ParseIntPipe) id: number) {
     await this.riparazioniService.deleteReparto(id);
     return { message: 'Reparto eliminato con successo' };
@@ -393,6 +403,7 @@ export class RiparazioniController {
    */
   @ApiOperation({ summary: 'Create numerata' })
   @Post('numerate')
+  @RequirePermLevel(PERM.CREATE)
   @LogActivity({ module: 'riparazioni', action: 'create', entity: 'Numerata', description: 'Creazione nuova ID numerata' })
   async createNumerata(@Body() createDto: any) {
     const idNumerata = (createDto.idNumerata ?? '').toString().trim();
@@ -432,6 +443,7 @@ export class RiparazioniController {
    */
   @ApiOperation({ summary: 'Update numerata' })
   @Put('numerate/:id(\\d+)')
+  @RequirePermLevel(PERM.UPDATE)
   @LogActivity({ module: 'riparazioni', action: 'update', entity: 'Numerata', description: 'Modifica ID numerata' })
   async updateNumerata(
     @Param('id', ParseIntPipe) id: number,
@@ -460,6 +472,7 @@ export class RiparazioniController {
    */
   @ApiOperation({ summary: 'Delete numerata' })
   @Delete('numerate/:id(\\d+)')
+  @RequirePermLevel(PERM.DELETE)
   @LogActivity({ module: 'riparazioni', action: 'delete', entity: 'Numerata', description: 'Eliminazione ID numerata' })
   async deleteNumerata(@Param('id', ParseIntPipe) id: number) {
     await this.riparazioniService.deleteNumerata(id);

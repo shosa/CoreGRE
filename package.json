@@ -33,6 +33,10 @@
     "node": ">=18.0.0",
     "npm": ">=9.0.0"
   },
+  "overrides": {
+    "react": "^18.3.0",
+    "react-dom": "^18.3.0"
+  },
   "dependencies": {
     "@nestjs/typeorm": "^11.0.0",
     "@types/pdfkit": "^0.17.3",

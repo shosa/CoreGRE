@@ -12,6 +12,7 @@ import {
 } from "@tanstack/react-table";
 import { exportApi } from "@/lib/api";
 import { showSuccess, showError } from "@/store/notifications";
+import { useAuthStore, PERM } from "@/store/auth";
 import PageHeader from "@/components/layout/PageHeader";
 import Breadcrumb from "@/components/layout/Breadcrumb";
 import Footer from "@/components/layout/Footer";
@@ -113,6 +114,8 @@ export default function DocumentDetailPage() {
   const params = useParams();
   const router = useRouter();
   const progressivo = params.progressivo as string;
+  const { hasPermLevel } = useAuthStore();
+  const canUpdate = hasPermLevel('export', PERM.UPDATE);
 
   const [loading, setLoading] = useState(true);
   const [document, setDocument] = useState<Document | null>(null);
@@ -3806,7 +3809,7 @@ export default function DocumentDetailPage() {
                       <i className="fas fa-lock text-gray-500 w-5"></i>
                       <span>Chiudi Documento</span>
                     </button>
-                  ) : (
+                  ) : canUpdate ? (
                     <button
                       onClick={() => {
                         setShowReopenDocumentModal(true);
@@ -3817,7 +3820,7 @@ export default function DocumentDetailPage() {
                       <i className="fas fa-lock-open text-yellow-500 w-5"></i>
                       <span>Riapri Documento</span>
                     </button>
-                  )}
+                  ) : null}
                 </div>
               </div>
             )}

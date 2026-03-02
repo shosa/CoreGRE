@@ -5,6 +5,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { exportApi } from "@/lib/api";
 import { showError } from "@/store/notifications";
+import { useAuthStore, PERM } from "@/store/auth";
 import PageHeader from "@/components/layout/PageHeader";
 import Breadcrumb from "@/components/layout/Breadcrumb";
 
@@ -40,6 +41,8 @@ interface Terzista {
 }
 
 export default function ExportPage() {
+  const { hasPermLevel } = useAuthStore();
+  const canCreate = hasPermLevel('export', PERM.CREATE);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<ExportStats>({
     totalDocuments: 0,
@@ -191,6 +194,7 @@ export default function ExportPage() {
       {/* Navigation Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
         {/* 2. Nuovo DDT */}
+        {canCreate && (
         <motion.div variants={itemVariants}>
           <div className="group relative overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-lg hover:shadow-xl transition-all duration-300 dark:border-gray-800 dark:bg-gray-800/40 backdrop-blur-sm h-full">
             <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/10 dark:to-indigo-800/10"></div>
@@ -242,6 +246,7 @@ export default function ExportPage() {
             </div>
           </div>
         </motion.div>
+        )}
 
         {/* 3. Archivio DDT */}
         <motion.div variants={itemVariants}>

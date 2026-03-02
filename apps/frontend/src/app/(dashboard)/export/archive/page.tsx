@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { exportApi } from '@/lib/api';
 import { showError, showSuccess } from '@/store/notifications';
+import { useAuthStore, PERM } from '@/store/auth';
 import PageHeader from '@/components/layout/PageHeader';
 import Breadcrumb from '@/components/layout/Breadcrumb';
 import Pagination from '@/components/ui/Pagination';
@@ -40,13 +41,17 @@ interface Terzista {
 
 export default function ArchivePage() {
   const router = useRouter();
+  const { hasPermLevel } = useAuthStore();
+  const canCreate = hasPermLevel('export', PERM.CREATE);
+  const canUpdate = hasPermLevel('export', PERM.UPDATE);
+  const canDelete = hasPermLevel('export', PERM.DELETE);
   const [loading, setLoading] = useState(true);
   const [documents, setDocuments] = useState<Document[]>([]);
   const [terzisti, setTerzisti] = useState<Terzista[]>([]);
 
-  // Filters
+  // Filters — con solo READ si vedono solo i chiusi
   const [searchTerm, setSearchTerm] = useState('');
-  const [chiusiFilter, setChiusiFilter] = useState<'ESCLUDI' | 'INCLUDI' | 'SOLO'>('ESCLUDI');
+  const [chiusiFilter, setChiusiFilter] = useState<'ESCLUDI' | 'INCLUDI' | 'SOLO'>(canUpdate ? 'ESCLUDI' : 'SOLO');
   const [terzistaFilter, setTerzistaFilter] = useState('');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
@@ -259,34 +264,36 @@ export default function ArchivePage() {
                 </select>
               </div>
 
-              {/* Documenti chiusi */}
-              <div>
-                <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">Documenti Chiusi</label>
-                <div className="flex gap-1">
-                  {(['ESCLUDI', 'INCLUDI', 'SOLO'] as const).map((mode) => (
-                    <label
-                      key={mode}
-                      className={`flex-1 flex items-center justify-center py-1.5 text-xs font-medium rounded-lg border cursor-pointer transition-all ${
-                        chiusiFilter === mode
-                          ? 'bg-blue-500 border-blue-500 text-white'
-                          : 'bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:border-blue-400'
-                      }`}
-                    >
-                      <input
-                        type="radio"
-                        name="chiusiFilter"
-                        value={mode}
-                        checked={chiusiFilter === mode}
-                        onChange={(e) => setChiusiFilter(e.target.value as any)}
-                        className="sr-only"
-                      />
-                      {mode === 'ESCLUDI' && 'Escl.'}
-                      {mode === 'INCLUDI' && 'Tutti'}
-                      {mode === 'SOLO' && 'Solo'}
-                    </label>
-                  ))}
+              {/* Documenti chiusi — nascosto se solo READ (filtro fissato a SOLO) */}
+              {canUpdate && (
+                <div>
+                  <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">Documenti Chiusi</label>
+                  <div className="flex gap-1">
+                    {(['ESCLUDI', 'INCLUDI', 'SOLO'] as const).map((mode) => (
+                      <label
+                        key={mode}
+                        className={`flex-1 flex items-center justify-center py-1.5 text-xs font-medium rounded-lg border cursor-pointer transition-all ${
+                          chiusiFilter === mode
+                            ? 'bg-blue-500 border-blue-500 text-white'
+                            : 'bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:border-blue-400'
+                        }`}
+                      >
+                        <input
+                          type="radio"
+                          name="chiusiFilter"
+                          value={mode}
+                          checked={chiusiFilter === mode}
+                          onChange={(e) => setChiusiFilter(e.target.value as any)}
+                          className="sr-only"
+                        />
+                        {mode === 'ESCLUDI' && 'Escl.'}
+                        {mode === 'INCLUDI' && 'Tutti'}
+                        {mode === 'SOLO' && 'Solo'}
+                      </label>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           </aside>
 
@@ -317,13 +324,15 @@ export default function ArchivePage() {
                 )}
               </span>
               <div className="ml-auto flex items-center gap-2">
-                <button
-                  onClick={() => router.push('/export/create')}
-                  className="flex items-center gap-2 rounded-lg bg-gradient-to-r from-blue-500 to-blue-600 px-3 py-2 text-xs font-medium text-white hover:shadow-md transition-all"
-                >
-                  <i className="fas fa-plus text-xs"></i>
-                  Nuovo DDT
-                </button>
+                {canCreate && (
+                  <button
+                    onClick={() => router.push('/export/create')}
+                    className="flex items-center gap-2 rounded-lg bg-gradient-to-r from-blue-500 to-blue-600 px-3 py-2 text-xs font-medium text-white hover:shadow-md transition-all"
+                  >
+                    <i className="fas fa-plus text-xs"></i>
+                    Nuovo DDT
+                  </button>
+                )}
                 <button
                   onClick={fetchData}
                   className="w-8 h-8 flex items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
@@ -391,7 +400,7 @@ export default function ArchivePage() {
                             >
                               <i className="fas fa-edit text-xs"></i>
                             </button>
-                            {doc.stato === 'Aperto' && (
+                            {doc.stato === 'Aperto' && canDelete && (
                               <button
                                 onClick={(e) => handleDeleteClick(doc.progressivo, e)}
                                 className="w-8 h-8 flex items-center justify-center rounded-lg bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors"

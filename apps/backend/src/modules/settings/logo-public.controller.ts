@@ -20,4 +20,12 @@ export class LogoPublicController {
     }
     await this.settingsService.pipeLogoImage(tipo as 'documenti' | 'icona', res);
   }
+
+  @Get(':tipo/exists')
+  async getLogoExistsPublic(@Param('tipo') tipo: string) {
+    if (!['documenti', 'icona'].includes(tipo)) {
+      return { exists: false };
+    }
+    return this.settingsService.getLogoExists(tipo as 'documenti' | 'icona');
+  }
 }

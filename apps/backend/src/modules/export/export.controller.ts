@@ -15,7 +15,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiTags, ApiBearerAuth, ApiOperation, ApiResponse, ApiParam, ApiQuery, ApiConsumes, ApiBody } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../../common/guards/permissions.guard';
-import { RequirePermissions } from '../../common/decorators/permissions.decorator';
+import { RequirePermissions, RequirePermLevel, PERM } from '../../common/decorators/permissions.decorator';
 import { LogActivity } from '../../common/decorators/log-activity.decorator';
 import { ExportService } from './export.service';
 import { ExcelProcessorService } from './excel-processor.service';
@@ -55,6 +55,7 @@ export class ExportController {
 
   @ApiOperation({ summary: 'Crea articles-master' })
   @Post('articles-master')
+  @RequirePermLevel(PERM.CREATE)
   @LogActivity({ module: 'export', action: 'create', entity: 'ArticleMaster', description: 'Creazione articolo master' })
   async createArticleMaster(@Body() data: {
     codiceArticolo: string;
@@ -68,6 +69,7 @@ export class ExportController {
 
   @ApiOperation({ summary: 'Aggiorna articles-master' })
   @Put('articles-master/:id')
+  @RequirePermLevel(PERM.UPDATE)
   @LogActivity({ module: 'export', action: 'update', entity: 'ArticleMaster', description: 'Modifica articolo master' })
   async updateArticleMaster(
     @Param('id') id: string,
@@ -84,6 +86,7 @@ export class ExportController {
 
   @ApiOperation({ summary: 'Elimina articles-master' })
   @Delete('articles-master/:id')
+  @RequirePermLevel(PERM.DELETE)
   @LogActivity({ module: 'export', action: 'delete', entity: 'ArticleMaster', description: 'Eliminazione articolo master' })
   async deleteArticleMaster(@Param('id') id: string) {
     return this.exportService.deleteArticleMaster(parseInt(id));
@@ -105,6 +108,7 @@ export class ExportController {
 
   @ApiOperation({ summary: 'Crea terzisti' })
   @Post('terzisti')
+  @RequirePermLevel(PERM.CREATE)
   @LogActivity({ module: 'export', action: 'create', entity: 'Terzista', description: 'Creazione terzista' })
   async createTerzista(@Body() data: {
     ragioneSociale: string;
@@ -120,6 +124,7 @@ export class ExportController {
 
   @ApiOperation({ summary: 'Aggiorna terzisti' })
   @Put('terzisti/:id')
+  @RequirePermLevel(PERM.UPDATE)
   @LogActivity({ module: 'export', action: 'update', entity: 'Terzista', description: 'Modifica terzista' })
   async updateTerzista(
     @Param('id') id: string,
@@ -139,6 +144,7 @@ export class ExportController {
 
   @ApiOperation({ summary: 'Elimina terzisti' })
   @Delete('terzisti/:id')
+  @RequirePermLevel(PERM.DELETE)
   @LogActivity({ module: 'export', action: 'delete', entity: 'Terzista', description: 'Eliminazione terzista' })
   async deleteTerzista(@Param('id') id: string) {
     return this.exportService.deleteTerzista(parseInt(id));
@@ -179,6 +185,7 @@ export class ExportController {
 
   @ApiOperation({ summary: 'Crea documents' })
   @Post('documents')
+  @RequirePermLevel(PERM.CREATE)
   @LogActivity({ module: 'export', action: 'create', entity: 'Document', description: 'Creazione DDT' })
   async createDocument(@Body() data: {
     progressivo: string;
@@ -192,6 +199,7 @@ export class ExportController {
 
   @ApiOperation({ summary: 'Aggiorna documents' })
   @Put('documents/:progressivo')
+  @RequirePermLevel(PERM.UPDATE)
   @LogActivity({ module: 'export', action: 'update', entity: 'Document', description: 'Modifica DDT' })
   async updateDocument(
     @Param('progressivo') progressivo: string,
@@ -209,6 +217,7 @@ export class ExportController {
 
   @ApiOperation({ summary: 'Elimina documents' })
   @Delete('documents/:progressivo')
+  @RequirePermLevel(PERM.DELETE)
   @LogActivity({ module: 'export', action: 'delete', entity: 'Document', description: 'Eliminazione DDT' })
   async deleteDocument(@Param('progressivo') progressivo: string) {
     return this.exportService.deleteDocument(progressivo);
@@ -216,6 +225,7 @@ export class ExportController {
 
   @ApiOperation({ summary: 'Crea close' })
   @Post('documents/:progressivo/close')
+  @RequirePermLevel(PERM.UPDATE)
   @LogActivity({ module: 'export', action: 'close', entity: 'Document', description: 'Chiusura DDT' })
   async closeDocument(@Param('progressivo') progressivo: string) {
     return this.exportService.closeDocument(progressivo);
@@ -223,6 +233,7 @@ export class ExportController {
 
   @ApiOperation({ summary: 'Crea reopen' })
   @Post('documents/:progressivo/reopen')
+  @RequirePermLevel(PERM.UPDATE)
   @LogActivity({ module: 'export', action: 'reopen', entity: 'Document', description: 'Riapertura DDT' })
   async reopenDocument(@Param('progressivo') progressivo: string) {
     return this.exportService.reopenDocument(progressivo);
@@ -232,6 +243,7 @@ export class ExportController {
 
   @ApiOperation({ summary: 'Crea document-items' })
   @Post('document-items')
+  @RequirePermLevel(PERM.UPDATE)
   @LogActivity({ module: 'export', action: 'create', entity: 'DocumentItem', description: 'Aggiunta riga DDT' })
   async addDocumentItem(@Body() data: {
     documentoId: number;
@@ -252,6 +264,7 @@ export class ExportController {
 
   @ApiOperation({ summary: 'Aggiorna document-items' })
   @Put('document-items/:id')
+  @RequirePermLevel(PERM.UPDATE)
   @LogActivity({ module: 'export', action: 'update', entity: 'DocumentItem', description: 'Modifica riga DDT' })
   async updateDocumentItem(
     @Param('id') id: string,
@@ -274,6 +287,7 @@ export class ExportController {
 
   @ApiOperation({ summary: 'Elimina document-items' })
   @Delete('document-items/:id')
+  @RequirePermLevel(PERM.DELETE)
   @LogActivity({ module: 'export', action: 'delete', entity: 'DocumentItem', description: 'Eliminazione riga DDT' })
   async deleteDocumentItem(@Param('id') id: string) {
     return this.exportService.deleteDocumentItem(parseInt(id));
@@ -283,6 +297,7 @@ export class ExportController {
 
   @ApiOperation({ summary: 'Crea document-footer' })
   @Post('document-footer')
+  @RequirePermLevel(PERM.UPDATE)
   @LogActivity({ module: 'export', action: 'update', entity: 'DocumentFooter', description: 'Modifica piede DDT' })
   async upsertDocumentFooter(@Body() data: {
     documentoId: number;
@@ -307,6 +322,7 @@ export class ExportController {
 
   @ApiOperation({ summary: 'Crea missing-data' })
   @Post('missing-data')
+  @RequirePermLevel(PERM.UPDATE)
   @LogActivity({ module: 'export', action: 'create', entity: 'MissingData', description: 'Aggiunta dati mancanti' })
   async addMissingData(@Body() data: {
     documentoId: number;
@@ -330,6 +346,7 @@ export class ExportController {
 
   @ApiOperation({ summary: 'Elimina missing-data' })
   @Delete('missing-data/:id')
+  @RequirePermLevel(PERM.DELETE)
   @LogActivity({ module: 'export', action: 'delete', entity: 'MissingData', description: 'Eliminazione dati mancanti' })
   async deleteMissingData(@Param('id') id: string) {
     return this.exportService.deleteMissingData(parseInt(id));
@@ -339,6 +356,7 @@ export class ExportController {
 
   @ApiOperation({ summary: 'Crea launch-data' })
   @Post('launch-data')
+  @RequirePermLevel(PERM.UPDATE)
   @LogActivity({ module: 'export', action: 'create', entity: 'LaunchData', description: 'Aggiunta lanci' })
   async addLaunchData(@Body() data: {
     documentoId: number;
@@ -358,6 +376,7 @@ export class ExportController {
 
   @ApiOperation({ summary: 'Elimina launch-data' })
   @Delete('launch-data/:id')
+  @RequirePermLevel(PERM.DELETE)
   @LogActivity({ module: 'export', action: 'delete', entity: 'LaunchData', description: 'Eliminazione lanci' })
   async deleteLaunchData(@Param('id') id: string) {
     return this.exportService.deleteLaunchData(parseInt(id));
@@ -367,6 +386,7 @@ export class ExportController {
 
   @ApiOperation({ summary: 'Crea upload-excel' })
   @Post('documents/:progressivo/upload-excel')
+  @RequirePermLevel(PERM.UPDATE)
   @UseInterceptors(FileInterceptor('file'))
   @LogActivity({ module: 'export', action: 'upload', entity: 'Excel', description: 'Upload file Excel' })
   async uploadExcelFile(
@@ -388,6 +408,7 @@ export class ExportController {
 
   @ApiOperation({ summary: 'Crea process-excel' })
   @Post('documents/:progressivo/process-excel')
+  @RequirePermLevel(PERM.UPDATE)
   @LogActivity({ module: 'export', action: 'process', entity: 'Excel', description: 'Elaborazione file Excel' })
   async processExcelFile(
     @Param('progressivo') progressivo: string,
@@ -398,6 +419,7 @@ export class ExportController {
 
   @ApiOperation({ summary: 'Elimina uploaded-files' })
   @Delete('documents/:progressivo/uploaded-files/:fileName')
+  @RequirePermLevel(PERM.DELETE)
   @LogActivity({ module: 'export', action: 'delete', entity: 'Excel', description: 'Eliminazione file Excel' })
   async deleteUploadedFile(
     @Param('progressivo') progressivo: string,
@@ -409,6 +431,7 @@ export class ExportController {
 
   @ApiOperation({ summary: 'Crea save-excel-data' })
   @Post('documents/:progressivo/save-excel-data')
+  @RequirePermLevel(PERM.UPDATE)
   @LogActivity({ module: 'export', action: 'save', entity: 'ExcelData', description: 'Salvataggio dati Excel' })
   async saveExcelData(
     @Param('progressivo') progressivo: string,
@@ -438,6 +461,7 @@ export class ExportController {
 
   @ApiOperation({ summary: 'Crea generate-ddt' })
   @Post('documents/:progressivo/generate-ddt')
+  @RequirePermLevel(PERM.CREATE)
   @LogActivity({ module: 'export', action: 'generate', entity: 'DDT', description: 'Generazione DDT da Excel' })
   async generateDDT(@Param('progressivo') progressivo: string) {
     // Generate DDT from processed Excel files
@@ -461,6 +485,7 @@ export class ExportController {
 
   @ApiOperation({ summary: 'Crea aspetto merce' })
   @Post('aspetto-merce')
+  @RequirePermLevel(PERM.CREATE)
   @LogActivity({ module: 'export', action: 'create', entity: 'AspettoMerce', description: 'Creazione aspetto merce' })
   async createAspettoMerce(@Body() data: {
     descrizione: string;
@@ -472,6 +497,7 @@ export class ExportController {
 
   @ApiOperation({ summary: 'Aggiorna aspetto merce' })
   @Put('aspetto-merce/:id')
+  @RequirePermLevel(PERM.UPDATE)
   @LogActivity({ module: 'export', action: 'update', entity: 'AspettoMerce', description: 'Modifica aspetto merce' })
   async updateAspettoMerce(
     @Param('id') id: string,
@@ -487,6 +513,7 @@ export class ExportController {
 
   @ApiOperation({ summary: 'Elimina aspetto merce' })
   @Delete('aspetto-merce/:id')
+  @RequirePermLevel(PERM.DELETE)
   @LogActivity({ module: 'export', action: 'delete', entity: 'AspettoMerce', description: 'Eliminazione aspetto merce' })
   async deleteAspettoMerce(@Param('id') id: string) {
     return this.exportService.deleteAspettoMerce(parseInt(id));
@@ -508,6 +535,7 @@ export class ExportController {
 
   @ApiOperation({ summary: 'Crea vettore' })
   @Post('vettori')
+  @RequirePermLevel(PERM.CREATE)
   @LogActivity({ module: 'export', action: 'create', entity: 'Vettore', description: 'Creazione vettore' })
   async createVettore(@Body() data: {
     ragioneSociale: string;
@@ -521,6 +549,7 @@ export class ExportController {
 
   @ApiOperation({ summary: 'Aggiorna vettore' })
   @Put('vettori/:id')
+  @RequirePermLevel(PERM.UPDATE)
   @LogActivity({ module: 'export', action: 'update', entity: 'Vettore', description: 'Modifica vettore' })
   async updateVettore(
     @Param('id') id: string,
@@ -538,6 +567,7 @@ export class ExportController {
 
   @ApiOperation({ summary: 'Elimina vettore' })
   @Delete('vettori/:id')
+  @RequirePermLevel(PERM.DELETE)
   @LogActivity({ module: 'export', action: 'delete', entity: 'Vettore', description: 'Eliminazione vettore' })
   async deleteVettore(@Param('id') id: string) {
     return this.exportService.deleteVettore(parseInt(id));

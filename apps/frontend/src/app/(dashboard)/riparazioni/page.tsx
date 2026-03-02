@@ -8,6 +8,7 @@ import Breadcrumb from "@/components/layout/Breadcrumb";
 import StatusBadge from "@/components/riparazioni/StatusBadge";
 import { riparazioniApi } from "@/lib/api";
 import { showError } from "@/store/notifications";
+import { useAuthStore, PERM } from "@/store/auth";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -42,6 +43,8 @@ type Stats = {
 };
 
 export default function RiparazioniPage() {
+  const { hasPermLevel } = useAuthStore();
+  const canCreate = hasPermLevel('riparazioni', PERM.CREATE);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<Stats>({
     totale: 0,
@@ -168,6 +171,7 @@ export default function RiparazioniPage() {
 
           {/* Azioni rapide */}
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+            {canCreate && (
             <motion.div variants={itemVariants}>
               <div className="group relative h-full overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-lg transition-all duration-300 hover:shadow-xl dark:border-gray-800 dark:bg-gray-800/40 backdrop-blur-sm">
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-indigo-50 opacity-60 dark:from-blue-900/10 dark:to-indigo-800/10" />
@@ -182,6 +186,7 @@ export default function RiparazioniPage() {
                 </div>
               </div>
             </motion.div>
+            )}
 
             <motion.div variants={itemVariants}>
               <div className="group relative h-full overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-lg transition-all duration-300 hover:shadow-xl dark:border-gray-800 dark:bg-gray-800/40 backdrop-blur-sm">

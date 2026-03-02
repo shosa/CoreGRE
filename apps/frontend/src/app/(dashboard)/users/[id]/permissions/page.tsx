@@ -23,6 +23,17 @@ interface PermissionCategory {
   permissions: PermissionItem[];
 }
 
+// Moduli con permessi granulari (bitmask numerico)
+const OPERATIVE_MODULES = new Set(['riparazioni', 'produzione', 'quality', 'export', 'tracking']);
+
+const PERM_LEVELS = [
+  { value: 0,  label: 'Nessun accesso' },
+  { value: 1,  label: 'Solo lettura' },
+  { value: 3,  label: 'Lettura + Inserimento' },
+  { value: 7,  label: 'Lettura + Inserimento + Modifica' },
+  { value: 15, label: 'Accesso completo' },
+] as const;
+
 const permissionsCategories: PermissionCategory[] = [
   {
     name: 'FUNZIONI',
@@ -85,6 +96,12 @@ const totalPermissions = permissionsCategories.reduce(
   0
 );
 
+function isActive(val: boolean | number | undefined): boolean {
+  if (typeof val === 'boolean') return val;
+  if (typeof val === 'number') return val > 0;
+  return false;
+}
+
 export default function UserPermissionsPage() {
   const router = useRouter();
   const params = useParams();
@@ -93,7 +110,7 @@ export default function UserPermissionsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [user, setUser] = useState<any>(null);
-  const [permissions, setPermissions] = useState<Record<string, boolean>>({});
+  const [permissions, setPermissions] = useState<Record<string, boolean | number>>({});
 
   useEffect(() => {
     const fetchData = async () => {
@@ -118,15 +135,27 @@ export default function UserPermissionsPage() {
     setPermissions((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
+  const setPermLevel = (key: string, value: number) => {
+    setPermissions((prev) => ({ ...prev, [key]: value }));
+  };
+
   const selectAll = () => {
-    const all: Record<string, boolean> = {};
-    permissionsCategories.forEach((cat) => cat.permissions.forEach((p) => (all[p.key] = true)));
+    const all: Record<string, boolean | number> = {};
+    permissionsCategories.forEach((cat) =>
+      cat.permissions.forEach((p) => {
+        all[p.key] = OPERATIVE_MODULES.has(p.key) ? 15 : true;
+      })
+    );
     setPermissions(all);
   };
 
   const clearAll = () => {
-    const all: Record<string, boolean> = {};
-    permissionsCategories.forEach((cat) => cat.permissions.forEach((p) => (all[p.key] = false)));
+    const all: Record<string, boolean | number> = {};
+    permissionsCategories.forEach((cat) =>
+      cat.permissions.forEach((p) => {
+        all[p.key] = OPERATIVE_MODULES.has(p.key) ? 0 : false;
+      })
+    );
     setPermissions(all);
   };
 
@@ -143,7 +172,7 @@ export default function UserPermissionsPage() {
     }
   };
 
-  const activeCount = Object.values(permissions).filter(Boolean).length;
+  const activeCount = Object.values(permissions).filter(isActive).length;
 
   if (loading) {
     return (
@@ -337,7 +366,10 @@ export default function UserPermissionsPage() {
                         </td>
                       </tr>
                       {category.permissions.map((perm) => {
-                        const isActive = permissions[perm.key] || false;
+                        const val = permissions[perm.key];
+                        const active = isActive(val);
+                        const isOperative = OPERATIVE_MODULES.has(perm.key);
+                        const numVal = isOperative ? (typeof val === 'number' ? val : (val ? 15 : 0)) : 0;
                         const cc = colorClasses[perm.color] || colorClasses.blue;
                         return (
                           <motion.tr
@@ -369,26 +401,62 @@ export default function UserPermissionsPage() {
                               </span>
                             </td>
                             <td className="px-4 py-3 whitespace-nowrap text-center">
-                              {isActive ? (
-                                <span className="inline-flex items-center rounded-full bg-green-100 dark:bg-green-900/30 px-2 py-0.5 text-xs font-medium text-green-700 dark:text-green-400">
-                                  <i className="fas fa-check-circle mr-1"></i>Attivo
-                                </span>
+                              {isOperative ? (
+                                numVal === 0 ? (
+                                  <span className="inline-flex items-center rounded-full bg-gray-100 dark:bg-gray-700 px-2 py-0.5 text-xs font-medium text-gray-500 dark:text-gray-400">
+                                    <i className="fas fa-times-circle mr-1"></i>Nessuno
+                                  </span>
+                                ) : numVal === 1 ? (
+                                  <span className="inline-flex items-center rounded-full bg-blue-100 dark:bg-blue-900/30 px-2 py-0.5 text-xs font-medium text-blue-700 dark:text-blue-400">
+                                    <i className="fas fa-eye mr-1"></i>Lettura
+                                  </span>
+                                ) : numVal === 3 ? (
+                                  <span className="inline-flex items-center rounded-full bg-yellow-100 dark:bg-yellow-900/30 px-2 py-0.5 text-xs font-medium text-yellow-700 dark:text-yellow-400">
+                                    <i className="fas fa-plus mr-1"></i>Creazione
+                                  </span>
+                                ) : numVal === 7 ? (
+                                  <span className="inline-flex items-center rounded-full bg-orange-100 dark:bg-orange-900/30 px-2 py-0.5 text-xs font-medium text-orange-700 dark:text-orange-400">
+                                    <i className="fas fa-edit mr-1"></i>Modifica
+                                  </span>
+                                ) : (
+                                  <span className="inline-flex items-center rounded-full bg-green-100 dark:bg-green-900/30 px-2 py-0.5 text-xs font-medium text-green-700 dark:text-green-400">
+                                    <i className="fas fa-check-circle mr-1"></i>Completo
+                                  </span>
+                                )
                               ) : (
-                                <span className="inline-flex items-center rounded-full bg-gray-100 dark:bg-gray-700 px-2 py-0.5 text-xs font-medium text-gray-500 dark:text-gray-400">
-                                  <i className="fas fa-times-circle mr-1"></i>Inattivo
-                                </span>
+                                active ? (
+                                  <span className="inline-flex items-center rounded-full bg-green-100 dark:bg-green-900/30 px-2 py-0.5 text-xs font-medium text-green-700 dark:text-green-400">
+                                    <i className="fas fa-check-circle mr-1"></i>Attivo
+                                  </span>
+                                ) : (
+                                  <span className="inline-flex items-center rounded-full bg-gray-100 dark:bg-gray-700 px-2 py-0.5 text-xs font-medium text-gray-500 dark:text-gray-400">
+                                    <i className="fas fa-times-circle mr-1"></i>Inattivo
+                                  </span>
+                                )
                               )}
                             </td>
                             <td className="px-4 py-3 whitespace-nowrap text-center">
-                              <label className="relative inline-flex items-center cursor-pointer">
-                                <input
-                                  type="checkbox"
-                                  checked={isActive}
-                                  onChange={() => togglePermission(perm.key)}
-                                  className="sr-only peer"
-                                />
-                                <div className="w-10 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-600 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-500 peer-checked:bg-blue-600"></div>
-                              </label>
+                              {isOperative ? (
+                                <select
+                                  value={numVal}
+                                  onChange={(e) => setPermLevel(perm.key, Number(e.target.value))}
+                                  className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-xs text-gray-800 dark:text-gray-200 px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                >
+                                  {PERM_LEVELS.map((lvl) => (
+                                    <option key={lvl.value} value={lvl.value}>{lvl.label}</option>
+                                  ))}
+                                </select>
+                              ) : (
+                                <label className="relative inline-flex items-center cursor-pointer">
+                                  <input
+                                    type="checkbox"
+                                    checked={active}
+                                    onChange={() => togglePermission(perm.key)}
+                                    className="sr-only peer"
+                                  />
+                                  <div className="w-10 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-600 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-500 peer-checked:bg-blue-600"></div>
+                                </label>
+                              )}
                             </td>
                           </motion.tr>
                         );
