@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { riparazioniApi, jobsApi } from '@/lib/api';
 import Footer from '@/components/layout/Footer';
 import { showError, showSuccess } from '@/store/notifications';
+import { useAuthStore, PERM } from '@/store/auth';
 import PageHeader from '@/components/layout/PageHeader';
 import Breadcrumb from '@/components/layout/Breadcrumb';
 
@@ -97,6 +98,9 @@ export default function RiparazioneDetailPage() {
   const params = useParams();
   const router = useRouter();
   const id = params.id as string;
+  const { hasPermLevel } = useAuthStore();
+  const canUpdate = hasPermLevel('riparazioni', PERM.UPDATE);
+  const canDelete = hasPermLevel('riparazioni', PERM.DELETE);
 
   const [loading, setLoading] = useState(true);
   const [riparazione, setRiparazione] = useState<Riparazione | null>(null);
@@ -598,14 +602,16 @@ export default function RiparazioneDetailPage() {
             Riparazione {riparazione.idRiparazione} • Cartellino {riparazione.cartellino || '-'}
           </div>
           <div className="flex flex-wrap justify-end gap-3">
-            <button
-              onClick={() => setShowDeleteModal(true)}
-              className="px-5 py-3 rounded-lg border-2 border-red-300 text-red-700 dark:border-red-700 dark:text-red-300 font-medium hover:bg-red-50 dark:hover:bg-red-900/20 transition"
-            >
-              <i className="fas fa-trash mr-2"></i>
-              Elimina
-            </button>
-            {!riparazione.completa && (
+            {canDelete && (
+              <button
+                onClick={() => setShowDeleteModal(true)}
+                className="px-5 py-3 rounded-lg border-2 border-red-300 text-red-700 dark:border-red-700 dark:text-red-300 font-medium hover:bg-red-50 dark:hover:bg-red-900/20 transition"
+              >
+                <i className="fas fa-trash mr-2"></i>
+                Elimina
+              </button>
+            )}
+            {!riparazione.completa && canUpdate && (
               <button
                 onClick={() => setShowCompleteModal(true)}
                 className="px-5 py-3 rounded-lg border-2 border-green-300 text-green-700 dark:border-green-700 dark:text-green-300 font-medium hover:bg-green-50 dark:hover:bg-green-900/20 transition"

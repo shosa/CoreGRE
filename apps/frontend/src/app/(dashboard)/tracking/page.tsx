@@ -29,6 +29,7 @@ interface TrackingStats {
 export default function TrackingPage() {
   const { hasPermLevel } = useAuthStore();
   const canCreate = hasPermLevel('tracking', PERM.CREATE);
+  const canUpdate = hasPermLevel('tracking', PERM.UPDATE);
   const canDelete = hasPermLevel('tracking', PERM.DELETE);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<TrackingStats>({
@@ -198,7 +199,8 @@ export default function TrackingPage() {
             </Link>
           </motion.div>
 
-          {/* 4. Dettagli Mancanti - SMALL CARD */}
+          {/* 4. Dettagli Mancanti - SMALL CARD (richiede UPDATE) */}
+          {canUpdate && (
           <motion.div variants={itemVariants}>
             <Link href="/tracking/lot-detail">
               <div className="group relative overflow-hidden rounded-2xl border border-gray-200 bg-white p-6 shadow-sm hover:shadow-lg transition-all hover:-translate-y-1 dark:border-gray-700 dark:bg-gray-800">
@@ -217,6 +219,7 @@ export default function TrackingPage() {
               </div>
             </Link>
           </motion.div>
+          )}
 
           {/* 5. Report e Stampe - SMALL CARD */}
           <motion.div variants={itemVariants}>
