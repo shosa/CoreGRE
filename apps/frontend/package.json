@@ -4,7 +4,7 @@
   "description": "CoreGRE Frontend - Next.js",
   "private": true,
   "scripts": {
-    "dev": "tsx server.ts",
+    "dev": "next dev -p 3010",
     "build": "next build",
     "start": "tsx server.ts",
     "lint": "next lint"

@@ -12,6 +12,8 @@
     "baseUrl": "./",
     "incremental": true,
     "skipLibCheck": true,
+    "skipDefaultLibCheck": true,
+    "types": ["node", "multer"],
     "strictNullChecks": false,
     "noImplicitAny": false,
     "strictBindCallApply": false,
