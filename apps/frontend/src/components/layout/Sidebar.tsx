@@ -127,6 +127,7 @@ const menuItems: MenuItem[] = [
       { name: 'Carica Dati', href: '/analitiche/upload', icon: 'fa-file-upload' },
       { name: 'Elenco Record', href: '/analitiche/records', icon: 'fa-list' },
       { name: 'Storico Import', href: '/analitiche/imports', icon: 'fa-history' },
+      { name: 'Reportistica', href: '/analitiche/reports', icon: 'fa-file-export' },
     ]
   },
 ];

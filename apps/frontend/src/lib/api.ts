@@ -1820,6 +1820,33 @@ export const analiticheApi = {
     return response.data;
   },
 
+  generateOriginePdfReport: async (data: {
+    dataFrom?: string;
+    dataTo?: string;
+    repartoOrigineId?: number;
+    tipoDocumento?: string;
+    linea?: string;
+    groupBy?: 'reparto' | 'linea' | 'tipoDocumento' | 'mese';
+    includeArticoliPerReparto?: boolean;
+    showUncorrelatedCosts?: boolean;
+  }) => {
+    const response = await api.post('/analitiche/reports/origine-pdf', data);
+    return response.data;
+  },
+
+  generateOrigineExcelReport: async (data: {
+    dataFrom?: string;
+    dataTo?: string;
+    repartoOrigineId?: number;
+    tipoDocumento?: string;
+    linea?: string;
+    includeDetails?: boolean;
+    showUncorrelatedCosts?: boolean;
+  }) => {
+    const response = await api.post('/analitiche/reports/origine-excel', data);
+    return response.data;
+  },
+
   // ==================== MAPPATURE REPARTI ↔ PRODUZIONE ====================
 
   getMappings: async () => {

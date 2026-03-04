@@ -399,4 +399,70 @@ export class AnaliticheController {
     );
     return { jobId: job.id, status: job.status };
   }
+
+  @Post('reports/origine-pdf')
+  @LogActivity({ module: 'analitiche', action: 'report', entity: 'Report', description: 'Generate Reparto Origine PDF report' })
+  async generateOriginePdfReport(
+    @Body()
+    data: {
+      dataFrom?: string;
+      dataTo?: string;
+      repartoOrigineId?: number;
+      tipoDocumento?: string;
+      linea?: string;
+      groupBy?: 'reparto' | 'linea' | 'tipoDocumento' | 'mese';
+      includeArticoliPerReparto?: boolean;
+      showUncorrelatedCosts?: boolean;
+    },
+    @Request() req: any
+  ) {
+    const userId = req.user?.userId;
+    const job = await this.jobsQueueService.enqueue(
+      'analitiche.report-origine-pdf',
+      {
+        dataFrom: data.dataFrom,
+        dataTo: data.dataTo,
+        repartoOrigineId: data.repartoOrigineId,
+        tipoDocumento: data.tipoDocumento,
+        linea: data.linea,
+        groupBy: data.groupBy || 'reparto',
+        includeArticoliPerReparto: data.includeArticoliPerReparto || false,
+        showUncorrelatedCosts: data.showUncorrelatedCosts || false,
+      },
+      userId
+    );
+    return { jobId: job.id, status: job.status };
+  }
+
+  @Post('reports/origine-excel')
+  @LogActivity({ module: 'analitiche', action: 'report', entity: 'Report', description: 'Generate Reparto Origine Excel report' })
+  async generateOrigineExcelReport(
+    @Body()
+    data: {
+      dataFrom?: string;
+      dataTo?: string;
+      repartoOrigineId?: number;
+      tipoDocumento?: string;
+      linea?: string;
+      includeDetails?: boolean;
+      showUncorrelatedCosts?: boolean;
+    },
+    @Request() req: any
+  ) {
+    const userId = req.user?.userId;
+    const job = await this.jobsQueueService.enqueue(
+      'analitiche.report-origine-excel',
+      {
+        dataFrom: data.dataFrom,
+        dataTo: data.dataTo,
+        repartoOrigineId: data.repartoOrigineId,
+        tipoDocumento: data.tipoDocumento,
+        linea: data.linea,
+        includeDetails: data.includeDetails || false,
+        showUncorrelatedCosts: data.showUncorrelatedCosts || false,
+      },
+      userId
+    );
+    return { jobId: job.id, status: job.status };
+  }
 }

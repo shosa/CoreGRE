@@ -47,7 +47,19 @@ export type ReportPayload =
       tipoDocumento?: string;
       linea?: string;
       includeProduzione?: boolean;
-    };
+    }
+  | ({
+      repartoOrigineId?: number;
+      tipoDocumento?: string;
+      linea?: string;
+      dataFrom?: string;
+      dataTo?: string;
+    } & {
+      groupBy?: 'reparto' | 'linea' | 'tipoDocumento' | 'mese';
+      includeArticoliPerReparto?: boolean;
+      showUncorrelatedCosts?: boolean;
+      includeDetails?: boolean;
+    });
 
 /* ------------------------------------------------------------------ */
 

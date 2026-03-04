@@ -18,6 +18,8 @@ import analiticheReportPdf from './analitiche.report-pdf';
 import analiticheReportExcel from './analitiche.report-excel';
 import analiticheReportProduzionePdf from './analitiche.report-produzione-pdf';
 import analiticheReportProduzioneExcel from './analitiche.report-produzione-excel';
+import analiticheReportOriginePdf from './analitiche.report-origine-pdf';
+import analiticheReportOrigineExcel from './analitiche.report-origine-excel';
 import { JobHandler } from '../types';
 
 export const jobHandlers: Record<string, JobHandler> = {
@@ -41,4 +43,6 @@ export const jobHandlers: Record<string, JobHandler> = {
   'analitiche.report-excel': analiticheReportExcel,
   'analitiche.report-produzione-pdf': analiticheReportProduzionePdf,
   'analitiche.report-produzione-excel': analiticheReportProduzioneExcel,
+  'analitiche.report-origine-pdf': analiticheReportOriginePdf,
+  'analitiche.report-origine-excel': analiticheReportOrigineExcel,
 };
