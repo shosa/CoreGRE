@@ -1196,11 +1196,11 @@ const handler: JobHandler = async (payload, helpers) => {
         width: colDescrizione - 4,
         lineBreak: false,
       });
-      doc.text('', marginX + colArticolo + colDescrizione + 2, currentY + 3, {
+      doc.text(mancante.article?.voceDoganale || '', marginX + colArticolo + colDescrizione + 2, currentY + 3, {
         width: colNomCom - 4,
         lineBreak: false,
       });
-      doc.text('', marginX + colArticolo + colDescrizione + colNomCom + 2, currentY + 3, {
+      doc.text(mancante.article?.um || '', marginX + colArticolo + colDescrizione + colNomCom + 2, currentY + 3, {
         width: colUM - 4,
         lineBreak: false,
       });
