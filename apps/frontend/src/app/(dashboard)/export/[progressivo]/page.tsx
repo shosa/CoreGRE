@@ -103,6 +103,7 @@ interface Document {
     indirizzo3?: string;
     nazione?: string;
     consegna?: string;
+    autorizzazione?: string;
   };
   righe: DocumentItem[];
   piede?: DocumentFooter;
@@ -120,7 +121,7 @@ export default function DocumentDetailPage() {
   const [loading, setLoading] = useState(true);
   const [document, setDocument] = useState<Document | null>(null);
   const [activeTab, setActiveTab] = useState<
-    "righe" | "piede" | "mancanti" | "lanci" | "upload"
+    "righe" | "piede" | "mancanti" | "lanci" | "upload" | "autorizzazione"
   >("righe");
   const [savingField, setSavingField] = useState<string | null>(null); // "itemId-field" es: "123-descrizione"
 
@@ -150,6 +151,8 @@ export default function DocumentDetailPage() {
   const [itemToDelete, setItemToDelete] = useState<number | null>(null);
   const [launchToDelete, setLaunchToDelete] = useState<number | null>(null);
   const [commentoText, setCommentoText] = useState("");
+  const [autorizzazioneText, setAutorizzazioneText] = useState("");
+  const [savingAutorizzazione, setSavingAutorizzazione] = useState(false);
 
   // Upload states
   const [uploadedFiles, setUploadedFiles] = useState<
@@ -297,6 +300,7 @@ export default function DocumentDetailPage() {
           vociDoganali: sortedFooterVoci,
         });
       }
+      setAutorizzazioneText(doc.autorizzazione || "");
     } catch (error) {
       showError("Errore nel caricamento del documento");
     } finally {
@@ -943,6 +947,21 @@ export default function DocumentDetailPage() {
     }
   };
 
+  const handleSaveAutorizzazione = async () => {
+    if (!document) return;
+
+    try {
+      setSavingAutorizzazione(true);
+      await exportApi.updateDocument(progressivo, { autorizzazione: autorizzazioneText });
+      showSuccess("Autorizzazione salvata");
+      fetchDocument();
+    } catch (error) {
+      showError("Errore salvataggio autorizzazione");
+    } finally {
+      setSavingAutorizzazione(false);
+    }
+  };
+
   const handleGeneratePDF = async (
     type: "griglia" | "segnacolli" | "ddt-completo"
   ) => {
@@ -1426,6 +1445,16 @@ export default function DocumentDetailPage() {
           >
             <i className="fas fa-file-excel mr-2"></i>
             Schede Excel
+          </button>
+          <button
+            onClick={() => {
+              setAutorizzazioneText(document.autorizzazione || "");
+              setActiveTab("autorizzazione");
+            }}
+            className={tabClasses(activeTab === "autorizzazione")}
+          >
+            <i className="fas fa-shield-alt mr-2"></i>
+            Autorizzazione
           </button>
         </div>
 
@@ -2166,6 +2195,64 @@ export default function DocumentDetailPage() {
                 </>
               );
             })()}
+            </motion.div>
+          )}
+
+          {activeTab === "autorizzazione" && (
+            <motion.div
+              key="autorizzazione"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="rounded-2xl border border-gray-200 bg-white p-6 shadow-lg dark:border-gray-800 dark:bg-gray-800/40"
+            >
+              <div className="mb-6 flex items-center gap-3">
+                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-500">
+                  <i className="fas fa-shield-alt text-sm text-white"></i>
+                </span>
+                <div>
+                  <h3 className="text-base font-semibold text-gray-900 dark:text-white">Autorizzazione</h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">Numero o testo di autorizzazione del documento</p>
+                </div>
+              </div>
+
+              <div className="max-w-lg space-y-4">
+                {document.terzista.autorizzazione && (
+                  <div className="rounded-lg bg-blue-50 px-4 py-3 text-sm text-blue-800 dark:bg-blue-900/20 dark:text-blue-300">
+                    <i className="fas fa-info-circle mr-2"></i>
+                    Autorizzazione terzista: <span className="font-mono font-medium">{document.terzista.autorizzazione}</span>
+                  </div>
+                )}
+
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Autorizzazione documento
+                  </label>
+                  <input
+                    type="text"
+                    value={autorizzazioneText}
+                    onChange={(e) => setAutorizzazioneText(e.target.value)}
+                    disabled={!canUpdate}
+                    placeholder="es. AUT-2026-001"
+                    className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm text-gray-900 font-mono focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 disabled:bg-gray-100 disabled:text-gray-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:disabled:bg-gray-800"
+                  />
+                </div>
+
+                {canUpdate && (
+                  <button
+                    onClick={handleSaveAutorizzazione}
+                    disabled={savingAutorizzazione}
+                    className="flex items-center gap-2 rounded-lg bg-gradient-to-r from-indigo-500 to-indigo-600 px-5 py-2.5 text-sm font-medium text-white shadow transition-all hover:shadow-lg disabled:opacity-50"
+                  >
+                    {savingAutorizzazione ? (
+                      <i className="fas fa-spinner fa-spin"></i>
+                    ) : (
+                      <i className="fas fa-save"></i>
+                    )}
+                    Salva autorizzazione
+                  </button>
+                )}
+              </div>
             </motion.div>
           )}
         </AnimatePresence>

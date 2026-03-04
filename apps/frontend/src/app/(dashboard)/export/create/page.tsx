@@ -21,6 +21,7 @@ const itemVariants = {
 interface Terzista {
   id: number;
   ragioneSociale: string;
+  autorizzazione?: string;
 }
 
 export default function CreateDDTPage() {
@@ -242,6 +243,15 @@ export default function CreateDDTPage() {
                 </option>
               ))}
             </select>
+            {terzistaId && (() => {
+              const t = terzisti.find(t => t.id === terzistaId);
+              return t?.autorizzazione ? (
+                <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                  <i className="fas fa-shield-alt mr-1 text-blue-400"></i>
+                  Autorizzazione ereditata: <span className="font-mono font-medium text-gray-700 dark:text-gray-300">{t.autorizzazione}</span>
+                </p>
+              ) : null;
+            })()}
           </div>
         </div>
 

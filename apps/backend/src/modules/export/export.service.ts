@@ -316,15 +316,20 @@ export class ExportService {
       throw new BadRequestException("Progressivo già esistente");
     }
 
-    // Check terzista exists
-    await this.getTerzistaById(data.terzistaId);
+    // Check terzista exists and inherit autorizzazione
+    const terzista = await this.getTerzistaById(data.terzistaId);
+
+    const autorizzazione =
+      data.autorizzazione !== undefined
+        ? data.autorizzazione
+        : (terzista.autorizzazione ?? undefined);
 
     return this.prisma.exportDocument.create({
       data: {
         progressivo: data.progressivo,
         terzistaId: data.terzistaId,
         data: new Date(data.data),
-        autorizzazione: data.autorizzazione,
+        autorizzazione,
         commento: data.commento,
         stato: "Aperto",
         firstBoot: true,
