@@ -116,6 +116,20 @@ const MODULES: ModuleMeta[] = [
       { model: 'inworkAvailableModule', label: 'Moduli', tableName: 'inwork_available_modules', icon: 'fa-th-large', previewCols: ['id', 'moduleId', 'moduleName'] },
     ],
   },
+  {
+    key: 'export', label: 'Export', icon: 'fa-file-export', color: 'blue',
+    tables: [
+      { model: 'exportTerzista', label: 'Terzisti', tableName: 'exp_terzisti', icon: 'fa-building', previewCols: ['id', 'ragioneSociale', 'nazione', 'autorizzazione', 'attivo'] },
+      { model: 'exportDocument', label: 'Documenti DDT', tableName: 'exp_documenti', icon: 'fa-file-alt', previewCols: ['id', 'progressivo', 'terzistaId', 'data', 'stato', 'autorizzazione'] },
+      { model: 'exportArticleMaster', label: 'Articoli Master', tableName: 'exp_articoli_master', icon: 'fa-boxes', previewCols: ['id', 'codiceArticolo', 'descrizione', 'voceDoganale', 'um', 'prezzoUnitario'] },
+      { model: 'exportDocumentItem', label: 'Righe DDT', tableName: 'exp_righe_documento', icon: 'fa-list', previewCols: ['id', 'documentoId', 'articleId', 'qtaOriginale', 'qtaReale', 'tipoRiga'] },
+      { model: 'exportDocumentFooter', label: 'Piede DDT', tableName: 'exp_piede_documenti', icon: 'fa-truck', previewCols: ['id', 'documentoId', 'nColli', 'totPesoLordo', 'totPesoNetto', 'trasportatore'] },
+      { model: 'exportMissingData', label: 'Mancanti', tableName: 'exp_dati_mancanti', icon: 'fa-exclamation-triangle', previewCols: ['id', 'documentoId', 'articleId', 'qtaMancante'] },
+      { model: 'exportLaunchData', label: 'Lanci DDT', tableName: 'exp_dati_lanci_ddt', icon: 'fa-play', previewCols: ['id', 'documentoId', 'lancio', 'articolo', 'paia'] },
+      { model: 'exportAspettoMerce', label: 'Aspetto Merce', tableName: 'exp_aspetto_merce', icon: 'fa-tag', previewCols: ['id', 'descrizione', 'attivo'] },
+      { model: 'exportVettore', label: 'Vettori', tableName: 'exp_vettori', icon: 'fa-shipping-fast', previewCols: ['id', 'ragioneSociale', 'attivo'] },
+    ],
+  },
 ];
 
 const COLOR_MAP: Record<string, { dot: string; badge: string; activeBg: string }> = {
