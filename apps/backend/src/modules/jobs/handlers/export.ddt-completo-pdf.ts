@@ -1524,10 +1524,10 @@ const handler: JobHandler = async (payload, helpers) => {
   const footerHeight = 80;
   const footerStartTarget = pageHeight - marginY - footerHeight;
   if (currentY < footerStartTarget) {
-    // Stampa autorizzazione terzista se presente nel riempitivo
-    if (document.terzista?.autorizzazione) {
+    // Stampa autorizzazione documento in grassetto centrato
+    if (document.autorizzazione) {
       doc.fontSize(8).fillColor('#000000').font('Helvetica-Bold');
-      doc.text(document.terzista.autorizzazione, marginX, currentY + 5, {
+      doc.text(document.autorizzazione, marginX, currentY + 5, {
         width: usableWidth,
         align: 'center',
       });
