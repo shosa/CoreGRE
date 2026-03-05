@@ -1488,13 +1488,6 @@ const handler: JobHandler = async (payload, helpers) => {
     );
   }
 
-  doc.rect(marginX, currentY, usableWidth, rowHeight).stroke();
-  doc.fontSize(7).fillColor('#000000').font('Helvetica');
-  doc.text(document.autorizzazione || '', marginX + 5, currentY + 3, {
-    width: usableWidth - 10,
-  });
-  currentY += rowHeight;
-
   // ========== TOTALE ==========
   if (currentY + rowHeight > pageHeight - 120) {
     currentY = handlePageBreak(
