@@ -2204,55 +2204,46 @@ export default function DocumentDetailPage() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              className="rounded-2xl border border-gray-200 bg-white p-6 shadow-lg dark:border-gray-800 dark:bg-gray-800/40"
+              className="space-y-4"
             >
-              <div className="mb-6 flex items-center gap-3">
-                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-500">
-                  <i className="fas fa-shield-alt text-sm text-white"></i>
-                </span>
-                <div>
-                  <h3 className="text-base font-semibold text-gray-900 dark:text-white">Autorizzazione</h3>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Numero o testo di autorizzazione del documento</p>
-                </div>
-              </div>
-
-              <div className="max-w-lg space-y-4">
-                {document.terzista.autorizzazione && (
-                  <div className="rounded-lg bg-blue-50 px-4 py-3 text-sm text-blue-800 dark:bg-blue-900/20 dark:text-blue-300">
+              {document.terzista.autorizzazione && (
+                <div className="w-full rounded-lg bg-blue-50 px-4 py-3 text-sm text-blue-800 dark:bg-blue-900/20 dark:text-blue-300">
+                  <p className="mb-1 font-medium">
                     <i className="fas fa-info-circle mr-2"></i>
-                    Autorizzazione terzista: <span className="font-mono font-medium">{document.terzista.autorizzazione}</span>
-                  </div>
-                )}
-
-                <div>
-                  <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Autorizzazione documento
-                  </label>
-                  <input
-                    type="text"
-                    value={autorizzazioneText}
-                    onChange={(e) => setAutorizzazioneText(e.target.value)}
-                    disabled={!canUpdate}
-                    placeholder="es. AUT-2026-001"
-                    className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm text-gray-900 font-mono focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 disabled:bg-gray-100 disabled:text-gray-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:disabled:bg-gray-800"
-                  />
+                    Autorizzazione terzista
+                  </p>
+                  <p className="font-mono whitespace-pre-wrap">{document.terzista.autorizzazione}</p>
                 </div>
+              )}
 
-                {canUpdate && (
-                  <button
-                    onClick={handleSaveAutorizzazione}
-                    disabled={savingAutorizzazione}
-                    className="flex items-center gap-2 rounded-lg bg-gradient-to-r from-indigo-500 to-indigo-600 px-5 py-2.5 text-sm font-medium text-white shadow transition-all hover:shadow-lg disabled:opacity-50"
-                  >
-                    {savingAutorizzazione ? (
-                      <i className="fas fa-spinner fa-spin"></i>
-                    ) : (
-                      <i className="fas fa-save"></i>
-                    )}
-                    Salva autorizzazione
-                  </button>
-                )}
+              <div>
+                <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Autorizzazione documento
+                </label>
+                <textarea
+                  value={autorizzazioneText}
+                  onChange={(e) => setAutorizzazioneText(e.target.value)}
+                  disabled={!canUpdate}
+                  placeholder="es. AUT-2026-001"
+                  rows={4}
+                  className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm text-gray-900 font-mono focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 disabled:bg-gray-100 disabled:text-gray-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:disabled:bg-gray-800"
+                />
               </div>
+
+              {canUpdate && (
+                <button
+                  onClick={handleSaveAutorizzazione}
+                  disabled={savingAutorizzazione}
+                  className="flex items-center gap-2 rounded-lg bg-gradient-to-r from-indigo-500 to-indigo-600 px-5 py-2.5 text-sm font-medium text-white shadow transition-all hover:shadow-lg disabled:opacity-50"
+                >
+                  {savingAutorizzazione ? (
+                    <i className="fas fa-spinner fa-spin"></i>
+                  ) : (
+                    <i className="fas fa-save"></i>
+                  )}
+                  Salva autorizzazione
+                </button>
+              )}
             </motion.div>
           )}
         </AnimatePresence>
