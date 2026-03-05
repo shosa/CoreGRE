@@ -74,9 +74,11 @@ interface DocumentFooter {
 
 interface MissingData {
   id: number;
-  codiceArticolo: string;
   qtaMancante: number;
-  descrizione?: string;
+  article: {
+    codiceArticolo: string;
+    descrizione?: string;
+  };
 }
 
 interface LaunchData {
@@ -1889,10 +1891,10 @@ export default function DocumentDetailPage() {
                         className="border-b border-gray-100 dark:border-gray-700/50"
                       >
                         <td className="py-3 text-gray-900 dark:text-white">
-                          {item.codiceArticolo || '-'}
+                          {item.article?.codiceArticolo || '-'}
                         </td>
                         <td className="py-3 text-gray-600 dark:text-gray-400">
-                          {item.descrizione || "-"}
+                          {item.article?.descrizione || "-"}
                         </td>
                         <td className="py-3 text-right text-gray-900 dark:text-white">
                           {item.qtaMancante}
