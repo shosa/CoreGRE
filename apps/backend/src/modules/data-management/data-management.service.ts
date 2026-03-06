@@ -147,6 +147,16 @@ export class DataManagementService {
       displayName: 'Lanci DDT',
       searchFields: ['lancio', 'articolo'],
     },
+    exportAspettoMerce: {
+      model: 'exportAspettoMerce',
+      displayName: 'Aspetto Merce',
+      searchFields: ['descrizione'],
+    },
+    exportVettore: {
+      model: 'exportVettore',
+      displayName: 'Vettori',
+      searchFields: ['ragioneSociale'],
+    },
 
     // Tracking Module (track_)
     trackLink: {
